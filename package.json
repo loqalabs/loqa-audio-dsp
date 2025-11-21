@@ -2,29 +2,14 @@
   "name": "@loqalabs/loqa-audio-dsp",
   "version": "0.1.0",
   "description": "Production-grade Expo native module for audio DSP analysis (FFT, pitch detection, formant extraction, spectral analysis)",
-  "main": "build/src/index.js",
-  "types": "build/src/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
-    "build/",
-    "src/",
-    "ios/*.swift",
-    "ios/*.h",
-    "ios/*.m",
-    "ios/*.mm",
-    "ios/*.podspec",
-    "!ios/Tests",
-    "!ios/**/*Tests.swift",
-    "!ios/**/*Test.swift",
-    "android/build.gradle",
-    "android/src/main/",
-    "!android/src/test",
-    "!android/src/androidTest",
-    "expo-module.config.json",
-    "LoqaAudioDsp.podspec",
+    "lib",
+    "ios",
+    "android",
     "README.md",
     "API.md",
-    "INTEGRATION_GUIDE.md",
-    "CHANGELOG.md",
     "LICENSE"
   ],
   "publishConfig": {
@@ -32,7 +17,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "clean": "expo-module clean",
+    "clean": "rm -rf lib",
     "lint": "eslint . --ext .ts,.tsx",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
@@ -41,18 +26,18 @@
     "test:coverage": "jest --coverage",
     "validate:structure": "./scripts/validate-module-structure.sh",
     "prepare": "expo-module prepare",
-    "prepublishOnly": "expo-module prepublishOnly",
+    "prepublishOnly": "npm run build",
     "expo-module": "expo-module"
   },
   "keywords": [
-    "expo",
-    "react-native",
     "audio",
     "dsp",
     "fft",
-    "pitch-detection",
+    "pitch",
     "formants",
-    "spectral-analysis"
+    "spectrum",
+    "react-native",
+    "expo"
   ],
   "repository": {
     "type": "git",
@@ -65,10 +50,9 @@
   "license": "MIT",
   "homepage": "https://github.com/loqalabs/loqa-audio-dsp#readme",
   "peerDependencies": {
-    "expo": ">=52.0.0",
-    "expo-modules-core": "*",
-    "react": ">=18.0.0",
-    "react-native": ">=0.72.0"
+    "expo": "^54.0.0",
+    "react": "*",
+    "react-native": "*"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
