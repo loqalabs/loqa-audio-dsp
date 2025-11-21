@@ -1,6 +1,6 @@
 # Story 5.2: Create API.md Reference Documentation
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 As a developer, I want detailed API.md documentation for all functions, types, and options, so that I can reference exact parameters and return types.
@@ -29,6 +29,9 @@ As a developer, I want detailed API.md documentation for all functions, types, a
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/5-2-create-api-md-reference-documentation.context.xml](./5-2-create-api-md-reference-documentation.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

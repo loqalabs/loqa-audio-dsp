@@ -1,0 +1,104 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>6</storyId>
+    <title>Finalize package.json and Publishing Configuration</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-6-finalize-package-json-and-publishing-configuration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>package.json properly configured for npm publishing</iWant>
+    <soThat>the library can be published with correct metadata and dependencies</soThat>
+    <tasks>
+- Set name: "@loqalabs/loqa-audio-dsp"
+- Set version: "0.1.0"
+- Add description, keywords, repository, license
+- Configure peerDependencies (expo, react-native)
+- Set files field to include only distributables
+- Add npm scripts (prepare, clean, test, typecheck)
+- Test npm pack to verify package contents
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given library complete, When finalizing package.json, Then includes name, version 0.1.0, description, keywords, repository, license (MIT)
+AC2: Given metadata set, When checking dependencies, Then peerDependencies include expo, react-native with correct versions
+AC3: Given dependencies set, When validating, Then files field includes only necessary files (lib/, ios/, android/, loqa-audio-dsp.podspec, README.md)
+AC4: Given package ready, When checking scripts, Then includes prepare, clean, test, typecheck scripts
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD - npm Publishing</title>
+        <section>FR77-FR79 npm Publishing</section>
+        <snippet>Package metadata, dependencies, files to include. npm scripts for build and publish. Version 0.1.0 initial release.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>package.json</path>
+        <kind>configuration</kind>
+        <symbol>package.json</symbol>
+        <lines>all</lines>
+        <reason>Package configuration for npm publishing</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="expo" version=">=49.0.0" type="peer" />
+        <package name="react-native" version=">=0.72.0" type="peer" />
+        <package name="typescript" version="^5.3.0" type="dev" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- name: "@loqalabs/loqa-audio-dsp"
+- version: "0.1.0"
+- description: "High-performance voice DSP library for React Native/Expo with FFT, pitch detection, formant extraction, and spectral analysis"
+- keywords: ["react-native", "expo", "dsp", "audio", "fft", "pitch", "formants", "spectral", "voice"]
+- repository: GitHub URL
+- license: "MIT"
+- peerDependencies: expo >=49.0.0, react-native >=0.72.0
+- devDependencies: typescript, jest, @types/*
+- files: ["lib/", "ios/", "android/", "loqa-audio-dsp.podspec", "README.md", "LICENSE"]
+- scripts:
+  - prepare: "npm run build"
+  - build: "tsc"
+  - clean: "rm -rf lib/"
+  - test: "jest"
+  - typecheck: "tsc --noEmit"
+- main: "lib/index.js"
+- types: "lib/index.d.ts"
+- Verify with npm pack before publishing
+- Depends on Stories 1.8 (initial package config), 5.1 (README)
+  </constraints>
+
+  <interfaces>
+<!-- Configuration story - modifies package.json, creates no code interfaces -->
+  </interfaces>
+
+  <tests>
+    <standards>
+Run npm pack, verify tarball contents. Check package.json metadata. Verify TypeScript compilation. Test npm scripts. Validate peerDependencies versions.
+    </standards>
+    <locations>
+Manual testing with npm pack and npm publish --dry-run
+    </locations>
+    <ideas>
+- Run npm pack, extract tarball, verify only lib/, ios/, android/ included (AC3)
+- Verify README.md and LICENSE in package (AC3)
+- Check package.json name and version (AC1)
+- Verify keywords and description present (AC1)
+- Test npm run build, verify lib/ created (AC4)
+- Test npm run test, verify tests run (AC4)
+- Run npm publish --dry-run, verify no errors (AC2, AC3)
+    </ideas>
+  </tests>
+</story-context>

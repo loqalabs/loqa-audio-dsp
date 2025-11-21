@@ -1,0 +1,106 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>8</storyId>
+    <title>Publish v0.1.0 to npm Registry</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-8-publish-v0-1-0-to-npm-registry.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>v0.1.0 published to npm</iWant>
+    <soThat>the library is publicly available for installation</soThat>
+    <tasks>
+- Verify all tests pass (npm test)
+- Verify CI/CD pipeline green
+- Verify docs complete (README, API.md, INTEGRATION_GUIDE.md)
+- Create git tag v0.1.0
+- Run npm publish
+- Verify package on npmjs.com
+- Test installation in fresh project
+- Update project status to "v0.1.0 released"
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given all Epic 1-5 stories complete, When preparing, Then all tests pass, CI/CD green, docs complete
+AC2: Given ready to publish, When running npm publish, Then successfully publishes @loqalabs/loqa-audio-dsp@0.1.0
+AC3: Given published, When verifying, Then package installable via npm, README displays on npm page, all files present
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD - npm Publishing</title>
+        <section>FR82 npm Publishing</section>
+        <snippet>Final publishing step. Verify all requirements met. Publish to npm. Validate installation.</snippet>
+      </doc>
+      <doc>
+        <path>RELEASING.md</path>
+        <title>Release Procedure</title>
+        <section>All sections</section>
+        <snippet>Follow release checklist from RELEASING.md</snippet>
+      </doc>
+    </docs>
+    <code>
+<!-- Publishing story - no code changes, just process execution -->
+    </code>
+    <dependencies>
+<!-- Publishing story - uses existing package configuration -->
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Pre-release checklist:
+  - All tests pass (npm test)
+  - TypeScript compilation clean (npm run typecheck)
+  - CI/CD pipeline green (GitHub Actions)
+  - README.md complete
+  - docs/API.md complete
+  - docs/INTEGRATION_GUIDE.md complete
+  - CHANGELOG.md updated with v0.1.0
+  - package.json version = 0.1.0
+  - Example app builds and runs
+- Publishing steps:
+  1. npm run clean && npm run build
+  2. npm pack (verify contents)
+  3. git tag v0.1.0
+  4. git push origin v0.1.0
+  5. npm publish --access public
+- Post-publish verification:
+  - Visit npmjs.com/package/@loqalabs/loqa-audio-dsp
+  - Test: npm install @loqalabs/loqa-audio-dsp in fresh Expo project
+  - Verify README displays on npm page
+  - Verify all files present in published package
+- Completes Epic 5 and entire project MVP
+- Depends on all previous stories (1.1-5.7)
+  </constraints>
+
+  <interfaces>
+<!-- Publishing story - executes process, creates no new interfaces -->
+  </interfaces>
+
+  <tests>
+    <standards>
+Execute full pre-release checklist. Publish to npm. Install in fresh project and verify all functions work. Check npm package page displays correctly.
+    </standards>
+    <locations>
+Manual execution following RELEASING.md procedure
+    </locations>
+    <ideas>
+- Run all tests, verify 100% pass (AC1)
+- Check CI/CD status, verify green (AC1)
+- Verify docs complete (AC1)
+- Run npm publish, verify success (AC2)
+- Visit npmjs.com, verify package visible (AC3)
+- Create fresh Expo project, npm install @loqalabs/loqa-audio-dsp (AC3)
+- Import and test computeFFT in fresh project (AC3)
+- Verify README displays on npm page (AC3)
+- Verify version shown as 0.1.0 on npm (AC2)
+    </ideas>
+  </tests>
+</story-context>

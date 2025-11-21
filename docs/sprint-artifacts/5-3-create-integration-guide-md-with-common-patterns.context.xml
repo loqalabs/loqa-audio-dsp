@@ -1,0 +1,90 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>3</storyId>
+    <title>Create INTEGRATION_GUIDE.md with Common Patterns</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-3-create-integration-guide-md-with-common-patterns.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>an INTEGRATION_GUIDE.md with real-world patterns and recipes</iWant>
+    <soThat>I can implement common voice analysis use cases quickly</soThat>
+    <tasks>
+- Create docs/INTEGRATION_GUIDE.md
+- Write voice recording integration pattern (expo-av)
+- Write real-time analysis pattern (streaming audio)
+- Write batch processing pattern (recorded files)
+- Add complete example: pitch tracking app
+- Add complete example: formant visualization
+- Add performance and memory management section
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given API documented, When writing guide, Then includes patterns for voice recording integration, real-time analysis, batch processing
+AC2: Given patterns documented, When checking examples, Then shows complete code for pitch tracking app, formant visualization, spectral analyzer
+AC3: Given use cases complete, When reviewing, Then includes performance tips, memory management, error handling best practices
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD - Integration Patterns</title>
+        <section>FR66-FR72 Integration Patterns</section>
+        <snippet>Real-world patterns: voice recording with expo-av, real-time analysis, batch processing. Complete examples: pitch tracker, formant visualizer. Performance and memory tips.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Performance</title>
+        <section>Performance Requirements &amp; Memory Management</section>
+        <snippet>Performance tips for mobile. Memory management at FFI/JNI boundary. Optimization strategies for real-time processing.</snippet>
+      </doc>
+    </docs>
+    <code>
+<!-- Documentation references implementation but creates no new code -->
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="expo-av" version="~13.0.0" type="example" note="Voice recording example" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Tutorial/guide style (not reference)
+- Complete, runnable code examples
+- Pattern 1: Voice recording integration with expo-av
+- Pattern 2: Real-time analysis (streaming chunks)
+- Pattern 3: Batch processing (pre-recorded files)
+- Complete example apps: pitch tracking, formant visualization, spectral analyzer
+- Performance section: buffer sizing, sampling strategies, memory management
+- Error handling best practices
+- Platform-specific considerations (iOS/Android differences)
+- Depends on Story 5.2 (API.md for reference)
+  </constraints>
+
+  <interfaces>
+<!-- Documentation story - shows usage of existing interfaces -->
+  </interfaces>
+
+  <tests>
+    <standards>
+Verify all code examples are complete and runnable. Test integration patterns in example project. Validate performance recommendations are accurate.
+    </standards>
+    <locations>
+Manual testing - build example apps from guide patterns
+    </locations>
+    <ideas>
+- Copy pitch tracking example code, build it, verify it works (AC2)
+- Copy formant visualization example, test on iOS and Android (AC2)
+- Verify expo-av integration pattern works (AC1)
+- Test real-time analysis pattern with streaming audio (AC1)
+- Validate performance tips against actual benchmarks (AC3)
+    </ideas>
+  </tests>
+</story-context>

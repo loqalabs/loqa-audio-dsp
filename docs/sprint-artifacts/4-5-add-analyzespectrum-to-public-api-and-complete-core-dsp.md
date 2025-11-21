@@ -30,6 +30,9 @@ As a developer, I want all four DSP functions fully exported and documented, so 
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/4-5-add-analyzespectrum-to-public-api-and-complete-core-dsp.context.xml](./4-5-add-analyzespectrum-to-public-api-and-complete-core-dsp.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

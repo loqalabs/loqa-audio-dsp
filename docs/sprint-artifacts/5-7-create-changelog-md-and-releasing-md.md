@@ -1,6 +1,6 @@
 # Story 5.7: Create CHANGELOG.md and RELEASING.md
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 As a developer, I want CHANGELOG.md and RELEASING.md, so that users can see version history and maintainers can follow release procedures.
@@ -28,6 +28,9 @@ As a developer, I want CHANGELOG.md and RELEASING.md, so that users can see vers
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/5-7-create-changelog-md-and-releasing-md.context.xml](./5-7-create-changelog-md-and-releasing-md.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

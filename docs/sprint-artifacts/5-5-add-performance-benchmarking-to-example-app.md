@@ -1,6 +1,6 @@
 # Story 5.5: Add Performance Benchmarking to Example App
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 As a developer, I want performance benchmarks in the example app, so that I can verify the library meets performance requirements and optimize if needed.
@@ -30,6 +30,9 @@ As a developer, I want performance benchmarks in the example app, so that I can 
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/5-5-add-performance-benchmarking-to-example-app.context.xml](./5-5-add-performance-benchmarking-to-example-app.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

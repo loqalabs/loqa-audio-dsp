@@ -29,6 +29,9 @@ As a developer, I want comprehensive tests for spectral analysis, so that analyz
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/4-4-write-unit-tests-for-analyzespectrum.context.xml](./4-4-write-unit-tests-for-analyzespectrum.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

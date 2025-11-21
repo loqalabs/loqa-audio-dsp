@@ -1,6 +1,6 @@
 # Story 5.1: Create Comprehensive README.md
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 As a developer, I want a comprehensive README.md that explains the library's purpose, features, and quick start, so that users can quickly understand and adopt the library.
@@ -28,6 +28,9 @@ As a developer, I want a comprehensive README.md that explains the library's pur
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/5-1-create-comprehensive-readme.context.xml](./5-1-create-comprehensive-readme.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

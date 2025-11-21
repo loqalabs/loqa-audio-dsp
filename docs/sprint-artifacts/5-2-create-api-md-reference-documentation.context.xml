@@ -1,0 +1,115 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>2</storyId>
+    <title>Create API.md Reference Documentation</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-2-create-api-md-reference-documentation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>detailed API.md documentation for all functions, types, and options</iWant>
+    <soThat>I can reference exact parameters and return types</soThat>
+    <tasks>
+- Create docs/API.md
+- Document computeFFT function and FFTOptions
+- Document detectPitch function and PitchDetectionOptions
+- Document extractFormants function and FormantExtractionOptions
+- Document analyzeSpectrum function and SpectralAnalysisOptions
+- Document all result types (FFTResult, PitchResult, FormantsResult, SpectralResult)
+- Add error handling and validation documentation
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given all functions implemented, When documenting, Then API.md includes complete signatures for computeFFT, detectPitch, extractFormants, analyzeSpectrum
+AC2: Given signatures documented, When detailing, Then documents all options interfaces (FFTOptions, PitchDetectionOptions, FormantExtractionOptions, SpectralAnalysisOptions)
+AC3: Given parameters documented, When checking completeness, Then includes parameter types, defaults, validation rules, return types, and error handling
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - API Contracts</title>
+        <section>API Contracts - TypeScript Public API</section>
+        <snippet>All function signatures, parameter types, return types from src/types.ts. Options interfaces with defaults. Validation rules from src/validation.ts.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/types.ts</path>
+        <kind>module</kind>
+        <symbol>all types</symbol>
+        <lines>all</lines>
+        <reason>Source of truth for API types and interfaces</reason>
+      </artifact>
+      <artifact>
+        <path>src/computeFFT.ts</path>
+        <kind>module</kind>
+        <symbol>computeFFT</symbol>
+        <lines>all</lines>
+        <reason>FFT API signature and JSDoc</reason>
+      </artifact>
+      <artifact>
+        <path>src/detectPitch.ts</path>
+        <kind>module</kind>
+        <symbol>detectPitch</symbol>
+        <lines>all</lines>
+        <reason>Pitch detection API signature and JSDoc</reason>
+      </artifact>
+      <artifact>
+        <path>src/extractFormants.ts</path>
+        <kind>module</kind>
+        <symbol>extractFormants</symbol>
+        <lines>all</lines>
+        <reason>Formant extraction API signature and JSDoc</reason>
+      </artifact>
+      <artifact>
+        <path>src/analyzeSpectrum.ts</path>
+        <kind>module</kind>
+        <symbol>analyzeSpectrum</symbol>
+        <lines>all</lines>
+        <reason>Spectral analysis API signature and JSDoc</reason>
+      </artifact>
+    </code>
+    <dependencies>
+<!-- Documentation story - no code dependencies -->
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Technical reference style (not tutorial)
+- Complete function signatures with TypeScript types
+- Document all options with defaults and valid ranges
+- Document all result types with field descriptions
+- Include validation rules (buffer length, sample rate ranges)
+- Error handling: NativeModuleError types and messages
+- Code examples for each function showing options usage
+- Cross-reference to INTEGRATION_GUIDE.md for patterns
+- Depends on Stories 2.5, 2.7, 3.4, 3.6, 4.3, 4.5 (all API functions)
+  </constraints>
+
+  <interfaces>
+<!-- Documentation story - documents existing interfaces, creates no new ones -->
+  </interfaces>
+
+  <tests>
+    <standards>
+Verify all function signatures match actual implementation. Test code examples compile. Verify all options and defaults documented. Check result type accuracy.
+    </standards>
+    <locations>
+Manual testing - verify API.md accuracy against source code
+    </locations>
+    <ideas>
+- Compare API.md signatures with src/*.ts files (AC1)
+- Verify all options interfaces documented with defaults (AC2)
+- Test example code snippets compile (AC3)
+- Verify validation rules match src/validation.ts (AC3)
+- Check error types match actual thrown errors (AC3)
+    </ideas>
+  </tests>
+</story-context>

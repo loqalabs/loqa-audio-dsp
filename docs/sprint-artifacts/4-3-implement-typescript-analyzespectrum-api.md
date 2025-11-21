@@ -29,6 +29,9 @@ As a developer, I want a clean TypeScript API for spectral analysis, so that use
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/4-3-implement-typescript-analyzespectrum-api.context.xml](./4-3-implement-typescript-analyzespectrum-api.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

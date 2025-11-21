@@ -1,0 +1,109 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>4</storyId>
+    <title>Build Example App with All Four DSP Functions</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-4-build-example-app-with-all-four-dsp-functions.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a working example app demonstrating all DSP functions</iWant>
+    <soThat>I can see the library in action and use it as a reference</soThat>
+    <tasks>
+- Create example/ directory with Expo app
+- Add expo-av for audio recording
+- Create FFT demo screen with frequency visualization
+- Create pitch detection screen with real-time pitch display
+- Create formant extraction screen with F1/F2/F3 plot
+- Create spectral analysis screen with band energy bars
+- Test on iOS and Android devices
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given library complete, When creating example, Then builds Expo app in example/ directory
+AC2: Given app created, When implementing, Then includes screens for FFT, pitch detection, formant extraction, spectral analysis
+AC3: Given screens built, When testing, Then allows voice recording, displays real-time results, shows visualizations for each function
+AC4: Given functionality complete, When validating, Then runs on both iOS and Android with same UI/UX
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD - Example Application</title>
+        <section>FR73-FR76 Example Application</section>
+        <snippet>Expo app with screens for each DSP function. Voice recording with expo-av. Real-time visualizations. Cross-platform iOS/Android.</snippet>
+      </doc>
+      <doc>
+        <path>docs/INTEGRATION_GUIDE.md</path>
+        <title>Integration Guide - Patterns</title>
+        <section>All sections</section>
+        <snippet>Reference integration patterns from guide for implementation</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>example/package.json</path>
+        <kind>configuration</kind>
+        <symbol>package.json</symbol>
+        <lines>all</lines>
+        <reason>Example app dependencies and configuration</reason>
+      </artifact>
+      <artifact>
+        <path>example/App.tsx</path>
+        <kind>module</kind>
+        <symbol>App</symbol>
+        <lines>all</lines>
+        <reason>Main app component with navigation</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="expo" version="~49.0.0" type="dev" />
+        <package name="expo-av" version="~13.0.0" type="dev" />
+        <package name="react-native" version="~0.72.0" type="dev" />
+        <package name="react-navigation" version="^6.0.0" type="dev" note="For screen navigation" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Create example/ directory at project root
+- Use Expo SDK 49+ and React Native 0.72+
+- Four main screens: FFT Analyzer, Pitch Detector, Formant Extractor, Spectral Analyzer
+- Voice recording with expo-av
+- Visualizations: FFT frequency bars, pitch needle/meter, formant F1/F2 plot, spectral band energy
+- Navigation: React Navigation with tab or stack navigator
+- Clean, professional UI matching both iOS and Android design guidelines
+- Real-time display of results
+- Record button, stop button, clear button
+- Depends on Stories 5.3 (integration patterns), 2.7, 3.6, 4.5 (all DSP APIs)
+  </constraints>
+
+  <interfaces>
+<!-- Example app uses existing public API, creates no new interfaces -->
+  </interfaces>
+
+  <tests>
+    <standards>
+Build and run example app on iOS simulator and Android emulator. Test all four screens. Record voice, verify results display. Verify visualizations render correctly.
+    </standards>
+    <locations>
+Manual testing on iOS and Android devices/simulators
+    </locations>
+    <ideas>
+- Create example app, run expo start, test on iOS (AC1)
+- Navigate to all four screens, verify they render (AC2)
+- Record voice on FFT screen, verify frequency bars display (AC3)
+- Record voice on Pitch screen, verify frequency and confidence shown (AC3)
+- Record voice on Formant screen, verify F1/F2/F3 plot (AC3)
+- Record voice on Spectral screen, verify centroid/rolloff/tilt display (AC3)
+- Test on both iOS and Android, verify identical behavior (AC4)
+    </ideas>
+  </tests>
+</story-context>

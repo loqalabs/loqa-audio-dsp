@@ -1,0 +1,101 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>5</storyId>
+    <title>Add Performance Benchmarking to Example App</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-5-add-performance-benchmarking-to-example-app.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>performance benchmarks in the example app</iWant>
+    <soThat>I can verify the library meets performance requirements and optimize if needed</soThat>
+    <tasks>
+- Add benchmark screen to example app
+- Measure computeFFT execution time (target: &lt;50ms for 2048 samples)
+- Measure detectPitch execution time (target: &lt;100ms)
+- Measure extractFormants execution time (target: &lt;150ms)
+- Measure analyzeSpectrum execution time (target: &lt;75ms)
+- Display results with pass/fail against NFR targets
+- Test on both iOS and Android
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given example app complete, When adding benchmarks, Then measures execution time for all four DSP functions
+AC2: Given benchmarks running, When testing, Then validates against NFR requirements (FFT &lt;50ms, pitch &lt;100ms, formants &lt;150ms, spectral &lt;75ms)
+AC3: Given results collected, When displaying, Then shows min/max/average times and frames per second capability
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Performance Requirements</title>
+        <section>Performance Requirements</section>
+        <snippet>NFR targets: FFT &lt;50ms (2048 samples), pitch &lt;100ms, formants &lt;150ms, spectral &lt;75ms. Real-time capable at 20 FPS (50ms frame budget).</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD - Performance Requirements</title>
+        <section>NFR1-NFR50 Performance Requirements</section>
+        <snippet>Performance targets for all DSP functions. Mobile device constraints. Battery efficiency.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>example/screens/BenchmarkScreen.tsx</path>
+        <kind>module</kind>
+        <symbol>BenchmarkScreen</symbol>
+        <lines>all</lines>
+        <reason>New benchmark screen component</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="expo" version="~49.0.0" type="dev" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Add fifth screen to example app: "Benchmarks"
+- Run each function 100 times with synthetic audio
+- Measure: min, max, average, median execution time
+- Display pass/fail indicators against NFR targets:
+  - computeFFT: &lt;50ms (2048 samples @ 16kHz)
+  - detectPitch: &lt;100ms
+  - extractFormants: &lt;150ms
+  - analyzeSpectrum: &lt;75ms
+- Calculate frames per second capability (1000ms / avg time)
+- Show results in table format with color coding (green=pass, red=fail)
+- Test on both iOS and Android devices (not just simulators)
+- Synthetic test data: sine waves, white noise
+- Depends on Story 5.4 (example app)
+  </constraints>
+
+  <interfaces>
+<!-- Benchmark screen uses existing public API, creates no new interfaces -->
+  </interfaces>
+
+  <tests>
+    <standards>
+Run benchmarks on physical iOS and Android devices. Verify all functions meet NFR targets. Document results for different device models. Verify UI displays results correctly.
+    </standards>
+    <locations>
+Manual testing on physical iOS and Android devices
+    </locations>
+    <ideas>
+- Run benchmarks on iPhone (verify FFT &lt;50ms) (AC2)
+- Run benchmarks on Android device (verify all targets met) (AC2)
+- Verify min/max/avg times calculated correctly (AC3)
+- Verify FPS capability shown (AC3)
+- Test with different buffer sizes (AC1)
+- Verify pass/fail indicators display correctly (AC2)
+- Document performance on multiple device models
+    </ideas>
+  </tests>
+</story-context>

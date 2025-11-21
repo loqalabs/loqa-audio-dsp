@@ -1,0 +1,102 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>7</storyId>
+    <title>Create CHANGELOG.md and RELEASING.md</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-7-create-changelog-md-and-releasing-md.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>CHANGELOG.md and RELEASING.md</iWant>
+    <soThat>users can see version history and maintainers can follow release procedures</soThat>
+    <tasks>
+- Create CHANGELOG.md with v0.1.0 section
+- Document all features: computeFFT, detectPitch, extractFormants, analyzeSpectrum
+- Create RELEASING.md with publish procedure
+- Add pre-release checklist (tests pass, docs updated, version bumped)
+- Document npm publish command and git tagging
+- Add versioning strategy (semver)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given v0.1.0 ready, When creating CHANGELOG, Then documents all features in v0.1.0 (FFT, pitch, formants, spectral)
+AC2: Given changelog complete, When creating RELEASING, Then documents npm publish procedure, versioning strategy, pre-release checklist
+AC3: Given both files created, When validating, Then follows keepachangelog.com format and includes git tagging instructions
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD - Release Documentation</title>
+        <section>FR80-FR81 Release Documentation</section>
+        <snippet>CHANGELOG.md following keepachangelog.com. RELEASING.md with publish procedure. Version 0.1.0 initial release with all four DSP functions.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>CHANGELOG.md</path>
+        <kind>documentation</kind>
+        <symbol>CHANGELOG</symbol>
+        <lines>all</lines>
+        <reason>Create version history document</reason>
+      </artifact>
+      <artifact>
+        <path>RELEASING.md</path>
+        <kind>documentation</kind>
+        <symbol>RELEASING</symbol>
+        <lines>all</lines>
+        <reason>Create release procedure document</reason>
+      </artifact>
+    </code>
+    <dependencies>
+<!-- Documentation story - no code dependencies -->
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- CHANGELOG.md follows keepachangelog.com format
+- Version 0.1.0 (2025-11-20):
+  - Added: computeFFT with Hanning/Hamming/Blackman windows
+  - Added: detectPitch with YIN algorithm
+  - Added: extractFormants with LPC algorithm
+  - Added: analyzeSpectrum with centroid/rolloff/tilt
+  - Added: TypeScript definitions
+  - Added: iOS and Android native implementations
+  - Added: Comprehensive documentation
+  - Added: Example app with benchmarks
+- RELEASING.md includes:
+  - Pre-release checklist (tests, docs, version, changelog)
+  - npm publish procedure
+  - Git tagging (git tag v0.1.0, git push --tags)
+  - Versioning strategy (semver: MAJOR.MINOR.PATCH)
+  - Post-release steps (verify on npmjs.com, test install)
+- Depends on Story 5.6 (package.json version set)
+  </constraints>
+
+  <interfaces>
+<!-- Documentation story - creates no code interfaces -->
+  </interfaces>
+
+  <tests>
+    <standards>
+Verify CHANGELOG follows keepachangelog.com format. Verify all v0.1.0 features listed. Test RELEASING procedure is complete and accurate.
+    </standards>
+    <locations>
+Manual review of CHANGELOG.md and RELEASING.md
+    </locations>
+    <ideas>
+- Verify CHANGELOG has "Added" section with all four DSP functions (AC1)
+- Check CHANGELOG date format (AC3)
+- Verify RELEASING has pre-release checklist (AC2)
+- Verify RELEASING has npm publish command (AC2)
+- Verify git tagging instructions present (AC3)
+- Verify semver strategy documented (AC2)
+    </ideas>
+  </tests>
+</story-context>

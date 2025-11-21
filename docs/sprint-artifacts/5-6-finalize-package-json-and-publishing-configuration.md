@@ -1,6 +1,6 @@
 # Story 5.6: Finalize package.json and Publishing Configuration
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 As a developer, I want package.json properly configured for npm publishing, so that the library can be published with correct metadata and dependencies.
@@ -30,6 +30,9 @@ As a developer, I want package.json properly configured for npm publishing, so t
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/5-6-finalize-package-json-and-publishing-configuration.context.xml](./5-6-finalize-package-json-and-publishing-configuration.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

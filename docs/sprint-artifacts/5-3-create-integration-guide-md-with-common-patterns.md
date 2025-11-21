@@ -1,6 +1,6 @@
 # Story 5.3: Create INTEGRATION_GUIDE.md with Common Patterns
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 As a developer, I want an INTEGRATION_GUIDE.md with real-world patterns and recipes, so that I can implement common voice analysis use cases quickly.
@@ -29,6 +29,9 @@ As a developer, I want an INTEGRATION_GUIDE.md with real-world patterns and reci
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/5-3-create-integration-guide-md-with-common-patterns.context.xml](./5-3-create-integration-guide-md-with-common-patterns.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

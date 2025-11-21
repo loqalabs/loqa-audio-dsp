@@ -1,6 +1,6 @@
 # Story 5.8: Publish v0.1.0 to npm Registry
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 As a developer, I want v0.1.0 published to npm, so that the library is publicly available for installation.
@@ -30,6 +30,9 @@ As a developer, I want v0.1.0 published to npm, so that the library is publicly 
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/5-8-publish-v0-1-0-to-npm-registry.context.xml](./5-8-publish-v0-1-0-to-npm-registry.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

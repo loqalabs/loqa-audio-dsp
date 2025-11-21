@@ -1,6 +1,6 @@
 # Story 5.4: Build Example App with All Four DSP Functions
 
-Status: drafted
+Status: ready-for-dev
 
 ## Story
 As a developer, I want a working example app demonstrating all DSP functions, so that I can see the library in action and use it as a reference.
@@ -30,6 +30,9 @@ As a developer, I want a working example app demonstrating all DSP functions, so
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/5-4-build-example-app-with-all-four-dsp-functions.context.xml](./5-4-build-example-app-with-all-four-dsp-functions.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

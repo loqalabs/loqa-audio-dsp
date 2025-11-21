@@ -29,6 +29,9 @@ As a developer, I want analyzeSpectrum working on both platforms, so that spectr
 
 ## Dev Agent Record
 ### Context Reference
+
+- [docs/sprint-artifacts/4-2-implement-ios-and-android-analyzespectrum-native-functions.context.xml](./4-2-implement-ios-and-android-analyzespectrum-native-functions.context.xml)
+
 ### Agent Model Used
 ### Debug Log References
 ### Completion Notes List

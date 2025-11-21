@@ -1,0 +1,86 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>5</epicId>
+    <storyId>1</storyId>
+    <title>Create Comprehensive README.md</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/5-1-create-comprehensive-readme.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a comprehensive README.md that explains the library's purpose, features, and quick start</iWant>
+    <soThat>users can quickly understand and adopt the library</soThat>
+    <tasks>
+- Write library overview and key features section
+- Add installation instructions (npm install @loqalabs/loqa-audio-dsp)
+- Create quick start examples for computeFFT, detectPitch, extractFormants, analyzeSpectrum
+- Add prerequisites (React Native, Expo SDK version, iOS/Android requirements)
+- Link to API.md and INTEGRATION_GUIDE.md
+- Add badges (npm version, license, build status)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given package complete, When writing README, Then includes purpose, key features (FFT, pitch, formants, spectral), installation, and quick start
+AC2: Given README created, When checking examples, Then shows code snippets for all four DSP functions
+AC3: Given content complete, When reviewing, Then includes API overview, platform support, prerequisites, and links to detailed docs
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD - Documentation Requirements</title>
+        <section>FR63-FR82 Documentation &amp; Developer Experience</section>
+        <snippet>README: library purpose, installation, quick start with all four DSP functions. Link to API.md and INTEGRATION_GUIDE.md. Badges and platform support.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>README.md</path>
+        <kind>documentation</kind>
+        <symbol>README</symbol>
+        <lines>all</lines>
+        <reason>Create comprehensive README for package</reason>
+      </artifact>
+    </code>
+    <dependencies>
+<!-- Documentation story - no code dependencies -->
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Professional, concise writing style
+- Code examples must be runnable and accurate
+- Installation: npm install @loqalabs/loqa-audio-dsp
+- Quick start examples for all four functions: computeFFT, detectPitch, extractFormants, analyzeSpectrum
+- Prerequisites: Expo SDK ≥49, React Native ≥0.72, iOS ≥13, Android ≥21
+- Include badges: npm version, license (MIT), build status
+- Link to docs/API.md and docs/INTEGRATION_GUIDE.md
+- Professional README sections: Features, Installation, Quick Start, Documentation, Platform Support, License
+- Completes Epic 5 documentation foundation
+  </constraints>
+
+  <interfaces>
+<!-- Documentation story - no code interfaces -->
+  </interfaces>
+
+  <tests>
+    <standards>
+Verify code examples are syntactically correct. Test installation instructions. Verify links to other docs work. Validate badges display correctly.
+    </standards>
+    <locations>
+Manual testing - verify README renders correctly on GitHub and npm
+    </locations>
+    <ideas>
+- Copy/paste quick start examples into fresh project, verify they work (AC2)
+- Verify all four DSP functions have examples (AC2)
+- Check prerequisites section complete (AC3)
+- Verify links to API.md and INTEGRATION_GUIDE.md resolve (AC3)
+- Test npm badge link works (AC3)
+    </ideas>
+  </tests>
+</story-context>
