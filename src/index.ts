@@ -17,11 +17,7 @@ export type {
 } from './types';
 
 // Export error classes
-export {
-  LoqaAudioDspError,
-  ValidationError,
-  NativeModuleError,
-} from './errors';
+export { LoqaAudioDspError, ValidationError, NativeModuleError } from './errors';
 
 // Export utility functions
 export { logDebug, logWarning } from './utils';

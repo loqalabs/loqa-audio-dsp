@@ -19,9 +19,7 @@
  * validateAudioBuffer(buffer); // Passes if buffer is valid
  * ```
  */
-export function validateAudioBuffer(
-  buffer: Float32Array | number[]
-): void {
+export function validateAudioBuffer(buffer: Float32Array | number[]): void {
   // Implementation in Epic 2 (Story 2.4)
   throw new Error('Not implemented - will be added in Epic 2');
 }
