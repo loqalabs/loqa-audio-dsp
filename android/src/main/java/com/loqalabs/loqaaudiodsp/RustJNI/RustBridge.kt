@@ -1,6 +1,29 @@
 package com.loqalabs.loqaaudiodsp.RustJNI
 
 /**
+ * PitchResult data class matching Rust #[repr(C)] PitchResult struct.
+ * Returned by value from nativeDetectPitch JNI function.
+ */
+data class PitchResult(
+    val frequency: Float,
+    val confidence: Float,
+    val isVoiced: Boolean
+)
+
+/**
+ * FormantsResult data class matching Rust #[repr(C)] FormantsResult struct.
+ * Returned by value from nativeExtractFormants JNI function.
+ */
+data class FormantsResult(
+    val f1: Float,
+    val f2: Float,
+    val f3: Float,
+    val bw1: Float,
+    val bw2: Float,
+    val bw3: Float
+)
+
+/**
  * RustBridge provides JNI bindings to the Rust loqa-voice-dsp library.
  *
  * This class handles:
@@ -10,13 +33,14 @@ package com.loqalabs.loqaaudiodsp.RustJNI
  *
  * Memory Management Notes:
  * - JNI automatically handles FloatArray marshalling for primitive arrays
+ * - Structs (PitchResult, FormantsResult) are returned by value (no heap allocation)
  * - No manual memory management needed (simpler than iOS FFI)
  * - All native calls are wrapped in try-catch for error handling
  *
  * Implementation Status:
- * - Story 1.4: Placeholder JNI function declarations (this story)
+ * - Story 1.4: Placeholder JNI function declarations
  * - Story 2.3: Real FFT implementation
- * - Story 3.3: Pitch and formant implementations
+ * - Story 3.3: Pitch and formant implementations (this story)
  * - Story 4.2: Spectrum analysis implementation
  */
 object RustBridge {
@@ -57,38 +81,42 @@ object RustBridge {
     ): FloatArray
 
     /**
-     * Placeholder JNI function for pitch detection.
+     * JNI native function for pitch detection.
      *
-     * This will be implemented in Story 3.1/3.3 to call Rust's detect_pitch_rust.
+     * Implemented in Story 3.1/3.3. Maps to Rust function:
+     * Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeDetectPitch
      *
-     * @param buffer Input audio samples as FloatArray
-     * @param sampleRate Sample rate in Hz
-     * @param minFreq Minimum detectable frequency in Hz
-     * @param maxFreq Maximum detectable frequency in Hz
-     * @return Map with keys: "frequency" (Float), "confidence" (Float), "isVoiced" (Boolean)
+     * This external function is resolved by JNI to the Rust implementation in lib.rs.
+     * The Rust function uses YIN algorithm for pitch detection.
+     *
+     * @param buffer Input audio samples as FloatArray (JNI auto-converts to *const f32)
+     * @param sampleRate Sample rate in Hz (8000-48000)
+     * @return PitchResult struct with frequency, confidence, and isVoiced
      */
     external fun nativeDetectPitch(
         buffer: FloatArray,
-        sampleRate: Int,
-        minFreq: Float,
-        maxFreq: Float
-    ): Map<String, Any>
+        sampleRate: Int
+    ): PitchResult
 
     /**
-     * Placeholder JNI function for formant extraction.
+     * JNI native function for formant extraction.
      *
-     * This will be implemented in Story 3.2/3.3 to call Rust's extract_formants_rust.
+     * Implemented in Story 3.2/3.3. Maps to Rust function:
+     * Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeExtractFormants
      *
-     * @param buffer Input audio samples as FloatArray
-     * @param sampleRate Sample rate in Hz
-     * @param lpcOrder LPC analysis order
-     * @return Map with keys: "f1", "f2", "f3" (Float), "bandwidths" (Map<String, Float>)
+     * This external function is resolved by JNI to the Rust implementation in lib.rs.
+     * The Rust function uses LPC analysis for formant extraction.
+     *
+     * @param buffer Input audio samples as FloatArray (JNI auto-converts to *const f32)
+     * @param sampleRate Sample rate in Hz (8000-48000)
+     * @param lpcOrder LPC order (0 for default: sampleRate / 1000 + 2)
+     * @return FormantsResult struct with f1, f2, f3 and bandwidths
      */
     external fun nativeExtractFormants(
         buffer: FloatArray,
         sampleRate: Int,
         lpcOrder: Int
-    ): Map<String, Any>
+    ): FormantsResult
 
     /**
      * Placeholder JNI function for spectral analysis.
@@ -131,23 +159,20 @@ object RustBridge {
     /**
      * Detects pitch from audio buffer with error handling.
      *
-     * Note: This is a placeholder wrapper. Full implementation in Story 3.3.
+     * Implemented in Story 3.3. This wrapper calls the native JNI function and
+     * provides Kotlin-friendly error handling.
      *
      * @param buffer Input audio samples
-     * @param sampleRate Sample rate in Hz
-     * @param minFreq Minimum frequency
-     * @param maxFreq Maximum frequency
-     * @return Pitch detection result
+     * @param sampleRate Sample rate in Hz (8000-48000)
+     * @return PitchResult with frequency, confidence, and isVoiced
      * @throws RuntimeException if JNI call fails
      */
     fun detectPitch(
         buffer: FloatArray,
-        sampleRate: Int,
-        minFreq: Float,
-        maxFreq: Float
-    ): Map<String, Any> {
+        sampleRate: Int
+    ): PitchResult {
         return try {
-            nativeDetectPitch(buffer, sampleRate, minFreq, maxFreq)
+            nativeDetectPitch(buffer, sampleRate)
         } catch (e: Exception) {
             throw RuntimeException("JNI call to nativeDetectPitch failed", e)
         }
@@ -156,19 +181,20 @@ object RustBridge {
     /**
      * Extracts formants from audio buffer with error handling.
      *
-     * Note: This is a placeholder wrapper. Full implementation in Story 3.3.
+     * Implemented in Story 3.3. This wrapper calls the native JNI function and
+     * provides Kotlin-friendly error handling.
      *
      * @param buffer Input audio samples
-     * @param sampleRate Sample rate in Hz
-     * @param lpcOrder LPC order
-     * @return Formants result
+     * @param sampleRate Sample rate in Hz (8000-48000)
+     * @param lpcOrder LPC order (0 for default: sampleRate / 1000 + 2)
+     * @return FormantsResult with f1, f2, f3 and bandwidths
      * @throws RuntimeException if JNI call fails
      */
     fun extractFormants(
         buffer: FloatArray,
         sampleRate: Int,
         lpcOrder: Int
-    ): Map<String, Any> {
+    ): FormantsResult {
         return try {
             nativeExtractFormants(buffer, sampleRate, lpcOrder)
         } catch (e: Exception) {

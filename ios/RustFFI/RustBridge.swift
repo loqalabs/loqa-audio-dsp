@@ -23,38 +23,47 @@ func free_fft_result_rust(_ ptr: UnsafePointer<Float>)
 
 // MARK: Pitch Detection Functions (Epic 3)
 
-/// Placeholder FFI declaration for pitch detection using YIN algorithm
-/// Will be implemented in Story 3.2
+/// PitchResult struct matching Rust #[repr(C)] layout
+/// Returned by value from detect_pitch_rust
+public struct PitchResult {
+    public let frequency: Float
+    public let confidence: Float
+    public let isVoiced: Bool
+}
+
+/// FFI declaration for pitch detection using YIN algorithm
+/// Implemented in Story 3.1, called from Story 3.3
+/// Note: Rust returns PitchResult by value (small struct, no heap allocation needed)
 @_silgen_name("detect_pitch_rust")
 func detect_pitch_rust(
     buffer: UnsafePointer<Float>,
     length: Int32,
-    sampleRate: Int32,
-    minFrequency: Float,
-    maxFrequency: Float
-) -> UnsafePointer<Float>? // Returns [frequency, confidence]
-
-/// Placeholder FFI declaration for freeing pitch detection result memory
-/// Will be implemented in Story 3.2
-@_silgen_name("free_pitch_result_rust")
-func free_pitch_result_rust(_ ptr: UnsafePointer<Float>)
+    sampleRate: Int32
+) -> PitchResult
 
 // MARK: Formant Extraction Functions (Epic 3)
 
-/// Placeholder FFI declaration for formant extraction using LPC analysis
-/// Will be implemented in Story 3.2
+/// FormantsResult struct matching Rust #[repr(C)] layout
+/// Returned by value from extract_formants_rust
+public struct FormantsResult {
+    public let f1: Float
+    public let f2: Float
+    public let f3: Float
+    public let bw1: Float
+    public let bw2: Float
+    public let bw3: Float
+}
+
+/// FFI declaration for formant extraction using LPC analysis
+/// Implemented in Story 3.2, called from Story 3.3
+/// Note: Rust returns FormantsResult by value (small struct, no heap allocation needed)
 @_silgen_name("extract_formants_rust")
 func extract_formants_rust(
     buffer: UnsafePointer<Float>,
     length: Int32,
     sampleRate: Int32,
     lpcOrder: Int32
-) -> UnsafePointer<Float>? // Returns [f1, f2, f3, bw1, bw2, bw3]
-
-/// Placeholder FFI declaration for freeing formants result memory
-/// Will be implemented in Story 3.2
-@_silgen_name("free_formants_result_rust")
-func free_formants_result_rust(_ ptr: UnsafePointer<Float>)
+) -> FormantsResult
 
 // MARK: Spectrum Analysis Functions (Epic 4)
 
@@ -147,17 +156,15 @@ public func computeFFTWrapper(buffer: [Float], fftSize: Int, windowType: Int32) 
     return output
 }
 
-// MARK: Pitch Detection Wrapper (Placeholder for Epic 3)
+// MARK: Pitch Detection Wrapper (Epic 3)
 
-/// Placeholder Swift wrapper for pitch detection
-/// MEMORY SAFETY PATTERN: Uses defer block to guarantee Rust memory is freed
-/// Will be fully implemented in Story 3.3
+/// Swift wrapper for pitch detection
+/// MEMORY SAFETY: PitchResult returned by value (no heap allocation, no cleanup needed)
+/// Implemented in Story 3.3
 public func detectPitchWrapper(
     buffer: [Float],
-    sampleRate: Int,
-    minFrequency: Float = 80.0,
-    maxFrequency: Float = 400.0
-) throws -> (frequency: Float?, confidence: Float) {
+    sampleRate: Int
+) throws -> (frequency: Float?, confidence: Float, isVoiced: Bool) {
     // Input validation
     guard !buffer.isEmpty else {
         throw RustFFIError.invalidInput("Buffer cannot be empty")
@@ -167,46 +174,31 @@ public func detectPitchWrapper(
         throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
     }
 
-    var rustResult: UnsafePointer<Float>? = nil
-
-    // CRITICAL: defer block guarantees Rust memory is freed
-    defer {
-        if let ptr = rustResult {
-            free_pitch_result_rust(ptr)
-        }
-    }
-
-    buffer.withUnsafeBufferPointer { bufferPtr in
+    // Call Rust function - returns PitchResult by value (no memory management needed)
+    let result = buffer.withUnsafeBufferPointer { bufferPtr -> PitchResult in
         guard let baseAddress = bufferPtr.baseAddress else {
-            return
+            // Return error result if buffer pointer is invalid
+            return PitchResult(frequency: 0.0, confidence: 0.0, isVoiced: false)
         }
 
-        rustResult = detect_pitch_rust(
+        return detect_pitch_rust(
             baseAddress,
             Int32(buffer.count),
-            Int32(sampleRate),
-            minFrequency,
-            maxFrequency
+            Int32(sampleRate)
         )
     }
 
-    guard let result = rustResult else {
-        throw RustFFIError.computationFailed("Pitch detection returned null")
-    }
+    // Convert frequency: 0.0 -> nil, otherwise use actual value
+    let frequency = result.isVoiced && result.frequency > 0 ? result.frequency : nil
 
-    // Copy result: [frequency, confidence]
-    let resultArray = Array(UnsafeBufferPointer(start: result, count: 2))
-    let frequency = resultArray[0] > 0 ? resultArray[0] : nil
-    let confidence = resultArray[1]
-
-    return (frequency, confidence)
+    return (frequency, result.confidence, result.isVoiced)
 }
 
-// MARK: Formant Extraction Wrapper (Placeholder for Epic 3)
+// MARK: Formant Extraction Wrapper (Epic 3)
 
-/// Placeholder Swift wrapper for formant extraction
-/// MEMORY SAFETY PATTERN: Uses defer block to guarantee Rust memory is freed
-/// Will be fully implemented in Story 3.3
+/// Swift wrapper for formant extraction
+/// MEMORY SAFETY: FormantsResult returned by value (no heap allocation, no cleanup needed)
+/// Implemented in Story 3.3
 public func extractFormantsWrapper(
     buffer: [Float],
     sampleRate: Int,
@@ -222,23 +214,17 @@ public func extractFormantsWrapper(
     }
 
     // Default LPC order: sampleRate / 1000 + 2
-    let order = lpcOrder ?? (sampleRate / 1000 + 2)
+    // If lpcOrder is provided, use it; otherwise use 0 to signal Rust to use default
+    let order = lpcOrder ?? 0
 
-    var rustResult: UnsafePointer<Float>? = nil
-
-    // CRITICAL: defer block guarantees Rust memory is freed
-    defer {
-        if let ptr = rustResult {
-            free_formants_result_rust(ptr)
-        }
-    }
-
-    buffer.withUnsafeBufferPointer { bufferPtr in
+    // Call Rust function - returns FormantsResult by value (no memory management needed)
+    let result = buffer.withUnsafeBufferPointer { bufferPtr -> FormantsResult in
         guard let baseAddress = bufferPtr.baseAddress else {
-            return
+            // Return error result if buffer pointer is invalid
+            return FormantsResult(f1: 0.0, f2: 0.0, f3: 0.0, bw1: 0.0, bw2: 0.0, bw3: 0.0)
         }
 
-        rustResult = extract_formants_rust(
+        return extract_formants_rust(
             baseAddress,
             Int32(buffer.count),
             Int32(sampleRate),
@@ -246,18 +232,11 @@ public func extractFormantsWrapper(
         )
     }
 
-    guard let result = rustResult else {
-        throw RustFFIError.computationFailed("Formant extraction returned null")
-    }
-
-    // Copy result: [f1, f2, f3, bw1, bw2, bw3]
-    let resultArray = Array(UnsafeBufferPointer(start: result, count: 6))
-
     return (
-        f1: resultArray[0],
-        f2: resultArray[1],
-        f3: resultArray[2],
-        bandwidths: (resultArray[3], resultArray[4], resultArray[5])
+        f1: result.f1,
+        f2: result.f2,
+        f3: result.f3,
+        bandwidths: (result.bw1, result.bw2, result.bw3)
     )
 }
 

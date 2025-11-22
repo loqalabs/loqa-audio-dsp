@@ -78,17 +78,12 @@ public class LoqaAudioDspModule: Module {
       }
     }
 
-    // MARK: - detectPitch (Placeholder for Epic 3)
-    // Will be fully implemented in Story 3.3 with actual Rust FFI calls
+    // MARK: - detectPitch (Implemented in Story 3.3)
+    // Calls Rust YIN pitch detection via RustBridge.detectPitchWrapper()
     AsyncFunction("detectPitch") { (buffer: [Float], sampleRate: Int, options: [String: Any], promise: Promise) in
       DispatchQueue.global(qos: .userInitiated).async {
         do {
-          // Placeholder implementation - returns zero values
-          // Story 3.3 will call RustBridge.detectPitchWrapper()
-          let minFrequency = options["minFrequency"] as? Float ?? 80.0
-          let maxFrequency = options["maxFrequency"] as? Float ?? 400.0
-
-          // Validate inputs
+          // Validate inputs (basic validation - detailed validation in RustBridge)
           guard !buffer.isEmpty else {
             promise.reject("VALIDATION_ERROR", "Buffer cannot be empty")
             return
@@ -99,30 +94,47 @@ public class LoqaAudioDspModule: Module {
             return
           }
 
-          // Placeholder: Return null frequency and zero confidence
+          // Call Rust pitch detection via wrapper
+          let (frequency, confidence, isVoiced) = try detectPitchWrapper(
+            buffer: buffer,
+            sampleRate: sampleRate
+          )
+
+          // Build result dictionary matching PitchResult type
+          // frequency is Optional<Float>, convert to NSNull if nil
           let result: [String: Any] = [
-            "frequency": NSNull(),
-            "confidence": 0.0,
-            "isVoiced": false
+            "frequency": frequency ?? NSNull(),
+            "confidence": confidence,
+            "isVoiced": isVoiced
           ]
 
           promise.resolve(result)
+        } catch let error as RustFFIError {
+          // Handle Rust FFI errors with specific error codes
+          switch error {
+          case .invalidInput(let message):
+            promise.reject("VALIDATION_ERROR", message)
+          case .computationFailed(let message):
+            promise.reject("PITCH_ERROR", message)
+          case .memoryAllocationFailed:
+            promise.reject("PITCH_ERROR", "Memory allocation failed in Rust pitch detection")
+          }
         } catch {
+          // Handle unexpected errors
           promise.reject("PITCH_ERROR", error.localizedDescription, error)
         }
       }
     }
 
-    // MARK: - extractFormants (Placeholder for Epic 3)
-    // Will be fully implemented in Story 3.3 with actual Rust FFI calls
+    // MARK: - extractFormants (Implemented in Story 3.3)
+    // Calls Rust LPC formant extraction via RustBridge.extractFormantsWrapper()
     AsyncFunction("extractFormants") { (buffer: [Float], sampleRate: Int, options: [String: Any], promise: Promise) in
       DispatchQueue.global(qos: .userInitiated).async {
         do {
-          // Placeholder implementation - returns zero values
-          // Story 3.3 will call RustBridge.extractFormantsWrapper()
+          // Extract optional LPC order from options
           let lpcOrder = options["lpcOrder"] as? Int
 
-          // Validate inputs
+          // Validate inputs (basic validation - detailed validation in RustBridge)
           guard !buffer.isEmpty else {
             promise.reject("VALIDATION_ERROR", "Buffer cannot be empty")
             return
@@ -133,20 +145,38 @@ public class LoqaAudioDspModule: Module {
             return
           }
 
-          // Placeholder: Return zero formants
+          // Call Rust formant extraction via wrapper
+          let (f1, f2, f3, bandwidths) = try extractFormantsWrapper(
+            buffer: buffer,
+            sampleRate: sampleRate,
+            lpcOrder: lpcOrder
+          )
+
+          // Build result dictionary matching FormantsResult type
           let result: [String: Any] = [
-            "f1": 0.0,
-            "f2": 0.0,
-            "f3": 0.0,
+            "f1": f1,
+            "f2": f2,
+            "f3": f3,
             "bandwidths": [
-              "f1": 0.0,
-              "f2": 0.0,
-              "f3": 0.0
+              "f1": bandwidths.0,
+              "f2": bandwidths.1,
+              "f3": bandwidths.2
             ]
           ]
 
           promise.resolve(result)
+        } catch let error as RustFFIError {
+          // Handle Rust FFI errors with specific error codes
+          switch error {
+          case .invalidInput(let message):
+            promise.reject("VALIDATION_ERROR", message)
+          case .computationFailed(let message):
+            promise.reject("FORMANTS_ERROR", message)
+          case .memoryAllocationFailed:
+            promise.reject("FORMANTS_ERROR", "Memory allocation failed in Rust formant extraction")
+          }
         } catch {
+          // Handle unexpected errors
           promise.reject("FORMANTS_ERROR", error.localizedDescription, error)
         }
       }

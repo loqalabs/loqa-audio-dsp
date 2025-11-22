@@ -104,22 +104,42 @@ class LoqaAudioDspModule : Module() {
     /**
      * Detects pitch using YIN algorithm.
      *
-     * Placeholder implementation - will be completed in Story 3.3.
+     * Implemented in Story 3.3.
      * Expo automatically runs this on a background thread.
      *
      * @param buffer Audio samples as FloatArray
      * @param sampleRate Sample rate in Hz (Int)
-     * @param options Map with optional keys: "minFrequency" (Float), "maxFrequency" (Float)
-     * @return Map with keys: "frequency" (Float), "confidence" (Float), "isVoiced" (Boolean)
+     * @param options Map with optional keys (currently unused - min/max frequency hardcoded in Rust)
+     * @return Map with keys: "frequency" (Float or null), "confidence" (Float), "isVoiced" (Boolean)
      * @throws Exception with error code "PITCH_ERROR"
      */
     AsyncFunction("detectPitch") { buffer: FloatArray, sampleRate: Int, options: Map<String, Any?> ->
       try {
-        // Placeholder: This will call RustBridge.detectPitch in Story 3.3
-        throw UnsupportedOperationException(
-          "detectPitch not yet implemented. Will be completed in Story 3.3."
+        // Validate buffer is not empty (AC3)
+        if (buffer.isEmpty()) {
+          throw Exception("VALIDATION_ERROR: Buffer cannot be empty")
+        }
+
+        // Validate sample rate (AC3)
+        if (sampleRate < 8000 || sampleRate > 48000) {
+          throw Exception("VALIDATION_ERROR: Sample rate must be between 8000 and 48000 Hz, got $sampleRate")
+        }
+
+        // Call Rust pitch detection via JNI (AC1, AC2)
+        val result = RustBridge.detectPitch(buffer, sampleRate)
+
+        // Convert PitchResult to Map for TypeScript (AC4)
+        // frequency is null if not voiced or 0.0
+        mapOf(
+          "frequency" to if (result.isVoiced && result.frequency > 0) result.frequency else null,
+          "confidence" to result.confidence,
+          "isVoiced" to result.isVoiced
         )
+      } catch (e: RuntimeException) {
+        // Catch JNI/Rust errors and throw with PITCH_ERROR code
+        throw Exception("PITCH_ERROR: ${e.message}", e)
       } catch (e: Exception) {
+        // Catch validation errors and other unexpected errors
         throw Exception("PITCH_ERROR: ${e.message}", e)
       }
     }
@@ -131,7 +151,7 @@ class LoqaAudioDspModule : Module() {
     /**
      * Extracts formant frequencies (F1, F2, F3) using LPC analysis.
      *
-     * Placeholder implementation - will be completed in Story 3.3.
+     * Implemented in Story 3.3.
      * Expo automatically runs this on a background thread.
      *
      * @param buffer Audio samples as FloatArray
@@ -142,11 +162,39 @@ class LoqaAudioDspModule : Module() {
      */
     AsyncFunction("extractFormants") { buffer: FloatArray, sampleRate: Int, options: Map<String, Any?> ->
       try {
-        // Placeholder: This will call RustBridge.extractFormants in Story 3.3
-        throw UnsupportedOperationException(
-          "extractFormants not yet implemented. Will be completed in Story 3.3."
+        // Extract optional LPC order from options
+        // If not provided, pass 0 to Rust to use default (sampleRate / 1000 + 2)
+        val lpcOrder = (options["lpcOrder"] as? Int) ?: 0
+
+        // Validate buffer is not empty (AC3)
+        if (buffer.isEmpty()) {
+          throw Exception("VALIDATION_ERROR: Buffer cannot be empty")
+        }
+
+        // Validate sample rate (AC3)
+        if (sampleRate < 8000 || sampleRate > 48000) {
+          throw Exception("VALIDATION_ERROR: Sample rate must be between 8000 and 48000 Hz, got $sampleRate")
+        }
+
+        // Call Rust formant extraction via JNI (AC1, AC2)
+        val result = RustBridge.extractFormants(buffer, sampleRate, lpcOrder)
+
+        // Convert FormantsResult to Map for TypeScript (AC4)
+        mapOf(
+          "f1" to result.f1,
+          "f2" to result.f2,
+          "f3" to result.f3,
+          "bandwidths" to mapOf(
+            "f1" to result.bw1,
+            "f2" to result.bw2,
+            "f3" to result.bw3
+          )
         )
+      } catch (e: RuntimeException) {
+        // Catch JNI/Rust errors and throw with FORMANTS_ERROR code
+        throw Exception("FORMANTS_ERROR: ${e.message}", e)
       } catch (e: Exception) {
+        // Catch validation errors and other unexpected errors
         throw Exception("FORMANTS_ERROR: ${e.message}", e)
       }
     }
