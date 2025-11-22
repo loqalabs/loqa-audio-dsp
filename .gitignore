@@ -68,3 +68,6 @@ coverage/
 # Rust
 rust/target/
 Cargo.lock
+
+# BMAD build artifacts
+.build/
