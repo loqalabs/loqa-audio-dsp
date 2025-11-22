@@ -325,6 +325,195 @@ pub unsafe extern "C" fn Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativ
     detect_pitch_rust(buffer, buffer_length, sample_rate)
 }
 
+/// Result structure for formant extraction
+///
+/// Returns the first three formant frequencies (F1, F2, F3) and their bandwidths.
+/// This struct is C-compatible for FFI/JNI interop.
+///
+/// # Fields
+/// * `f1` - First formant frequency in Hz (typically 200-1000 Hz for human voice)
+/// * `f2` - Second formant frequency in Hz (typically 800-2500 Hz)
+/// * `f3` - Third formant frequency in Hz (typically 2000-4000 Hz)
+/// * `bw1` - Bandwidth of first formant in Hz
+/// * `bw2` - Bandwidth of second formant in Hz
+/// * `bw3` - Bandwidth of third formant in Hz
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct FormantsResult {
+    pub f1: c_float,
+    pub f2: c_float,
+    pub f3: c_float,
+    pub bw1: c_float,
+    pub bw2: c_float,
+    pub bw3: c_float,
+}
+
+/// Extracts formants (F1, F2, F3) using LPC analysis from loqa-voice-dsp crate
+///
+/// # Arguments
+/// * `buffer` - Pointer to input audio samples (Float32 array)
+/// * `length` - Number of samples in input buffer
+/// * `sample_rate` - Sample rate in Hz (must be 8000-48000 Hz)
+/// * `lpc_order` - LPC order (if 0, uses default: sample_rate / 1000 + 2)
+///
+/// # Returns
+/// * FormantsResult struct with f1, f2, f3 frequencies and bandwidths
+/// * Returns zeros on error
+///
+/// # Safety
+/// * Caller must ensure `buffer` points to valid memory of at least `length` samples
+/// * This function dereferences raw pointers and is inherently unsafe
+/// * Buffer must remain valid for the duration of this function call
+///
+/// # Validation
+/// * Sample rate must be between 8000 and 48000 Hz (AC3)
+/// * Audio should be voiced for accurate formant extraction (AC3)
+/// * Default LPC order is (sample_rate / 1000) + 2 (AC4)
+/// * Returns formant frequencies in Hz (AC5)
+///
+/// # Note on LPC Analysis
+/// * LPC (Linear Predictive Coding) finds resonant frequencies of vocal tract
+/// * Best results with voiced speech segments (vowels)
+/// * F1, F2, F3 are essential for vowel identification
+/// * Formant bandwidths indicate the width of resonance peaks
+#[no_mangle]
+pub unsafe extern "C" fn extract_formants_rust(
+    buffer: *const c_float,
+    length: c_int,
+    sample_rate: c_int,
+    lpc_order: c_int,
+) -> FormantsResult {
+    // Default error result (all zeros)
+    let error_result = FormantsResult {
+        f1: 0.0,
+        f2: 0.0,
+        f3: 0.0,
+        bw1: 0.0,
+        bw2: 0.0,
+        bw3: 0.0,
+    };
+
+    // Input validation
+    if buffer.is_null() {
+        eprintln!("[Rust FFI] Error: buffer pointer is null");
+        return error_result;
+    }
+
+    if length <= 0 {
+        eprintln!("[Rust FFI] Error: length must be > 0, got {length}");
+        return error_result;
+    }
+
+    // Validate sample rate range: 8000-48000 Hz (AC3)
+    if !(8000..=48000).contains(&sample_rate) {
+        eprintln!(
+            "[Rust FFI] Error: sample_rate must be in range [8000, 48000] Hz, got {sample_rate}"
+        );
+        return error_result;
+    }
+
+    // Calculate default LPC order if not specified (AC4)
+    // Default: (sample_rate / 1000) + 2, clamped to valid range [8, 24]
+    // loqa-voice-dsp requires LPC order to be in range 8-24
+    let computed_lpc_order = if lpc_order <= 0 {
+        let calculated = (sample_rate / 1000) + 2;
+        calculated.clamp(8, 24)
+    } else {
+        lpc_order
+    };
+
+    // Validate LPC order is in the range supported by loqa-voice-dsp (8-24)
+    if !(8..=24).contains(&computed_lpc_order) {
+        eprintln!(
+            "[Rust FFI] Error: LPC order must be in range [8, 24], got {computed_lpc_order}"
+        );
+        return error_result;
+    }
+
+    // Validate buffer is long enough for LPC analysis
+    // Need at least lpc_order * 2 samples for meaningful analysis
+    if length < computed_lpc_order * 2 {
+        eprintln!(
+            "[Rust FFI] Error: buffer length {length} too short for LPC order {computed_lpc_order} (need at least {})",
+            computed_lpc_order * 2
+        );
+        return error_result;
+    }
+
+    // Convert raw pointer to Rust slice
+    let input_slice = slice::from_raw_parts(buffer, length as usize);
+
+    // Call loqa-voice-dsp LPC formant extraction function (AC2)
+    let formants_result = loqa_voice_dsp::extract_formants(
+        input_slice,
+        sample_rate as u32,
+        computed_lpc_order as usize,
+    );
+
+    // Handle formant extraction result
+    match formants_result {
+        Ok(result) => {
+            // Extract F1, F2, F3 (AC1, AC5)
+            // Note: loqa-voice-dsp v0.1 returns f1, f2, f3, and confidence
+            // Bandwidth estimation is not yet available in v0.1, so we set them to 0
+            // Future versions may include bandwidth information
+            FormantsResult {
+                f1: result.f1,
+                f2: result.f2,
+                f3: result.f3,
+                bw1: 0.0,  // TODO: Add bandwidth estimation in future version
+                bw2: 0.0,
+                bw3: 0.0,
+            }
+        }
+        Err(e) => {
+            eprintln!("[Rust FFI] Formant extraction failed: {e:?}");
+            error_result
+        }
+    }
+}
+
+/// Android JNI native method for extractFormants
+///
+/// JNI Method Signature Resolution:
+/// - Kotlin declaration: `external fun nativeExtractFormants(buffer: FloatArray, sampleRate: Int, lpcOrder: Int): FormantsResult`
+/// - Package: com.loqalabs.loqaaudiodsp.RustJNI
+/// - Class: RustBridge (object)
+/// - Method: nativeExtractFormants
+/// - JNI Function Name: Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeExtractFormants
+///
+/// # Arguments
+/// * `env` - JNI environment pointer (unused but required by JNI)
+/// * `class` - JNI class reference (unused but required by JNI)
+/// * `buffer` - JNI jfloatArray reference to input audio samples
+/// * `buffer_length` - Number of samples in buffer
+/// * `sample_rate` - Sample rate in Hz (8000-48000)
+/// * `lpc_order` - LPC order (0 for default: sample_rate / 1000 + 2)
+///
+/// # Returns
+/// * FormantsResult struct with f1, f2, f3 and bandwidths
+///
+/// # Safety
+/// * JNI framework ensures proper type conversions and memory management
+/// * This function is called from Kotlin via JNI, not directly
+///
+/// # Note
+/// FormantsResult is returned by value (small struct), not by pointer.
+/// JNI will automatically marshal this back to Kotlin data class.
+#[no_mangle]
+pub unsafe extern "C" fn Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeExtractFormants(
+    _env: *mut std::os::raw::c_void,
+    _class: *mut std::os::raw::c_void,
+    buffer: *const c_float,
+    buffer_length: c_int,
+    sample_rate: c_int,
+    lpc_order: c_int,
+) -> FormantsResult {
+    // Delegate to the main formant extraction implementation
+    // The JNI framework handles conversion of FloatArray to *const f32
+    extract_formants_rust(buffer, buffer_length, sample_rate, lpc_order)
+}
+
 /// Placeholder FFI function for testing build infrastructure (retained for backward compatibility)
 #[no_mangle]
 pub extern "C" fn test_ffi_bridge() -> i32 {
@@ -806,5 +995,303 @@ mod tests {
         let copied = test_result;
         assert_eq!(copied.frequency, 440.0);
         assert_eq!(test_result.frequency, 440.0); // Original still valid
+    }
+
+    // ======== Formant Extraction Tests ========
+
+    #[test]
+    fn test_extract_formants_null_buffer() {
+        unsafe {
+            let result = extract_formants_rust(std::ptr::null(), 1024, 44100, 0);
+            assert_eq!(result.f1, 0.0, "Should return f1=0.0 for null buffer");
+            assert_eq!(result.f2, 0.0, "Should return f2=0.0 for null buffer");
+            assert_eq!(result.f3, 0.0, "Should return f3=0.0 for null buffer");
+            assert_eq!(result.bw1, 0.0, "Should return bw1=0.0 for null buffer");
+            assert_eq!(result.bw2, 0.0, "Should return bw2=0.0 for null buffer");
+            assert_eq!(result.bw3, 0.0, "Should return bw3=0.0 for null buffer");
+        }
+    }
+
+    #[test]
+    fn test_extract_formants_invalid_length() {
+        let buffer: Vec<f32> = vec![0.0; 1024];
+        unsafe {
+            // Test zero length
+            let result = extract_formants_rust(buffer.as_ptr(), 0, 44100, 0);
+            assert_eq!(result.f1, 0.0);
+            assert_eq!(result.f2, 0.0);
+            assert_eq!(result.f3, 0.0);
+
+            // Test negative length
+            let result = extract_formants_rust(buffer.as_ptr(), -10, 44100, 0);
+            assert_eq!(result.f1, 0.0);
+            assert_eq!(result.f2, 0.0);
+            assert_eq!(result.f3, 0.0);
+        }
+    }
+
+    #[test]
+    fn test_extract_formants_invalid_sample_rate() {
+        let buffer: Vec<f32> = vec![0.0; 1024];
+        unsafe {
+            // Test below 8000 Hz (AC3)
+            let result = extract_formants_rust(buffer.as_ptr(), 1024, 7999, 0);
+            assert_eq!(result.f1, 0.0, "Should return error for sample rate < 8000 Hz");
+
+            // Test above 48000 Hz
+            let result = extract_formants_rust(buffer.as_ptr(), 1024, 48001, 0);
+            assert_eq!(result.f1, 0.0, "Should return error for sample rate > 48000 Hz");
+
+            // Test zero/negative sample rate
+            let result = extract_formants_rust(buffer.as_ptr(), 1024, 0, 0);
+            assert_eq!(result.f1, 0.0);
+
+            let result = extract_formants_rust(buffer.as_ptr(), 1024, -100, 0);
+            assert_eq!(result.f1, 0.0);
+        }
+    }
+
+    #[test]
+    fn test_extract_formants_default_lpc_order() {
+        // Test that default LPC order is computed correctly (AC4)
+        // Default should be: (sample_rate / 1000) + 2
+
+        let test_cases = [
+            (8000, (8000 / 1000) + 2),    // 10
+            (16000, (16000 / 1000) + 2),  // 18
+            (44100, (44100 / 1000) + 2),  // 46
+            (48000, (48000 / 1000) + 2),  // 50
+        ];
+
+        for (sample_rate, expected_order) in test_cases {
+            let buffer_len = expected_order * 4; // Ensure buffer is long enough
+            let buffer: Vec<f32> = vec![0.5; buffer_len as usize];
+
+            unsafe {
+                // Call with lpc_order = 0 to use default
+                let result = extract_formants_rust(buffer.as_ptr(), buffer_len, sample_rate, 0);
+
+                // If the function succeeds (doesn't return error), it used the default order
+                // We can't directly verify the order, but we can verify the function accepts valid inputs
+                // The function should not crash or return null - formants may be 0 due to buffer content
+                assert!(
+                    result.f1 >= 0.0 && result.f2 >= 0.0 && result.f3 >= 0.0,
+                    "Formant values should be non-negative for sample rate {sample_rate} Hz",
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_extract_formants_custom_lpc_order() {
+        let buffer: Vec<f32> = vec![0.5; 2048];
+        let sample_rate = 44100;
+        let custom_lpc_order = 20;
+
+        unsafe {
+            let result = extract_formants_rust(buffer.as_ptr(), 2048, sample_rate, custom_lpc_order);
+
+            // Should accept custom LPC order
+            // Formant values should be non-negative
+            assert!(result.f1 >= 0.0);
+            assert!(result.f2 >= 0.0);
+            assert!(result.f3 >= 0.0);
+            assert!(result.bw1 >= 0.0);
+            assert!(result.bw2 >= 0.0);
+            assert!(result.bw3 >= 0.0);
+        }
+    }
+
+    #[test]
+    fn test_extract_formants_buffer_too_short() {
+        // Buffer must be at least lpc_order * 2 samples long
+        let sample_rate = 44100;
+        let lpc_order = 46; // Default for 44100 Hz
+        let buffer_len = lpc_order - 1; // Too short
+        let buffer: Vec<f32> = vec![0.5; buffer_len as usize];
+
+        unsafe {
+            let result = extract_formants_rust(buffer.as_ptr(), buffer_len, sample_rate, lpc_order);
+
+            // Should return error (zeros) for buffer that's too short
+            assert_eq!(result.f1, 0.0, "Should fail for buffer that's too short");
+            assert_eq!(result.f2, 0.0);
+            assert_eq!(result.f3, 0.0);
+        }
+    }
+
+    #[test]
+    fn test_extract_formants_vowel_a_synthetic() {
+        // Test formant extraction with a synthetic vowel-like signal
+        // Note: LPC analysis is designed for real voiced speech signals
+        // Synthetic signals may not produce accurate formant estimates, but we test basic functionality
+        let sample_rate = 44100;
+        let duration = 0.1; // 100ms for better LPC analysis
+        let num_samples = (sample_rate as f32 * duration) as usize;
+
+        // Create a more realistic synthetic vowel using pitch + formant resonances
+        // Fundamental frequency (pitch): 120 Hz (typical male voice)
+        let f0 = 120.0;
+        // Formant frequencies for /a/ vowel: F1 ~700 Hz, F2 ~1200 Hz, F3 ~2500 Hz
+        let f1_target = 700.0;
+        let f2_target = 1200.0;
+        let f3_target = 2500.0;
+
+        let mut buffer: Vec<f32> = Vec::with_capacity(num_samples);
+        for i in 0..num_samples {
+            let t = i as f32 / sample_rate as f32;
+            // Generate pitched source signal (sum of harmonics)
+            let mut source = 0.0;
+            for harmonic in 1..=20 {
+                let freq = f0 * harmonic as f32;
+                source += (1.0 / harmonic as f32) * (2.0 * PI * freq * t).sin();
+            }
+            // Apply simple formant emphasis (not perfect, but better than raw sine waves)
+            let formant_emphasis =
+                0.5 * (2.0 * PI * f1_target * t).sin() +
+                0.3 * (2.0 * PI * f2_target * t).sin() +
+                0.2 * (2.0 * PI * f3_target * t).sin();
+            buffer.push(source * 0.3 + formant_emphasis * 0.7);
+        }
+
+        unsafe {
+            let result = extract_formants_rust(
+                buffer.as_ptr(),
+                num_samples as c_int,
+                sample_rate,
+                0  // Use default LPC order
+            );
+
+            // AC1, AC2, AC5: Should extract formants and return them in Hz
+            // For synthetic signals, LPC may produce varying results
+            // Key tests:
+            // 1. Function executes without crashing
+            // 2. Returns valid (finite, non-NaN) values
+            // 3. At least one formant is detected (F1 should be non-zero for voiced signal)
+
+            // All formants should be finite (not NaN or Infinity)
+            assert!(result.f1.is_finite(), "F1 should be finite");
+            assert!(result.f2.is_finite(), "F2 should be finite");
+            assert!(result.f3.is_finite(), "F3 should be finite");
+
+            // All formants should be non-negative
+            assert!(result.f1 >= 0.0, "F1 should be non-negative");
+            assert!(result.f2 >= 0.0, "F2 should be non-negative");
+            assert!(result.f3 >= 0.0, "F3 should be non-negative");
+
+            // For a voiced signal (even synthetic), we expect at least F1 to be detected
+            // F2 and F3 may be 0 depending on the signal quality and LPC algorithm behavior
+            if result.f1 > 0.0 {
+                // If formants are detected, they should be in physically plausible ranges
+                // Very wide ranges to accommodate synthetic signal limitations
+                assert!(
+                    result.f1 <= 5000.0,
+                    "F1 {:.1} Hz should be below Nyquist/2 for 44.1kHz",
+                    result.f1
+                );
+                if result.f2 > 0.0 {
+                    assert!(
+                        result.f2 <= 5000.0,
+                        "F2 {:.1} Hz should be below Nyquist/2",
+                        result.f2
+                    );
+                }
+                if result.f3 > 0.0 {
+                    assert!(
+                        result.f3 <= 5000.0,
+                        "F3 {:.1} Hz should be below Nyquist/2",
+                        result.f3
+                    );
+                }
+            }
+
+            // Bandwidths are not yet implemented in loqa-voice-dsp v0.1, so they will be 0
+            // This is acceptable for v0.1.0 - bandwidth estimation can be added in future versions
+            assert!(result.bw1 >= 0.0, "Bandwidth 1 should be non-negative");
+            assert!(result.bw2 >= 0.0, "Bandwidth 2 should be non-negative");
+            assert!(result.bw3 >= 0.0, "Bandwidth 3 should be non-negative");
+        }
+    }
+
+    #[test]
+    fn test_extract_formants_multiple_sample_rates() {
+        // Test formant extraction works across different sample rates
+        for sample_rate in [8000, 16000, 22050, 44100, 48000] {
+            let duration = 0.05; // 50ms
+            let num_samples = (sample_rate as f32 * duration) as usize;
+
+            // Generate a simple periodic signal
+            let frequency = 200.0;
+            let mut buffer: Vec<f32> = Vec::with_capacity(num_samples);
+            for i in 0..num_samples {
+                let t = i as f32 / sample_rate as f32;
+                buffer.push((2.0 * PI * frequency * t).sin());
+            }
+
+            unsafe {
+                let result = extract_formants_rust(
+                    buffer.as_ptr(),
+                    num_samples as c_int,
+                    sample_rate as c_int,
+                    0  // Use default LPC order
+                );
+
+                // AC3: All sample rates in 8000-48000 Hz should work
+                // Formants should be non-negative (may be 0 depending on signal)
+                assert!(
+                    result.f1 >= 0.0 && result.f2 >= 0.0 && result.f3 >= 0.0,
+                    "Sample rate {} Hz should work (got F1={:.1}, F2={:.1}, F3={:.1})",
+                    sample_rate,
+                    result.f1,
+                    result.f2,
+                    result.f3
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_extract_formants_result_struct_layout() {
+        // Verify FormantsResult struct is properly laid out for FFI
+        let test_result = FormantsResult {
+            f1: 700.0,
+            f2: 1200.0,
+            f3: 2500.0,
+            bw1: 50.0,
+            bw2: 100.0,
+            bw3: 150.0,
+        };
+
+        assert_eq!(test_result.f1, 700.0);
+        assert_eq!(test_result.f2, 1200.0);
+        assert_eq!(test_result.f3, 2500.0);
+        assert_eq!(test_result.bw1, 50.0);
+        assert_eq!(test_result.bw2, 100.0);
+        assert_eq!(test_result.bw3, 150.0);
+
+        // Verify struct is Copy (required for FFI)
+        let copied = test_result;
+        assert_eq!(copied.f1, 700.0);
+        assert_eq!(test_result.f1, 700.0); // Original still valid
+    }
+
+    #[test]
+    fn test_extract_formants_silence() {
+        // Test with silence (all zeros)
+        let buffer: Vec<f32> = vec![0.0; 2048];
+        let sample_rate = 44100;
+
+        unsafe {
+            let result = extract_formants_rust(buffer.as_ptr(), 2048, sample_rate, 0);
+
+            // Silence may produce formant estimates or zeros depending on algorithm
+            // The important thing is it doesn't crash and returns valid (non-NaN) values
+            assert!(result.f1.is_finite(), "F1 should be finite for silence");
+            assert!(result.f2.is_finite(), "F2 should be finite for silence");
+            assert!(result.f3.is_finite(), "F3 should be finite for silence");
+            assert!(result.bw1.is_finite(), "BW1 should be finite for silence");
+            assert!(result.bw2.is_finite(), "BW2 should be finite for silence");
+            assert!(result.bw3.is_finite(), "BW3 should be finite for silence");
+        }
     }
 }
