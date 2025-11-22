@@ -22,8 +22,10 @@ export { LoqaAudioDspError, ValidationError, NativeModuleError } from './errors'
 // Export utility functions
 export { logDebug, logWarning } from './utils';
 
+// Export DSP functions
+export { computeFFT } from './computeFFT';
+
 // Placeholder for future DSP function exports (Epic 2+)
-// export { computeFFT } from './computeFFT';
 // export { detectPitch } from './detectPitch';
 // export { extractFormants } from './extractFormants';
 // export { analyzeSpectrum } from './analyzeSpectrum';
