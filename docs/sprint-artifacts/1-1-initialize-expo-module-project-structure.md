@@ -115,7 +115,7 @@ The expected directory structure after initialization (from [Architecture docume
 │   └── LoqaAudioDspModule.swift
 ├── android/                        # Android native module
 │   ├── build.gradle
-│   └── src/main/java/com/loqalabs/loquaaudiodsp/
+│   └── src/main/java/com/loqalabs/loqaaudiodsp/
 │       └── LoqaAudioDspModule.kt
 └── example/                        # Example Expo app
 ```
@@ -212,7 +212,7 @@ The structure follows Expo module conventions exactly as specified in the Archit
 - ios/LoqaAudioDspModule.swift
 - ios/LoqaAudioDsp.podspec
 - android/build.gradle
-- android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt
+- android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt
 - expo-module.config.json
 - example/package.json
 - example/App.tsx
@@ -258,7 +258,7 @@ This story successfully establishes the foundation for the loqa-audio-dsp Expo m
 
 | AC# | Description | Status | Evidence |
 |-----|-------------|--------|----------|
-| **AC1** | Project structure created with all required directories and files | ✅ IMPLEMENTED | • [package.json:2-3](../package.json#L2-L3): Contains Expo module metadata<br/>• [src/index.ts:1-8](../src/index.ts#L1-L8): TypeScript source directory exists<br/>• [ios/LoqaAudioDsp.podspec:1-25](../ios/LoqaAudioDsp.podspec#L1-L25): iOS Podspec present<br/>• [ios/LoqaAudioDspModule.swift:1-14](../ios/LoqaAudioDspModule.swift#L1-L14): Swift module exists<br/>• [android/build.gradle:1-48](../android/build.gradle#L1-L48): Android build.gradle present<br/>• [android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt:1-17](../android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt#L1-L17): Kotlin module exists<br/>• [example/package.json:1-21](../example/package.json#L1-L21): Example app exists<br/>• [expo-module.config.json:1-9](../expo-module.config.json#L1-L9): Module config present |
+| **AC1** | Project structure created with all required directories and files | ✅ IMPLEMENTED | • [package.json:2-3](../package.json#L2-L3): Contains Expo module metadata<br/>• [src/index.ts:1-8](../src/index.ts#L1-L8): TypeScript source directory exists<br/>• [ios/LoqaAudioDsp.podspec:1-25](../ios/LoqaAudioDsp.podspec#L1-L25): iOS Podspec present<br/>• [ios/LoqaAudioDspModule.swift:1-14](../ios/LoqaAudioDspModule.swift#L1-L14): Swift module exists<br/>• [android/build.gradle:1-48](../android/build.gradle#L1-L48): Android build.gradle present<br/>• [android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt:1-17](../android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt#L1-L17): Kotlin module exists<br/>• [example/package.json:1-21](../example/package.json#L1-L21): Example app exists<br/>• [expo-module.config.json:1-9](../expo-module.config.json#L1-L9): Module config present |
 | **AC2** | TypeScript configured with strict mode enabled | ✅ IMPLEMENTED | • [tsconfig.json:6](../tsconfig.json#L6): `"strict": true` enabled in compiler options<br/>• Build verification: `npm run build` completed successfully with no errors |
 | **AC3** | ESLint and Prettier configured | ✅ IMPLEMENTED | • [.eslintrc.js:1-2](../.eslintrc.js#L1-L2): ESLint config exists (uses expo-module-scripts base)<br/>• [.prettierrc:1-10](../.prettierrc#L1-L10): Prettier config exists with formatting rules<br/>• Lint verification: `npm run lint` completed with no errors |
 | **AC4** | README.md exists with project description | ✅ IMPLEMENTED | • [README.md:1-3](../README.md#L1-L3): Title and description present: "Production-grade Expo native module for audio DSP analysis"<br/>• README includes overview, DSP functions list, installation instructions, and architecture diagram |
@@ -275,7 +275,7 @@ This story successfully establishes the foundation for the loqa-audio-dsp Expo m
 | Verify ios/ directory contains LoqaAudioDsp.podspec | ☑️ Complete | ✅ VERIFIED | [ios/LoqaAudioDsp.podspec:1-25](../ios/LoqaAudioDsp.podspec#L1-L25) configured with iOS 15.1+ minimum |
 | Verify ios/ directory contains LoqaAudioDspModule.swift | ☑️ Complete | ✅ VERIFIED | [ios/LoqaAudioDspModule.swift:1-14](../ios/LoqaAudioDspModule.swift#L1-L14) implements Expo Module Definition |
 | Verify android/ directory contains build.gradle | ☑️ Complete | ✅ VERIFIED | [android/build.gradle:17-22](../android/build.gradle#L17-L22) configured with minSdkVersion 24 (Android API 24+) |
-| Verify android/ directory contains LoqaAudioDspModule.kt | ☑️ Complete | ✅ VERIFIED | [android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt:1-17](../android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt#L1-L17) implements Expo Module Definition |
+| Verify android/ directory contains LoqaAudioDspModule.kt | ☑️ Complete | ✅ VERIFIED | [android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt:1-17](../android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt#L1-L17) implements Expo Module Definition |
 | Verify example/ directory exists with demo Expo app | ☑️ Complete | ✅ VERIFIED | [example/package.json:1-21](../example/package.json#L1-L21) and [example/App.tsx:1-40](../example/App.tsx#L1-L40) present with UI scaffold |
 | Verify expo-module.config.json exists | ☑️ Complete | ✅ VERIFIED | [expo-module.config.json:1-9](../expo-module.config.json#L1-L9) configured for iOS and Android platforms |
 | Verify tsconfig.json exists | ☑️ Complete | ✅ VERIFIED | [tsconfig.json:1-10](../tsconfig.json#L1-10) present |

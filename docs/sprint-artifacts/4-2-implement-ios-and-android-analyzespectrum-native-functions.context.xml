@@ -48,7 +48,7 @@ AC5: Given memory, When managing, Then follows established patterns
         <reason>Add analyzeSpectrum AsyncFunction following established pattern</reason>
       </artifact>
       <artifact>
-        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+        <path>android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt</path>
         <kind>module</kind>
         <symbol>LoqaAudioDspModule</symbol>
         <lines>all</lines>
@@ -57,10 +57,10 @@ AC5: Given memory, When managing, Then follows established patterns
     </code>
     <dependencies>
       <ios>
-        <library name="libloqua_voice_dsp.a" path="ios/RustFFI/" note="Rust spectral analysis from Story 4.1" />
+        <library name="libloqa_voice_dsp.a" path="ios/RustFFI/" note="Rust spectral analysis from Story 4.1" />
       </ios>
       <android>
-        <library name="libloqua_voice_dsp.so" path="android/src/main/jniLibs/" note="Rust spectral analysis from Story 4.1" />
+        <library name="libloqa_voice_dsp.so" path="android/src/main/jniLibs/" note="Rust spectral analysis from Story 4.1" />
       </android>
     </dependencies>
   </artifacts>

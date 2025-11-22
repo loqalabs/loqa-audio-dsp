@@ -1,8 +1,8 @@
-package com.loqalabs.loquaaudiodsp
+package com.loqalabs.loqaaudiodsp
 
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import com.loqalabs.loquaaudiodsp.RustJNI.RustBridge
+import com.loqalabs.loqaaudiodsp.RustJNI.RustBridge
 
 /**
  * LoqaAudioDspModule provides Expo Module API for accessing Rust DSP functions.

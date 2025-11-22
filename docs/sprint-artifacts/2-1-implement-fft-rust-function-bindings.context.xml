@@ -179,7 +179,7 @@ OR rust/tests/ directory
 - Test fft_size out of range returns null (AC5)
 - Test free_fft_result_rust doesn't crash (AC4)
 - Verify compiled libraries exist after build scripts run
-- Use nm command to verify exported symbols: nm -g libloqua_voice_dsp.a | grep compute_fft_rust
+- Use nm command to verify exported symbols: nm -g libloqa_voice_dsp.a | grep compute_fft_rust
     </ideas>
   </tests>
 </story-context>

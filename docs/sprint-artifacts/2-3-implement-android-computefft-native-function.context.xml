@@ -44,14 +44,14 @@ AC6: Given errors occur, When handled, Then catches exceptions and rejects Promi
     </docs>
     <code>
       <artifact>
-        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+        <path>android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt</path>
         <kind>module</kind>
         <symbol>LoqaAudioDspModule</symbol>
         <lines>all</lines>
         <reason>Replace placeholder computeFFT with actual implementation</reason>
       </artifact>
       <artifact>
-        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt</path>
+        <path>android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt</path>
         <kind>bridge</kind>
         <symbol>RustBridge</symbol>
         <lines>all</lines>
@@ -60,7 +60,7 @@ AC6: Given errors occur, When handled, Then catches exceptions and rejects Promi
     </code>
     <dependencies>
       <android>
-        <library name="libloqua_voice_dsp.so" path="android/src/main/jniLibs/" note="Rust FFT library from Story 2.1" />
+        <library name="libloqa_voice_dsp.so" path="android/src/main/jniLibs/" note="Rust FFT library from Story 2.1" />
       </android>
     </dependencies>
   </artifacts>
@@ -84,7 +84,7 @@ AsyncFunction("computeFFT") { buffer: FloatArray, options: Map&lt;String, Any&gt
     // Returns map of "magnitude" and "frequencies"
 }
       </signature>
-      <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+      <path>android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt</path>
     </interface>
   </interfaces>
 

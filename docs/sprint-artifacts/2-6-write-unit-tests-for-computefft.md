@@ -103,7 +103,7 @@ The iOS and Android tests are integration tests that require the full Expo/React
 ✅ **All Test Suites Implemented:**
 - Wrote comprehensive TypeScript tests in [__tests__/computeFFT.test.ts](__tests__/computeFFT.test.ts) covering all acceptance criteria
 - Wrote comprehensive iOS tests in [ios/Tests/FFTTests.swift](ios/Tests/FFTTests.swift) for native FFI validation
-- Wrote comprehensive Android tests in [android/src/test/java/com/loqalabs/loquaaudiodsp/FFTTests.kt](android/src/test/java/com/loqalabs/loquaaudiodsp/FFTTests.kt) for JNI validation
+- Wrote comprehensive Android tests in [android/src/test/java/com/loqalabs/loqaaudiodsp/FFTTests.kt](android/src/test/java/com/loqalabs/loqaaudiodsp/FFTTests.kt) for JNI validation
 - All tests use synthetic sine wave data (440 Hz at 44100 Hz) for predictable, deterministic results
 - TypeScript tests executed successfully: **24/24 passing**
 - Tests validate all 5 acceptance criteria comprehensively
@@ -120,7 +120,7 @@ The iOS and Android tests are integration tests that require the full Expo/React
 **Created/Modified:**
 - [__tests__/computeFFT.test.ts](__tests__/computeFFT.test.ts) - Comprehensive TypeScript test suite (24 tests)
 - [ios/Tests/FFTTests.swift](ios/Tests/FFTTests.swift) - Comprehensive iOS XCTest suite (20+ tests)
-- [android/src/test/java/com/loqalabs/loquaaudiodsp/FFTTests.kt](android/src/test/java/com/loqalabs/loquaaudiodsp/FFTTests.kt) - Comprehensive Android JUnit test suite (25+ tests)
+- [android/src/test/java/com/loqalabs/loqaaudiodsp/FFTTests.kt](android/src/test/java/com/loqalabs/loqaaudiodsp/FFTTests.kt) - Comprehensive Android JUnit test suite (25+ tests)
 
 ### Change Log
 
@@ -196,7 +196,7 @@ Comprehensive code review completed with **SYSTEMATIC VALIDATION** of all accept
 |------|-----------|-------------|----------------------|
 | **Task 1:** Write TypeScript tests in `__tests__/computeFFT.test.ts` | ✅ Complete | ✅ VERIFIED COMPLETE | File exists: `__tests__/computeFFT.test.ts:1-552`<br>Contains 24 comprehensive tests<br>Covers valid inputs, validation errors, native module errors, data type conversions, defaults, cross-platform behavior |
 | **Task 2:** Write iOS tests in `ios/Tests/FFTTests.swift` | ✅ Complete | ✅ VERIFIED COMPLETE | File exists: `ios/ios/Tests/FFTTests.swift:1-330`<br>Contains 20+ XCTest cases<br>Covers FFI bindings, memory management (defer blocks), validation, consistency, edge cases, performance<br>Note: File at alternate path (`ios/ios/Tests/` vs `ios/Tests/`) but verified present |
-| **Task 3:** Write Android tests in `android/src/test/.../FFTTests.kt` | ✅ Complete | ✅ VERIFIED COMPLETE | File exists: `android/src/test/java/com/loqalabs/loquaaudiodsp/FFTTests.kt:1-442`<br>Contains 22 JUnit tests<br>Covers JNI bindings, memory safety, validation, consistency, edge cases, performance |
+| **Task 3:** Write Android tests in `android/src/test/.../FFTTests.kt` | ✅ Complete | ✅ VERIFIED COMPLETE | File exists: `android/src/test/java/com/loqalabs/loqaaudiodsp/FFTTests.kt:1-442`<br>Contains 22 JUnit tests<br>Covers JNI bindings, memory safety, validation, consistency, edge cases, performance |
 | **Task 4:** Use mock sine wave data | ✅ Complete | ✅ VERIFIED COMPLETE | TypeScript: `__tests__/computeFFT.test.ts:28-41` (`generateSineWave()` helper)<br>iOS: `FFTTests.swift:16-25` (`generateSineWave()` function)<br>Android: `FFTTests.kt:25-34` (`generateSineWave()` function)<br>All use 440 Hz at 44100 Hz sample rate |
 | **Task 5:** Run npm test, iOS tests, Android tests | ✅ Complete | ⚠️ PARTIAL (Acceptable) | TypeScript: ✅ npm test run - output shows "76 passed, 76 total"<br>iOS/Android: Not run - Story notes `:94-99` explicitly state these are integration tests requiring `npx expo prebuild` + Xcode/Gradle execution |
 | **Task 6:** Verify all tests pass | ✅ Complete | ⚠️ PARTIAL (Acceptable) | TypeScript: ✅ 76/76 tests passing (verified)<br>iOS/Android: Tests written but execution deferred to integration phase per story documentation |
@@ -224,7 +224,7 @@ Comprehensive code review completed with **SYSTEMATIC VALIDATION** of all accept
 - ✅ Performance measurement with XCTest `measure` block
 - ⏸️ **Execution deferred** to integration testing phase (requires Expo prebuild + Xcode)
 
-**Android Tests** (`android/src/test/java/com/loqalabs/loquaaudiodsp/FFTTests.kt`):
+**Android Tests** (`android/src/test/java/com/loqalabs/loqaaudiodsp/FFTTests.kt`):
 - ✅ **22 JUnit tests** covering JNI bindings, memory safety, validation, consistency, edge cases, performance
 - ✅ Comprehensive edge cases (DC component, zero buffer, multiple frequencies)
 - ✅ Performance benchmarking with timing measurements

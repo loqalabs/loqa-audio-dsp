@@ -19,11 +19,11 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
 
 2. **Given** Rust build scripts exist
    **When** I configure iOS Podspec
-   **Then** it is configured to include compiled libloqua_voice_dsp.a
+   **Then** it is configured to include compiled libloqa_voice_dsp.a
 
 3. **Given** Rust build scripts exist
    **When** I configure Android build.gradle
-   **Then** it is configured to include compiled libloqua_voice_dsp.so
+   **Then** it is configured to include compiled libloqa_voice_dsp.so
 
 4. **Given** build scripts are configured
    **When** I run the iOS build script
@@ -32,8 +32,8 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
 5. **Given** build scripts are configured
    **When** I run builds
    **Then** compiled libraries are placed in correct platform-specific directories:
-   - iOS: ios/RustFFI/libloqua_voice_dsp.a
-   - Android: android/src/main/jniLibs/{arch}/libloqua_voice_dsp.so
+   - iOS: ios/RustFFI/libloqa_voice_dsp.a
+   - Android: android/src/main/jniLibs/{arch}/libloqa_voice_dsp.so
 
 ## Tasks / Subtasks
 
@@ -62,10 +62,10 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
   - [x] Make script executable (chmod +x)
 
 - [x] Configure iOS Podspec (AC: #2, #5)
-  - [x] Update LoqaAudioDsp.podspec to include libloqua_voice_dsp.a
+  - [x] Update LoqaAudioDsp.podspec to include libloqa_voice_dsp.a
   - [x] Create ios/RustFFI/ directory
   - [x] Configure Podspec to link the static library
-  - [x] Verify library path: ios/RustFFI/libloqua_voice_dsp.a
+  - [x] Verify library path: ios/RustFFI/libloqa_voice_dsp.a
 
 - [x] Configure Android build.gradle (AC: #3, #5)
   - [x] Update build.gradle to include .so libraries
@@ -106,13 +106,13 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
 - Requires universal binary for device + simulator
 - Target architectures: arm64 (devices), x86_64 (Intel simulators)
 - Output: Static library (.a file)
-- Location: ios/RustFFI/libloqua_voice_dsp.a
+- Location: ios/RustFFI/libloqa_voice_dsp.a
 
 **Android:**
 - Requires separate .so for each architecture
 - Target architectures: arm64-v8a, armeabi-v7a, x86_64
 - Output: Shared libraries (.so files)
-- Location: android/src/main/jniLibs/{arch}/libloqua_voice_dsp.so
+- Location: android/src/main/jniLibs/{arch}/libloqa_voice_dsp.so
 
 **Build Optimization:**
 - Release mode compilation mandatory for performance
@@ -131,15 +131,15 @@ Expected directory structure after this story:
 │   └── build-android.sh            # Android library build script
 ├── ios/
 │   └── RustFFI/                    # Created by this story
-│       └── libloqua_voice_dsp.a    # Compiled Rust library (iOS)
+│       └── libloqa_voice_dsp.a    # Compiled Rust library (iOS)
 └── android/
     └── src/main/jniLibs/           # Created by this story
         ├── arm64-v8a/
-        │   └── libloqua_voice_dsp.so
+        │   └── libloqa_voice_dsp.so
         ├── armeabi-v7a/
-        │   └── libloqua_voice_dsp.so
+        │   └── libloqa_voice_dsp.so
         └── x86_64/
-            └── libloqua_voice_dsp.so
+            └── libloqa_voice_dsp.so
 ```
 
 **Alignment Notes:**
@@ -283,7 +283,7 @@ This story was intended to set up Rust build infrastructure for both iOS and And
    - **Task marked complete but NOT done:** "Configure Cargo.toml with appropriate version of loqa-voice-dsp crate" (subtask under first task)
 
 2. **[HIGH] AC5 VIOLATION: Android compiled libraries are missing** [files: android/src/main/jniLibs/*/]
-   - **AC5 requirement:** "Compiled libraries are placed in correct platform-specific directories: Android: android/src/main/jniLibs/{arch}/libloqua_voice_dsp.so"
+   - **AC5 requirement:** "Compiled libraries are placed in correct platform-specific directories: Android: android/src/main/jniLibs/{arch}/libloqa_voice_dsp.so"
    - **Evidence:** All three architecture directories exist but are EMPTY:
      - `android/src/main/jniLibs/arm64-v8a/` - no .so file
      - `android/src/main/jniLibs/armeabi-v7a/` - no .so file
@@ -306,7 +306,7 @@ This story was intended to set up Rust build infrastructure for both iOS and And
    - **Recommendation:** Should explicitly state "placeholder implementation for build validation" in task or Dev Notes
 
 5. **[MED] AC3 partial compliance: build.gradle configured but untested**
-   - **AC3 requirement:** "Android build.gradle is configured to include compiled libloqua_voice_dsp.so"
+   - **AC3 requirement:** "Android build.gradle is configured to include compiled libloqa_voice_dsp.so"
    - **Evidence:** android/build.gradle:30-38 has correct jniLibs configuration
    - **Issue:** Configuration is present but cannot be verified to work since no .so files exist
    - **Status:** Configuration appears correct, but untestable

@@ -72,7 +72,7 @@ so that iOS can call Rust loqa-voice-dsp functions safely.
 
 **From Story 1-2-set-up-rust-build-infrastructure (Status: drafted)**
 
-- **Rust Libraries Available**: libloqua_voice_dsp.a compiled and located at ios/RustFFI/
+- **Rust Libraries Available**: libloqa_voice_dsp.a compiled and located at ios/RustFFI/
 - **Build Infrastructure Ready**: Scripts configured for release mode with LTO
 - **Next Step**: Create Swift FFI layer to call these Rust functions
 
@@ -150,7 +150,7 @@ Files created by this story:
 ios/
 ├── RustFFI/
 │   ├── RustBridge.swift        # NEW: FFI declarations and wrappers
-│   └── libloqua_voice_dsp.a    # Exists from Story 1.2
+│   └── libloqa_voice_dsp.a    # Exists from Story 1.2
 └── LoqaAudioDspModule.swift    # MODIFIED: Add Expo module implementation
 ```
 

@@ -38,7 +38,7 @@
   - Create SpectrumAnalysisTests.swift placeholder
   - Verify test target compiles
 - Set up Android JUnit infrastructure
-  - Create android/src/test/java/com/loqalabs/loquaaudiodsp/ directory
+  - Create android/src/test/java/com/loqalabs/loqaaudiodsp/ directory
   - Add JUnit 4.13+ dependency to build.gradle
   - Create FFTTests.kt placeholder
   - Create PitchDetectionTests.kt placeholder

@@ -12,9 +12,9 @@ so that Android can call Rust loqa-voice-dsp functions safely.
 
 1. **Given** Rust libraries are compiled for Android
    **When** I create Kotlin JNI bridge code
-   **Then** android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt is created with:
+   **Then** android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt is created with:
    - JNI external function declarations for Rust functions
-   - System.loadLibrary("loqua_voice_dsp") initialization
+   - System.loadLibrary("loqa_voice_dsp") initialization
    - Kotlin wrapper functions that handle array marshalling
    - Error handling for JNI failures
 
@@ -33,9 +33,9 @@ so that Android can call Rust loqa-voice-dsp functions safely.
 ## Tasks / Subtasks
 
 - [x] Create RustBridge.kt (AC: #1)
-  - [x] Create android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/ directory
+  - [x] Create android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/ directory
   - [x] Create RustBridge.kt file
-  - [x] Add System.loadLibrary("loqua_voice_dsp") in init block
+  - [x] Add System.loadLibrary("loqa_voice_dsp") in init block
   - [x] Declare external JNI function signatures for Rust functions
   - [x] Implement placeholder Kotlin wrappers (will be completed in Epic 2)
   - [x] Add error handling for JNI call failures
@@ -87,7 +87,7 @@ From [Architecture - Android Kotlin JNI](../architecture.md#integration-points):
 // RustBridge.kt - JNI declarations
 object RustBridge {
     init {
-        System.loadLibrary("loqua_voice_dsp")
+        System.loadLibrary("loqa_voice_dsp")
     }
 
     external fun computeFFT(
@@ -130,7 +130,7 @@ fun computeFFT(
 Files created by this story:
 
 ```
-android/src/main/java/com/loqalabs/loquaaudiodsp/
+android/src/main/java/com/loqalabs/loqaaudiodsp/
 ├── RustJNI/                          # NEW directory
 │   └── RustBridge.kt                 # NEW: JNI declarations
 └── LoqaAudioDspModule.kt             # MODIFIED: Add Expo module implementation
@@ -173,9 +173,9 @@ Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 ### Debug Log References
 
 **Implementation Plan:**
-1. Created RustJNI directory structure at android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/
+1. Created RustJNI directory structure at android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/
 2. Implemented RustBridge.kt with:
-   - System.loadLibrary("loqua_voice_dsp") in init block with error handling
+   - System.loadLibrary("loqa_voice_dsp") in init block with error handling
    - External JNI function declarations for all four DSP functions (computeFFT, detectPitch, extractFormants, analyzeSpectrum)
    - Kotlin wrapper functions with try-catch error handling
    - Comprehensive documentation about JNI memory management
@@ -227,10 +227,10 @@ Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 ### File List
 
 **Created:**
-- android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt
+- android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt
 
 **Modified:**
-- android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt
+- android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt
 - android/build.gradle
 
 ---
@@ -281,7 +281,7 @@ Story 1.4 successfully implements Android Kotlin JNI bindings scaffold with Rust
 
 | Task | Marked As | Verified As | Evidence |
 |------|-----------|-------------|----------|
-| Create RustBridge.kt | [x] Complete | ✅ VERIFIED | File exists at android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt with all required components |
+| Create RustBridge.kt | [x] Complete | ✅ VERIFIED | File exists at android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt with all required components |
 | - Create directory | [x] Complete | ✅ VERIFIED | Directory structure created correctly |
 | - Create RustBridge.kt file | [x] Complete | ✅ VERIFIED | File created with proper structure and documentation |
 | - Add System.loadLibrary | [x] Complete | ✅ VERIFIED | Lines 24-33 with try-catch error handling |

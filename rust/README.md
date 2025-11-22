@@ -48,9 +48,9 @@ Output: `../ios/RustFFI/LoqaVoiceDSP.xcframework`
 ```
 
 Output:
-- `../android/src/main/jniLibs/arm64-v8a/libloqua_voice_dsp.so`
-- `../android/src/main/jniLibs/armeabi-v7a/libloqua_voice_dsp.so`
-- `../android/src/main/jniLibs/x86_64/libloqua_voice_dsp.so`
+- `../android/src/main/jniLibs/arm64-v8a/libloqa_voice_dsp.so`
+- `../android/src/main/jniLibs/armeabi-v7a/libloqa_voice_dsp.so`
+- `../android/src/main/jniLibs/x86_64/libloqa_voice_dsp.so`
 
 ## Library Configuration
 

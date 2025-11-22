@@ -56,7 +56,7 @@ AC5: Given all tests, When executed, Then pass on TypeScript, iOS, and Android
         <reason>iOS implementation from Story 2.2</reason>
       </artifact>
       <artifact>
-        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+        <path>android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt</path>
         <kind>module</kind>
         <symbol>computeFFT</symbol>
         <lines>all</lines>

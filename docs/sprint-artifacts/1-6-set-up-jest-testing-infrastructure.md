@@ -64,7 +64,7 @@ so that I can write unit tests for TypeScript, iOS, and Android code.
   - [x] Verify test target compiles
 
 - [x] Set up Android JUnit infrastructure (AC: #3)
-  - [x] Create android/src/test/java/com/loqalabs/loquaaudiodsp/ directory
+  - [x] Create android/src/test/java/com/loqalabs/loqaaudiodsp/ directory
   - [x] Add JUnit 4.13+ dependency to build.gradle
   - [x] Create FFTTests.kt placeholder
   - [x] Create PitchDetectionTests.kt placeholder
@@ -147,7 +147,7 @@ Files/directories created by this story:
 │   ├── FormantExtractionTests.swift
 │   └── SpectrumAnalysisTests.swift
 └── android/src/test/               # NEW: Android JUnit tests
-    └── java/com/loqalabs/loquaaudiodsp/
+    └── java/com/loqalabs/loqaaudiodsp/
         ├── FFTTests.kt
         ├── PitchDetectionTests.kt
         ├── FormantExtractionTests.kt
@@ -210,7 +210,7 @@ claude-sonnet-4-5-20250929
    - Tests will run via example app's Xcode test target
 
 4. **Android JUnit Infrastructure (AC #3):**
-   - Created `android/src/test/java/com/loqalabs/loquaaudiodsp/` directory
+   - Created `android/src/test/java/com/loqalabs/loqaaudiodsp/` directory
    - Added JUnit 4.13.2 dependency to build.gradle
    - Created 4 Kotlin test files (FFTTests, PitchDetectionTests, FormantExtractionTests, SpectrumAnalysisTests)
    - Tests follow JUnit conventions
@@ -251,10 +251,10 @@ claude-sonnet-4-5-20250929
 - `ios/Tests/PitchDetectionTests.swift` - iOS pitch detection placeholder tests
 - `ios/Tests/FormantExtractionTests.swift` - iOS formant extraction placeholder tests
 - `ios/Tests/SpectrumAnalysisTests.swift` - iOS spectral analysis placeholder tests
-- `android/src/test/java/com/loqalabs/loquaaudiodsp/FFTTests.kt` - Android FFT placeholder tests
-- `android/src/test/java/com/loqalabs/loquaaudiodsp/PitchDetectionTests.kt` - Android pitch detection placeholder tests
-- `android/src/test/java/com/loqalabs/loquaaudiodsp/FormantExtractionTests.kt` - Android formant extraction placeholder tests
-- `android/src/test/java/com/loqalabs/loquaaudiodsp/SpectrumAnalysisTests.kt` - Android spectral analysis placeholder tests
+- `android/src/test/java/com/loqalabs/loqaaudiodsp/FFTTests.kt` - Android FFT placeholder tests
+- `android/src/test/java/com/loqalabs/loqaaudiodsp/PitchDetectionTests.kt` - Android pitch detection placeholder tests
+- `android/src/test/java/com/loqalabs/loqaaudiodsp/FormantExtractionTests.kt` - Android formant extraction placeholder tests
+- `android/src/test/java/com/loqalabs/loqaaudiodsp/SpectrumAnalysisTests.kt` - Android spectral analysis placeholder tests
 
 **Modified:**
 
@@ -326,12 +326,12 @@ This story successfully establishes a comprehensive testing infrastructure acros
 | Create SpectrumAnalysisTests.swift | ✅ Complete | ✅ VERIFIED | [ios/Tests/SpectrumAnalysisTests.swift](ios/Tests/SpectrumAnalysisTests.swift) |
 | Verify test target compiles | ✅ Complete | ✅ VERIFIED | Swift tests use standard XCTest syntax, will compile when added to target |
 | Set up Android JUnit infrastructure | ✅ Complete | ✅ VERIFIED | android/src/test/ with JUnit dependency and 4 test files |
-| Create android/src/test/ directory | ✅ Complete | ✅ VERIFIED | Full path: android/src/test/java/com/loqalabs/loquaaudiodsp/ |
+| Create android/src/test/ directory | ✅ Complete | ✅ VERIFIED | Full path: android/src/test/java/com/loqalabs/loqaaudiodsp/ |
 | Add JUnit 4.13+ dependency | ✅ Complete | ✅ VERIFIED | [build.gradle:59-60](android/build.gradle#L59-L60) (JUnit 4.13.2, kotlin-test-junit 1.9.0) |
-| Create FFTTests.kt placeholder | ✅ Complete | ✅ VERIFIED | [FFTTests.kt:1-37](android/src/test/java/com/loqalabs/loquaaudiodsp/FFTTests.kt) |
-| Create PitchDetectionTests.kt | ✅ Complete | ✅ VERIFIED | [PitchDetectionTests.kt](android/src/test/java/com/loqalabs/loquaaudiodsp/PitchDetectionTests.kt) |
-| Create FormantExtractionTests.kt | ✅ Complete | ✅ VERIFIED | [FormantExtractionTests.kt](android/src/test/java/com/loqalabs/loquaaudiodsp/FormantExtractionTests.kt) |
-| Create SpectrumAnalysisTests.kt | ✅ Complete | ✅ VERIFIED | [SpectrumAnalysisTests.kt:1-47](android/src/test/java/com/loqalabs/loquaaudiodsp/SpectrumAnalysisTests.kt) |
+| Create FFTTests.kt placeholder | ✅ Complete | ✅ VERIFIED | [FFTTests.kt:1-37](android/src/test/java/com/loqalabs/loqaaudiodsp/FFTTests.kt) |
+| Create PitchDetectionTests.kt | ✅ Complete | ✅ VERIFIED | [PitchDetectionTests.kt](android/src/test/java/com/loqalabs/loqaaudiodsp/PitchDetectionTests.kt) |
+| Create FormantExtractionTests.kt | ✅ Complete | ✅ VERIFIED | [FormantExtractionTests.kt](android/src/test/java/com/loqalabs/loqaaudiodsp/FormantExtractionTests.kt) |
+| Create SpectrumAnalysisTests.kt | ✅ Complete | ✅ VERIFIED | [SpectrumAnalysisTests.kt:1-47](android/src/test/java/com/loqalabs/loqaaudiodsp/SpectrumAnalysisTests.kt) |
 | Verify tests compile with Gradle | ✅ Complete | ✅ VERIFIED | Kotlin tests use standard JUnit syntax and will compile with Gradle |
 | Verify test execution | ✅ Complete | ✅ VERIFIED | npm test executed successfully |
 | Run `npm test` and verify Jest runs | ✅ Complete | ✅ VERIFIED | Executed: 5 suites passed, 11 tests passed |

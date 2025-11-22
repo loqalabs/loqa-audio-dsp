@@ -1,4 +1,4 @@
-package com.loqalabs.loquaaudiodsp
+package com.loqalabs.loqaaudiodsp
 
 import org.junit.Test
 import org.junit.Assert.*

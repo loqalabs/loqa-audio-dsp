@@ -105,7 +105,7 @@ AC6: Given errors occur, When I handle errors, Then function throws descriptive 
     <dependencies>
       <ios>
         <framework name="Foundation" />
-        <library name="libloqua_voice_dsp.a" path="ios/RustFFI/" note="Rust FFT library from Story 2.1" />
+        <library name="libloqa_voice_dsp.a" path="ios/RustFFI/" note="Rust FFT library from Story 2.1" />
       </ios>
     </dependencies>
   </artifacts>

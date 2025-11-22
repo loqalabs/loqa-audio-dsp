@@ -16,14 +16,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.loqalabs.loquaaudiodsp.example"
+      "bundleIdentifier": "com.loqalabs.loqaaudiodsp.example"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.loqalabs.loquaaudiodsp.example"
+      "package": "com.loqalabs.loqaaudiodsp.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"

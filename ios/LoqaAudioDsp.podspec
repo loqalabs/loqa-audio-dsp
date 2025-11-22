@@ -28,8 +28,8 @@ Pod::Spec.new do |s|
   s.preserve_paths = "RustFFI/LoqaVoiceDSP.xcframework"
 
   # Fallback: Static library (device only, for legacy support)
-  # s.vendored_libraries = "RustFFI/libloqua_voice_dsp.a"
-  # s.preserve_paths = "RustFFI/libloqua_voice_dsp.a"
+  # s.vendored_libraries = "RustFFI/libloqa_voice_dsp.a"
+  # s.preserve_paths = "RustFFI/libloqa_voice_dsp.a"
 
   # Link required system frameworks and libraries
   s.frameworks = 'Foundation'

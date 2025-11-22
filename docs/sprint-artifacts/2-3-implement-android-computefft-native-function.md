@@ -90,15 +90,15 @@ so that Android apps can perform frequency analysis.
 
 **Code Review Resolution (2025-11-21):**
 
-- Fixed critical JNI signature mismatch by creating `Java_com_loqalabs_loquaaudiodsp_RustJNI_RustBridge_nativeComputeFFT` function
+- Fixed critical JNI signature mismatch by creating `Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeComputeFFT` function
 - Documented window type handling (accepted but ignored in v0.1.0)
 - Deferred device testing and comprehensive test coverage to Story 2.6 (dedicated testing story)
 - Both HIGH severity blocking issues from code review have been resolved
 
 ### File List
 
-- [android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt](../../../android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt)
-- [android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt](../../../android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt)
+- [android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt](../../../android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt)
+- [android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt](../../../android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt)
 - [rust/src/lib.rs](../../../rust/src/lib.rs) - Added JNI function at lines 159-174
 
 ---
@@ -175,7 +175,7 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 #### MEDIUM Severity
 
 **3. No Functional Test Coverage**
-- **Location:** android/src/test/java/com/loqalabs/loquaaudiodsp/FFTTests.kt
+- **Location:** android/src/test/java/com/loqalabs/loqaaudiodsp/FFTTests.kt
 - **Issue:** Test file contains only 3 placeholder tests - zero FFT computation validation
   - `testFFTTestInfrastructure()` - JUnit check only
   - `testFFTBufferValidation()` - Basic array check (no FFT call)
@@ -307,14 +307,14 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 
 1. **FFI/JNI Signature Mismatch - RESOLVED** ✅
    - **Issue:** Rust function `compute_fft_rust` had signature `(buffer, length, sample_rate, fft_size)` but Kotlin expected `(buffer, fftSize, windowType)`
-   - **Fix:** Created new JNI function in [rust/src/lib.rs:159-174](../../../rust/src/lib.rs) named `Java_com_loqalabs_loquaaudiodsp_RustJNI_RustBridge_nativeComputeFFT` that matches JNI naming convention
+   - **Fix:** Created new JNI function in [rust/src/lib.rs:159-174](../../../rust/src/lib.rs) named `Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeComputeFFT` that matches JNI naming convention
    - **Implementation:** New function accepts `(buffer, buffer_length, fft_size, window_type)` and delegates to `compute_fft_rust` with default sample rate of 44100 Hz
    - **Result:** Kotlin JNI signature now properly resolves to Rust implementation
 
 2. **Window Type Parameter Clarification - RESOLVED** ✅
    - **Issue:** Unclear where window type processing occurs
    - **Resolution:** Documented that windowType is accepted but ignored in v0.1.0 - loqa-voice-dsp handles windowing internally
-   - **Location:** [rust/src/lib.rs:149-157](../../../rust/src/lib.rs), [RustBridge.kt:40-51](../../../android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt)
+   - **Location:** [rust/src/lib.rs:149-157](../../../rust/src/lib.rs), [RustBridge.kt:40-51](../../../android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt)
 
 **DEFERRED ITEMS:**
 

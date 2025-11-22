@@ -101,7 +101,7 @@ This establishes:
 │   ├── LoqaAudioDspView.swift      # View component (if needed)
 │   ├── RustFFI/                    # Rust FFI bridge
 │   │   ├── RustBridge.swift        # Swift wrapper for Rust functions
-│   │   └── libloqua_voice_dsp.a    # Compiled Rust library (iOS)
+│   │   └── libloqa_voice_dsp.a    # Compiled Rust library (iOS)
 │   └── Tests/                      # XCTest unit tests
 │       ├── FFTTests.swift
 │       ├── PitchDetectionTests.swift
@@ -112,15 +112,15 @@ This establishes:
 │   ├── build.gradle                # Gradle build configuration
 │   ├── src/
 │   │   ├── main/
-│   │   │   ├── java/com/loqalabs/loquaaudiodsp/
+│   │   │   ├── java/com/loqalabs/loqaaudiodsp/
 │   │   │   │   ├── LoqaAudioDspModule.kt      # Expo module implementation
 │   │   │   │   ├── LoqaAudioDspView.kt        # View component (if needed)
 │   │   │   │   └── RustJNI/                   # Rust JNI bridge
 │   │   │   │       ├── RustBridge.kt          # Kotlin wrapper for Rust
-│   │   │   │       └── libloqua_voice_dsp.so  # Compiled Rust library (Android)
+│   │   │   │       └── libloqa_voice_dsp.so  # Compiled Rust library (Android)
 │   │   │   └── AndroidManifest.xml
 │   │   └── test/
-│   │       └── java/com/loqalabs/loquaaudiodsp/
+│   │       └── java/com/loqalabs/loqaaudiodsp/
 │   │           ├── FFTTests.kt
 │   │           ├── PitchDetectionTests.kt
 │   │           ├── FormantExtractionTests.kt
@@ -278,7 +278,7 @@ public func computeFFT(
 // RustBridge.kt - JNI declarations
 object RustBridge {
     init {
-        System.loadLibrary("loqua_voice_dsp")
+        System.loadLibrary("loqa_voice_dsp")
     }
 
     external fun computeFFT(

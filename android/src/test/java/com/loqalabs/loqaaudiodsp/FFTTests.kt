@@ -1,6 +1,6 @@
-package com.loqalabs.loquaaudiodsp
+package com.loqalabs.loqaaudiodsp
 
-import com.loqalabs.loquaaudiodsp.RustJNI.RustBridge
+import com.loqalabs.loqaaudiodsp.RustJNI.RustBridge
 import org.junit.Test
 import org.junit.Assert.*
 import kotlin.math.PI

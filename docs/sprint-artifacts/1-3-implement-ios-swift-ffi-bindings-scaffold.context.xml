@@ -92,7 +92,7 @@ AC4: Given FFI bindings are implemented, When I review memory management, Then m
     <dependencies>
       <ios>
         <framework name="Foundation" />
-        <library name="libloqua_voice_dsp.a" path="ios/RustFFI/" note="Compiled Rust library from Story 1.2" />
+        <library name="libloqa_voice_dsp.a" path="ios/RustFFI/" note="Compiled Rust library from Story 1.2" />
       </ios>
     </dependencies>
   </artifacts>

@@ -36,10 +36,10 @@
   - Enable LTO (Link-Time Optimization) for performance
   - Make script executable (chmod +x)
 - Configure iOS Podspec
-  - Update LoqaAudioDsp.podspec to include libloqua_voice_dsp.a
+  - Update LoqaAudioDsp.podspec to include libloqa_voice_dsp.a
   - Create ios/RustFFI/ directory
   - Configure Podspec to link the static library
-  - Verify library path: ios/RustFFI/libloqua_voice_dsp.a
+  - Verify library path: ios/RustFFI/libloqa_voice_dsp.a
 - Configure Android build.gradle
   - Update build.gradle to include .so libraries
   - Create android/src/main/jniLibs/ directory structure
@@ -57,13 +57,13 @@
   <acceptanceCriteria>
 AC1: Given the Expo module structure exists, When I add Rust build configuration, Then a rust/ directory is created with: Cargo.toml declaring loqa-voice-dsp dependency, build-ios.sh script that compiles for iOS architectures (arm64, x86_64 simulator), build-android.sh script that compiles for Android architectures (arm64-v8a, armeabi-v7a, x86_64)
 
-AC2: Given Rust build scripts exist, When I configure iOS Podspec, Then it is configured to include compiled libloqua_voice_dsp.a
+AC2: Given Rust build scripts exist, When I configure iOS Podspec, Then it is configured to include compiled libloqa_voice_dsp.a
 
-AC3: Given Rust build scripts exist, When I configure Android build.gradle, Then it is configured to include compiled libloqua_voice_dsp.so
+AC3: Given Rust build scripts exist, When I configure Android build.gradle, Then it is configured to include compiled libloqa_voice_dsp.so
 
 AC4: Given build scripts are configured, When I run the iOS build script, Then Rust compiles in release mode with optimizations enabled
 
-AC5: Given build scripts are configured, When I run builds, Then compiled libraries are placed in correct platform-specific directories: iOS: ios/RustFFI/libloqua_voice_dsp.a, Android: android/src/main/jniLibs/{arch}/libloqua_voice_dsp.so
+AC5: Given build scripts are configured, When I run builds, Then compiled libraries are placed in correct platform-specific directories: iOS: ios/RustFFI/libloqa_voice_dsp.a, Android: android/src/main/jniLibs/{arch}/libloqa_voice_dsp.so
   </acceptanceCriteria>
 
   <artifacts>
@@ -78,7 +78,7 @@ AC5: Given build scripts are configured, When I run builds, Then compiled librar
         <path>docs/architecture.md</path>
         <title>Architecture Document - Project Structure</title>
         <section>Project Structure - rust/ directory</section>
-        <snippet>rust/ directory contains Cargo.toml (Rust dependencies - loqa-voice-dsp), build-ios.sh (iOS library build script), and build-android.sh (Android library build script). iOS output: ios/RustFFI/libloqua_voice_dsp.a. Android output: android/src/main/jniLibs/{arch}/libloqua_voice_dsp.so</snippet>
+        <snippet>rust/ directory contains Cargo.toml (Rust dependencies - loqa-voice-dsp), build-ios.sh (iOS library build script), and build-android.sh (Android library build script). iOS output: ios/RustFFI/libloqa_voice_dsp.a. Android output: android/src/main/jniLibs/{arch}/libloqa_voice_dsp.so</snippet>
       </doc>
       <doc>
         <path>docs/epics.md</path>
@@ -120,8 +120,8 @@ AC5: Given build scripts are configured, When I run builds, Then compiled librar
 - Must enable LTO (Link-Time Optimization) for <5ms performance target
 - iOS: Build universal binary for arm64 (devices) and x86_64 (simulators)
 - Android: Build separate .so files for arm64-v8a, armeabi-v7a, x86_64
-- iOS library path must be: ios/RustFFI/libloqua_voice_dsp.a
-- Android library paths must be: android/src/main/jniLibs/{arch}/libloqua_voice_dsp.so
+- iOS library path must be: ios/RustFFI/libloqa_voice_dsp.a
+- Android library paths must be: android/src/main/jniLibs/{arch}/libloqa_voice_dsp.so
 - Depends on Story 1.1 (Expo module structure must exist)
 - Prepares foundation for FFI/JNI bindings in Stories 1.3 and 1.4
   </constraints>
@@ -136,14 +136,14 @@ Run build scripts manually to verify compilation. Check that libraries are creat
     </standards>
     <locations>
 Manual verification for this story - automated tests in Story 1.6
-Verify: ios/RustFFI/libloqua_voice_dsp.a exists after iOS build
-Verify: android/src/main/jniLibs/*/libloqua_voice_dsp.so exist after Android build
+Verify: ios/RustFFI/libloqa_voice_dsp.a exists after iOS build
+Verify: android/src/main/jniLibs/*/libloqa_voice_dsp.so exist after Android build
     </locations>
     <ideas>
 - Run build-ios.sh and verify exit code 0 (AC1, AC4)
-- Check ios/RustFFI/libloqua_voice_dsp.a exists and is valid (AC2, AC5)
+- Check ios/RustFFI/libloqa_voice_dsp.a exists and is valid (AC2, AC5)
 - Run build-android.sh and verify exit code 0 (AC1, AC4)
-- Check android/src/main/jniLibs/{arm64-v8a,armeabi-v7a,x86_64}/libloqua_voice_dsp.so exist (AC3, AC5)
+- Check android/src/main/jniLibs/{arm64-v8a,armeabi-v7a,x86_64}/libloqa_voice_dsp.so exist (AC3, AC5)
 - Use `file` command to verify library formats
 - Verify Podspec includes library reference (AC2)
 - Verify build.gradle includes library packaging (AC3)

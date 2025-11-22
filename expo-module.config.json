@@ -4,6 +4,6 @@
     "modules": ["LoqaAudioDspModule"]
   },
   "android": {
-    "modules": ["com.loqalabs.loquaaudiodsp.LoqaAudioDspModule"]
+    "modules": ["com.loqalabs.loqaaudiodsp.LoqaAudioDspModule"]
   }
 }

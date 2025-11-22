@@ -224,15 +224,15 @@ So that the loqa-voice-dsp crate is automatically built for iOS and Android.
 - build-ios.sh script that compiles for iOS architectures (arm64, x86_64 simulator)
 - build-android.sh script that compiles for Android architectures (arm64-v8a, armeabi-v7a, x86_64)
 
-**And** iOS Podspec is configured to include compiled libloqua_voice_dsp.a
+**And** iOS Podspec is configured to include compiled libloqa_voice_dsp.a
 
-**And** Android build.gradle is configured to include compiled libloqua_voice_dsp.so
+**And** Android build.gradle is configured to include compiled libloqa_voice_dsp.so
 
 **And** Build scripts compile Rust in release mode with optimizations enabled
 
 **And** Compiled libraries are placed in correct platform-specific directories:
-- iOS: ios/RustFFI/libloqua_voice_dsp.a
-- Android: android/src/main/jniLibs/{arch}/libloqua_voice_dsp.so
+- iOS: ios/RustFFI/libloqa_voice_dsp.a
+- Android: android/src/main/jniLibs/{arch}/libloqa_voice_dsp.so
 
 **Prerequisites:** Story 1.1
 
@@ -290,9 +290,9 @@ So that Android can call Rust loqa-voice-dsp functions safely.
 
 **Given** Rust libraries are compiled for Android
 **When** I create Kotlin JNI bridge code
-**Then** android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt is created with:
+**Then** android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt is created with:
 - JNI external function declarations for Rust functions
-- System.loadLibrary("loqua_voice_dsp") initialization
+- System.loadLibrary("loqa_voice_dsp") initialization
 - Kotlin wrapper functions that handle array marshalling
 - Error handling for JNI failures
 

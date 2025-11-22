@@ -1,10 +1,10 @@
-package com.loqalabs.loquaaudiodsp.RustJNI
+package com.loqalabs.loqaaudiodsp.RustJNI
 
 /**
  * RustBridge provides JNI bindings to the Rust loqa-voice-dsp library.
  *
  * This class handles:
- * - Loading the native Rust library (libloqua_voice_dsp.so)
+ * - Loading the native Rust library (libloqa_voice_dsp.so)
  * - Declaring external JNI function signatures for Rust DSP functions
  * - Providing Kotlin wrapper functions with error handling
  *
@@ -22,10 +22,10 @@ package com.loqalabs.loquaaudiodsp.RustJNI
 object RustBridge {
     init {
         try {
-            System.loadLibrary("loqua_voice_dsp")
+            System.loadLibrary("loqa_voice_dsp")
         } catch (e: UnsatisfiedLinkError) {
             throw RuntimeException(
-                "Failed to load native library 'loqua_voice_dsp'. " +
+                "Failed to load native library 'loqa_voice_dsp'. " +
                 "Ensure the .so files are included in jniLibs directory.",
                 e
             )
@@ -40,7 +40,7 @@ object RustBridge {
      * JNI native function for FFT computation.
      *
      * Implemented in Story 2.3. Maps to Rust function:
-     * Java_com_loqalabs_loquaaudiodsp_RustJNI_RustBridge_nativeComputeFFT
+     * Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeComputeFFT
      *
      * This external function is resolved by JNI to the Rust implementation in lib.rs.
      * The Rust function delegates to compute_fft_rust with a default sample rate of 44100 Hz.

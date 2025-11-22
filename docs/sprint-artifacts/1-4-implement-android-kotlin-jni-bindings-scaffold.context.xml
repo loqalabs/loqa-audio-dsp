@@ -15,9 +15,9 @@
     <soThat>Android can call Rust loqa-voice-dsp functions safely</soThat>
     <tasks>
 - Create RustBridge.kt
-  - Create android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/ directory
+  - Create android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/ directory
   - Create RustBridge.kt file
-  - Add System.loadLibrary("loqua_voice_dsp") in init block
+  - Add System.loadLibrary("loqa_voice_dsp") in init block
   - Declare external JNI function signatures for Rust functions
   - Implement placeholder Kotlin wrappers (will be completed in Epic 2)
   - Add error handling for JNI call failures
@@ -42,7 +42,7 @@
   </story>
 
   <acceptanceCriteria>
-AC1: Given Rust libraries are compiled for Android, When I create Kotlin JNI bridge code, Then android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt is created with: JNI external function declarations for Rust functions, System.loadLibrary("loqua_voice_dsp") initialization, Kotlin wrapper functions that handle array marshalling, Error handling for JNI failures
+AC1: Given Rust libraries are compiled for Android, When I create Kotlin JNI bridge code, Then android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt is created with: JNI external function declarations for Rust functions, System.loadLibrary("loqa_voice_dsp") initialization, Kotlin wrapper functions that handle array marshalling, Error handling for JNI failures
 
 AC2: Given Kotlin JNI bridge exists, When I update LoqaAudioDspModule.kt, Then it implements Expo Module Definition protocol
 
@@ -74,7 +74,7 @@ AC4: Given JNI bindings are implemented, When I review memory management, Then J
     </docs>
     <code>
       <artifact>
-        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+        <path>android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt</path>
         <kind>module</kind>
         <symbol>LoqaAudioDspModule</symbol>
         <lines>all</lines>
@@ -90,7 +90,7 @@ AC4: Given JNI bindings are implemented, When I review memory management, Then J
     </code>
     <dependencies>
       <android>
-        <library name="libloqua_voice_dsp.so" path="android/src/main/jniLibs/" note="Compiled Rust library from Story 1.2" />
+        <library name="libloqa_voice_dsp.so" path="android/src/main/jniLibs/" note="Compiled Rust library from Story 1.2" />
       </android>
       <kotlin>
         <package name="kotlinx.coroutines" note="For GlobalScope.launch and Dispatchers" />
@@ -115,7 +115,7 @@ AC4: Given JNI bindings are implemented, When I review memory management, Then J
       <signature>
 object RustBridge {
     init {
-        System.loadLibrary("loqua_voice_dsp")
+        System.loadLibrary("loqa_voice_dsp")
     }
 
     external fun placeholderJniFunction(
@@ -133,7 +133,7 @@ object RustBridge {
     }
 }
       </signature>
-      <path>android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt</path>
+      <path>android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt</path>
     </interface>
     <interface>
       <name>LoqaAudioDsp Expo Module</name>
@@ -156,7 +156,7 @@ class LoqaAudioDspModule : Module() {
     }
 }
       </signature>
-      <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+      <path>android/src/main/java/com/loqalabs/loqaaudiodsp/LoqaAudioDspModule.kt</path>
     </interface>
   </interfaces>
 
@@ -170,7 +170,7 @@ Manual verification for this story
     </locations>
     <ideas>
 - Verify RustBridge.kt compiles without errors (AC1)
-- Test System.loadLibrary("loqua_voice_dsp") succeeds (AC1)
+- Test System.loadLibrary("loqa_voice_dsp") succeeds (AC1)
 - Verify LoqaAudioDspModule implements Expo Module Definition (AC2)
 - Call placeholder async functions and verify Promise resolution (AC3)
 - Test error handling with invalid inputs (AC4)
