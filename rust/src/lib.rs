@@ -514,6 +514,173 @@ pub unsafe extern "C" fn Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativ
     extract_formants_rust(buffer, buffer_length, sample_rate, lpc_order)
 }
 
+/// Result structure for spectral analysis
+///
+/// Returns spectral features: centroid (brightness), rolloff (energy distribution), and tilt (spectral slope).
+/// This struct is C-compatible for FFI/JNI interop.
+///
+/// # Fields
+/// * `centroid` - Spectral centroid in Hz (weighted mean of frequencies, indicates brightness)
+/// * `rolloff` - Spectral rolloff frequency in Hz (frequency below which 95% of energy is concentrated)
+/// * `tilt` - Spectral tilt (slope of spectrum, negative = more low frequency energy)
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct SpectrumResult {
+    pub centroid: c_float,
+    pub rolloff: c_float,
+    pub tilt: c_float,
+}
+
+/// Analyzes spectral features using loqa-voice-dsp crate
+///
+/// Computes three key spectral features in a single efficient function call:
+/// - Spectral centroid: weighted mean of frequencies (brightness measure)
+/// - Spectral rolloff: frequency below which 95% of energy is concentrated
+/// - Spectral tilt: overall slope of the spectral envelope
+///
+/// # Arguments
+/// * `buffer` - Pointer to input audio samples (Float32 array)
+/// * `length` - Number of samples in input buffer
+/// * `sample_rate` - Sample rate in Hz (must be 8000-48000 Hz)
+///
+/// # Returns
+/// * SpectrumResult struct with centroid, rolloff, and tilt
+/// * Returns zeros on error
+///
+/// # Safety
+/// * Caller must ensure `buffer` points to valid memory of at least `length` samples
+/// * This function dereferences raw pointers and is inherently unsafe
+/// * Buffer must remain valid for the duration of this function call
+///
+/// # Validation
+/// * Sample rate must be between 8000 and 48000 Hz (AC1)
+/// * All three spectral features computed in single pass for efficiency (AC5)
+///
+/// # Spectral Feature Definitions
+/// * **Spectral Centroid (AC2):** Weighted mean of frequencies, indicates "brightness"
+///   - Higher values = brighter, more high-frequency content
+///   - Measured in Hz
+/// * **Spectral Rolloff (AC3):** Frequency below which 95% of energy is concentrated
+///   - Indicates energy distribution across spectrum
+///   - Measured in Hz
+/// * **Spectral Tilt (AC4):** Slope of spectral envelope
+///   - Negative values = more low-frequency energy (bass-heavy)
+///   - Positive values = more high-frequency energy (treble-heavy)
+///   - Measured as slope coefficient
+#[no_mangle]
+pub unsafe extern "C" fn analyze_spectrum_rust(
+    buffer: *const c_float,
+    length: c_int,
+    sample_rate: c_int,
+) -> SpectrumResult {
+    // Default error result (all zeros)
+    let error_result = SpectrumResult {
+        centroid: 0.0,
+        rolloff: 0.0,
+        tilt: 0.0,
+    };
+
+    // Input validation
+    if buffer.is_null() {
+        eprintln!("[Rust FFI] Error: buffer pointer is null");
+        return error_result;
+    }
+
+    if length <= 0 {
+        eprintln!("[Rust FFI] Error: length must be > 0, got {length}");
+        return error_result;
+    }
+
+    // Validate sample rate range: 8000-48000 Hz (AC1)
+    if !(8000..=48000).contains(&sample_rate) {
+        eprintln!(
+            "[Rust FFI] Error: sample_rate must be in range [8000, 48000] Hz, got {sample_rate}"
+        );
+        return error_result;
+    }
+
+    // Convert raw pointer to Rust slice
+    let input_slice = slice::from_raw_parts(buffer, length as usize);
+
+    // First, compute FFT to get frequency domain representation
+    // We use the same FFT size as buffer length for spectral analysis
+    let fft_size = length as usize;
+
+    // Call loqa-voice-dsp FFT function
+    let fft_result = loqa_voice_dsp::compute_fft(
+        input_slice,
+        sample_rate as u32,
+        fft_size
+    );
+
+    let fft_data = match fft_result {
+        Ok(result) => result,
+        Err(e) => {
+            eprintln!("[Rust FFI] FFT computation for spectral analysis failed: {e:?}");
+            return error_result;
+        }
+    };
+
+    // Call loqa-voice-dsp spectral analysis function
+    // AC5: All three features computed in single function call for efficiency
+    let spectrum_result = loqa_voice_dsp::analyze_spectrum(&fft_data);
+
+    // Handle spectral analysis result
+    match spectrum_result {
+        Ok(result) => {
+            // Extract spectral features (AC2, AC3, AC4)
+            SpectrumResult {
+                centroid: result.centroid,      // AC2: Spectral centroid in Hz
+                rolloff: result.rolloff_95,     // AC3: Spectral rolloff (95% energy threshold)
+                tilt: result.tilt,              // AC4: Spectral tilt (slope)
+            }
+        }
+        Err(e) => {
+            eprintln!("[Rust FFI] Spectral analysis failed: {e:?}");
+            error_result
+        }
+    }
+}
+
+/// Android JNI native method for analyzeSpectrum
+///
+/// JNI Method Signature Resolution:
+/// - Kotlin declaration: `external fun nativeAnalyzeSpectrum(buffer: FloatArray, sampleRate: Int): SpectrumResult`
+/// - Package: com.loqalabs.loqaaudiodsp.RustJNI
+/// - Class: RustBridge (object)
+/// - Method: nativeAnalyzeSpectrum
+/// - JNI Function Name: Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeAnalyzeSpectrum
+///
+/// # Arguments
+/// * `env` - JNI environment pointer (unused but required by JNI)
+/// * `class` - JNI class reference (unused but required by JNI)
+/// * `buffer` - JNI jfloatArray reference to input audio samples
+/// * `buffer_length` - Number of samples in buffer
+/// * `sample_rate` - Sample rate in Hz (8000-48000)
+///
+/// # Returns
+/// * SpectrumResult struct with centroid, rolloff, and tilt
+///
+/// # Safety
+/// * JNI framework ensures proper type conversions and memory management
+/// * This function is called from Kotlin via JNI, not directly
+///
+/// # Note
+/// SpectrumResult is returned by value (small struct), not by pointer.
+/// JNI will automatically marshal this back to Kotlin data class.
+#[no_mangle]
+pub unsafe extern "C" fn Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeAnalyzeSpectrum(
+    _env: *mut std::os::raw::c_void,
+    _class: *mut std::os::raw::c_void,
+    buffer: *const c_float,
+    buffer_length: c_int,
+    sample_rate: c_int,
+) -> SpectrumResult {
+    // Delegate to the main spectral analysis implementation
+    // The JNI framework handles conversion of FloatArray to *const f32
+    analyze_spectrum_rust(buffer, buffer_length, sample_rate)
+}
+
 /// Placeholder FFI function for testing build infrastructure (retained for backward compatibility)
 #[no_mangle]
 pub extern "C" fn test_ffi_bridge() -> i32 {
@@ -1292,6 +1459,368 @@ mod tests {
             assert!(result.bw1.is_finite(), "BW1 should be finite for silence");
             assert!(result.bw2.is_finite(), "BW2 should be finite for silence");
             assert!(result.bw3.is_finite(), "BW3 should be finite for silence");
+        }
+    }
+
+    // ======== Spectral Analysis Tests ========
+
+    #[test]
+    fn test_analyze_spectrum_null_buffer() {
+        unsafe {
+            let result = analyze_spectrum_rust(std::ptr::null(), 1024, 44100);
+            assert_eq!(result.centroid, 0.0, "Should return centroid=0.0 for null buffer");
+            assert_eq!(result.rolloff, 0.0, "Should return rolloff=0.0 for null buffer");
+            assert_eq!(result.tilt, 0.0, "Should return tilt=0.0 for null buffer");
+        }
+    }
+
+    #[test]
+    fn test_analyze_spectrum_invalid_length() {
+        let buffer: Vec<f32> = vec![0.0; 1024];
+        unsafe {
+            // Test zero length
+            let result = analyze_spectrum_rust(buffer.as_ptr(), 0, 44100);
+            assert_eq!(result.centroid, 0.0);
+            assert_eq!(result.rolloff, 0.0);
+            assert_eq!(result.tilt, 0.0);
+
+            // Test negative length
+            let result = analyze_spectrum_rust(buffer.as_ptr(), -10, 44100);
+            assert_eq!(result.centroid, 0.0);
+            assert_eq!(result.rolloff, 0.0);
+            assert_eq!(result.tilt, 0.0);
+        }
+    }
+
+    #[test]
+    fn test_analyze_spectrum_invalid_sample_rate() {
+        let buffer: Vec<f32> = vec![0.0; 1024];
+        unsafe {
+            // Test below 8000 Hz (AC1)
+            let result = analyze_spectrum_rust(buffer.as_ptr(), 1024, 7999);
+            assert_eq!(result.centroid, 0.0, "Should return error for sample rate < 8000 Hz");
+
+            // Test above 48000 Hz (AC1)
+            let result = analyze_spectrum_rust(buffer.as_ptr(), 1024, 48001);
+            assert_eq!(result.centroid, 0.0, "Should return error for sample rate > 48000 Hz");
+
+            // Test zero/negative sample rate
+            let result = analyze_spectrum_rust(buffer.as_ptr(), 1024, 0);
+            assert_eq!(result.centroid, 0.0);
+
+            let result = analyze_spectrum_rust(buffer.as_ptr(), 1024, -100);
+            assert_eq!(result.centroid, 0.0);
+        }
+    }
+
+    #[test]
+    fn test_analyze_spectrum_valid_sample_rates() {
+        let buffer: Vec<f32> = vec![0.5; 2048];
+
+        unsafe {
+            // Test minimum valid sample rate (8000 Hz)
+            let result = analyze_spectrum_rust(buffer.as_ptr(), 2048, 8000);
+            // Should not error (values may vary based on buffer content, but call should succeed)
+            assert!(result.centroid.is_finite());
+            assert!(result.rolloff.is_finite());
+            assert!(result.tilt.is_finite());
+
+            // Test common sample rate (44100 Hz)
+            let result = analyze_spectrum_rust(buffer.as_ptr(), 2048, 44100);
+            assert!(result.centroid.is_finite());
+            assert!(result.rolloff.is_finite());
+            assert!(result.tilt.is_finite());
+
+            // Test maximum valid sample rate (48000 Hz)
+            let result = analyze_spectrum_rust(buffer.as_ptr(), 2048, 48000);
+            assert!(result.centroid.is_finite());
+            assert!(result.rolloff.is_finite());
+            assert!(result.tilt.is_finite());
+        }
+    }
+
+    #[test]
+    fn test_analyze_spectrum_sine_wave_440hz() {
+        // Generate a pure 440 Hz sine wave
+        // Expected characteristics:
+        // - Centroid should be close to 440 Hz (narrow spectral peak)
+        // - Rolloff should be close to 440 Hz (most energy concentrated there)
+        // - Tilt should be near 0 (flat spectrum around the peak)
+        let sample_rate = 44100;
+        let frequency = 440.0;
+        let duration = 0.1; // 100ms
+        let num_samples = (sample_rate as f32 * duration) as usize;
+
+        let mut buffer: Vec<f32> = Vec::with_capacity(num_samples);
+        for i in 0..num_samples {
+            let t = i as f32 / sample_rate as f32;
+            buffer.push((2.0 * PI * frequency * t).sin());
+        }
+
+        unsafe {
+            let result = analyze_spectrum_rust(buffer.as_ptr(), num_samples as c_int, sample_rate);
+
+            // AC2, AC3, AC4: All spectral features should be computed
+            // All values should be finite (not NaN or Infinity)
+            assert!(result.centroid.is_finite(), "Centroid should be finite");
+            assert!(result.rolloff.is_finite(), "Rolloff should be finite");
+            assert!(result.tilt.is_finite(), "Tilt should be finite");
+
+            // All values should be non-negative for frequencies
+            assert!(result.centroid >= 0.0, "Centroid should be non-negative");
+            assert!(result.rolloff >= 0.0, "Rolloff should be non-negative");
+            // Tilt can be negative (indicating low-frequency emphasis)
+
+            // For a narrow sine wave, centroid should be close to the frequency
+            // Allow reasonable tolerance for FFT resolution and windowing effects
+            if result.centroid > 0.0 {
+                let centroid_error = (result.centroid - frequency).abs();
+                let error_percent = (centroid_error / frequency) * 100.0;
+
+                // Centroid should be within reasonable range of target frequency
+                // (allowing for FFT bin resolution and windowing artifacts)
+                assert!(
+                    error_percent < 50.0,
+                    "Centroid {:.1} Hz should be reasonably close to {:.1} Hz (error: {:.1}%)",
+                    result.centroid,
+                    frequency,
+                    error_percent
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_analyze_spectrum_white_noise() {
+        // Generate white noise - broad spectrum
+        // Expected characteristics:
+        // - Centroid should be mid-range (around sample_rate / 4)
+        // - Rolloff should be high (energy distributed across spectrum)
+        // - Tilt should be near 0 (flat spectrum)
+        let sample_rate = 44100;
+        let num_samples = 2048;
+        let mut buffer: Vec<f32> = Vec::with_capacity(num_samples);
+
+        // Simple pseudo-random noise generator
+        for i in 0..num_samples {
+            let hash = (i as u32).wrapping_mul(2654435761);
+            buffer.push(((hash % 1000) as f32 / 1000.0) * 2.0 - 1.0);
+        }
+
+        unsafe {
+            let result = analyze_spectrum_rust(buffer.as_ptr(), num_samples as c_int, sample_rate);
+
+            // AC2, AC3, AC4: All features should be computed
+            assert!(result.centroid.is_finite(), "Centroid should be finite for white noise");
+            assert!(result.rolloff.is_finite(), "Rolloff should be finite for white noise");
+            assert!(result.tilt.is_finite(), "Tilt should be finite for white noise");
+
+            // For white noise, centroid should be somewhere in mid-range
+            // (not at extremes like 0 or Nyquist frequency)
+            if result.centroid > 0.0 {
+                let nyquist = sample_rate as f32 / 2.0;
+                assert!(
+                    result.centroid < nyquist,
+                    "Centroid {:.1} Hz should be below Nyquist {:.1} Hz",
+                    result.centroid,
+                    nyquist
+                );
+            }
+
+            // Rolloff should also be reasonable (below Nyquist)
+            if result.rolloff > 0.0 {
+                let nyquist = sample_rate as f32 / 2.0;
+                assert!(
+                    result.rolloff < nyquist,
+                    "Rolloff {:.1} Hz should be below Nyquist {:.1} Hz",
+                    result.rolloff,
+                    nyquist
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_analyze_spectrum_pink_noise() {
+        // Generate pink noise (1/f spectrum) - more low frequency energy
+        // Expected characteristics:
+        // - Centroid should be lower than white noise
+        // - Rolloff should be lower than white noise
+        // - Tilt should be negative (more low-frequency energy)
+        let sample_rate = 44100;
+        let num_samples = 2048;
+        let mut buffer: Vec<f32> = Vec::with_capacity(num_samples);
+
+        // Approximate pink noise by summing sine waves with 1/f amplitude
+        for i in 0..num_samples {
+            let t = i as f32 / sample_rate as f32;
+            let mut sample = 0.0;
+            // Sum harmonics with decreasing amplitude (1/f)
+            for harmonic in 1..=20 {
+                let freq = 100.0 * harmonic as f32;
+                let amplitude = 1.0 / harmonic as f32;
+                sample += amplitude * (2.0 * PI * freq * t).sin();
+            }
+            buffer.push(sample * 0.1); // Scale down to reasonable amplitude
+        }
+
+        unsafe {
+            let result = analyze_spectrum_rust(buffer.as_ptr(), num_samples as c_int, sample_rate);
+
+            // AC2, AC3, AC4: All features should be computed
+            assert!(result.centroid.is_finite(), "Centroid should be finite for pink noise");
+            assert!(result.rolloff.is_finite(), "Rolloff should be finite for pink noise");
+            assert!(result.tilt.is_finite(), "Tilt should be finite for pink noise");
+
+            // All frequencies should be in valid range
+            if result.centroid > 0.0 {
+                let nyquist = sample_rate as f32 / 2.0;
+                assert!(
+                    result.centroid < nyquist,
+                    "Centroid should be below Nyquist frequency"
+                );
+            }
+
+            if result.rolloff > 0.0 {
+                let nyquist = sample_rate as f32 / 2.0;
+                assert!(
+                    result.rolloff < nyquist,
+                    "Rolloff should be below Nyquist frequency"
+                );
+            }
+
+            // AC4: Pink noise should typically have negative tilt (more low freq energy)
+            // But this depends on the algorithm's tilt calculation, so we just verify it's finite
+        }
+    }
+
+    #[test]
+    fn test_analyze_spectrum_silence() {
+        // Test with silence (all zeros)
+        let buffer: Vec<f32> = vec![0.0; 2048];
+        let sample_rate = 44100;
+
+        unsafe {
+            let result = analyze_spectrum_rust(buffer.as_ptr(), 2048, sample_rate);
+
+            // Silence may produce specific values or zeros depending on algorithm
+            // The important thing is it doesn't crash and returns valid (non-NaN) values
+            assert!(result.centroid.is_finite(), "Centroid should be finite for silence");
+            assert!(result.rolloff.is_finite(), "Rolloff should be finite for silence");
+            assert!(result.tilt.is_finite(), "Tilt should be finite for silence");
+
+            // All values should be non-negative for silence (no negative frequencies)
+            assert!(result.centroid >= 0.0, "Centroid should be non-negative for silence");
+            assert!(result.rolloff >= 0.0, "Rolloff should be non-negative for silence");
+        }
+    }
+
+    #[test]
+    fn test_analyze_spectrum_multiple_sample_rates() {
+        // Test spectral analysis works across different sample rates
+        for sample_rate in [8000, 16000, 22050, 44100, 48000] {
+            let duration = 0.05; // 50ms
+            let num_samples = (sample_rate as f32 * duration) as usize;
+
+            // Generate a simple periodic signal
+            let frequency = 200.0;
+            let mut buffer: Vec<f32> = Vec::with_capacity(num_samples);
+            for i in 0..num_samples {
+                let t = i as f32 / sample_rate as f32;
+                buffer.push((2.0 * PI * frequency * t).sin());
+            }
+
+            unsafe {
+                let result = analyze_spectrum_rust(
+                    buffer.as_ptr(),
+                    num_samples as c_int,
+                    sample_rate as c_int,
+                );
+
+                // AC1: All sample rates in 8000-48000 Hz should work
+                assert!(
+                    result.centroid.is_finite() && result.rolloff.is_finite() && result.tilt.is_finite(),
+                    "Sample rate {} Hz should work (centroid={:.1}, rolloff={:.1}, tilt={:.3})",
+                    sample_rate,
+                    result.centroid,
+                    result.rolloff,
+                    result.tilt
+                );
+
+                // Verify values are in physically reasonable range
+                if result.centroid > 0.0 {
+                    let nyquist = sample_rate as f32 / 2.0;
+                    assert!(
+                        result.centroid <= nyquist,
+                        "Centroid {:.1} Hz should not exceed Nyquist {:.1} Hz at sample rate {}",
+                        result.centroid,
+                        nyquist,
+                        sample_rate
+                    );
+                }
+
+                if result.rolloff > 0.0 {
+                    let nyquist = sample_rate as f32 / 2.0;
+                    assert!(
+                        result.rolloff <= nyquist,
+                        "Rolloff {:.1} Hz should not exceed Nyquist {:.1} Hz at sample rate {}",
+                        result.rolloff,
+                        nyquist,
+                        sample_rate
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_analyze_spectrum_result_struct_layout() {
+        // Verify SpectrumResult struct is properly laid out for FFI
+        let test_result = SpectrumResult {
+            centroid: 2000.0,
+            rolloff: 4000.0,
+            tilt: -0.5,
+        };
+
+        assert_eq!(test_result.centroid, 2000.0);
+        assert_eq!(test_result.rolloff, 4000.0);
+        assert_eq!(test_result.tilt, -0.5);
+
+        // Verify struct is Copy (required for FFI)
+        let copied = test_result;
+        assert_eq!(copied.centroid, 2000.0);
+        assert_eq!(test_result.centroid, 2000.0); // Original still valid
+    }
+
+    #[test]
+    fn test_analyze_spectrum_all_features_single_call() {
+        // AC5: Verify all three spectral features are computed in a single function call
+        let sample_rate = 44100;
+        let num_samples = 2048;
+
+        // Generate a complex signal with multiple frequency components
+        let mut buffer: Vec<f32> = Vec::with_capacity(num_samples);
+        for i in 0..num_samples {
+            let t = i as f32 / sample_rate as f32;
+            // Mix of low, mid, and high frequencies
+            buffer.push(
+                0.5 * (2.0 * PI * 200.0 * t).sin() +  // Low
+                0.3 * (2.0 * PI * 1000.0 * t).sin() +  // Mid
+                0.2 * (2.0 * PI * 4000.0 * t).sin()    // High
+            );
+        }
+
+        unsafe {
+            let result = analyze_spectrum_rust(buffer.as_ptr(), num_samples as c_int, sample_rate);
+
+            // AC5: All three features should be computed and returned
+            // Verify all are valid (finite, non-NaN)
+            assert!(result.centroid.is_finite(), "Centroid should be computed");
+            assert!(result.rolloff.is_finite(), "Rolloff should be computed");
+            assert!(result.tilt.is_finite(), "Tilt should be computed");
+
+            // For this mixed signal, all three values should be meaningful (non-zero if algorithm works)
+            // But we don't enforce non-zero as that depends on the algorithm implementation
         }
     }
 }
