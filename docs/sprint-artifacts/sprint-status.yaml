@@ -70,7 +70,7 @@ development_status:
   4-2-implement-ios-and-android-analyzespectrum-native-functions: done
   4-3-implement-typescript-analyzespectrum-api: done
   4-4-write-unit-tests-for-analyzespectrum: done
-  4-5-add-analyzespectrum-to-public-api-and-complete-core-dsp: ready-for-dev
+  4-5-add-analyzespectrum-to-public-api-and-complete-core-dsp: done
   epic-4-retrospective: optional
 
   epic-5: backlog

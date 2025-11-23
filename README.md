@@ -123,6 +123,36 @@ if (formants.f1 < 400 && formants.f2 > 2000) {
 }
 ```
 
+### Spectral Analysis Example (Audio Classification)
+
+```typescript
+import { analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
+
+// Example: Analyze spectral features for audio classification
+const audioBuffer = new Float32Array(2048); // Your audio samples
+// ... fill buffer with audio data ...
+
+const spectrum = await analyzeSpectrum(audioBuffer, 44100);
+
+console.log(`Spectral centroid: ${spectrum.centroid.toFixed(1)} Hz`);
+console.log(`Spectral rolloff: ${spectrum.rolloff.toFixed(1)} Hz`);
+console.log(`Spectral tilt: ${spectrum.tilt.toFixed(3)}`);
+
+// Use spectral features for audio classification
+if (spectrum.centroid > 3000) {
+  console.log('Bright sound (high-frequency content)');
+} else if (spectrum.centroid < 1500) {
+  console.log('Dark sound (low-frequency content)');
+}
+
+// Spectral tilt indicates timbre: negative = more bass, positive = more treble
+if (spectrum.tilt < -0.01) {
+  console.log('Bass-heavy timbre');
+} else if (spectrum.tilt > 0.01) {
+  console.log('Treble-heavy timbre');
+}
+```
+
 ### Complete Voice Analysis Example
 
 ```typescript
