@@ -71,3 +71,4 @@ Cargo.lock
 
 # BMAD build artifacts
 .build/
+.build/
