@@ -69,7 +69,7 @@ development_status:
   4-1-implement-spectral-analysis-rust-function-bindings: done
   4-2-implement-ios-and-android-analyzespectrum-native-functions: done
   4-3-implement-typescript-analyzespectrum-api: done
-  4-4-write-unit-tests-for-analyzespectrum: ready-for-dev
+  4-4-write-unit-tests-for-analyzespectrum: done
   4-5-add-analyzespectrum-to-public-api-and-complete-core-dsp: ready-for-dev
   epic-4-retrospective: optional
 
