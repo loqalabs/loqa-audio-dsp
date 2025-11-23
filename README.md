@@ -68,30 +68,106 @@ console.log(`Magnitude bins: ${result.magnitude.length}`);
 console.log(`Frequency range: ${result.frequencies[0]} Hz - ${result.frequencies[result.frequencies.length - 1]} Hz`);
 ```
 
-### Complete DSP Example
+### Pitch Detection Example (Voice Analysis)
 
 ```typescript
-import { detectPitch, computeFFT, extractFormants, analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
+import { detectPitch } from '@loqalabs/loqa-audio-dsp';
 
-// Example: Analyze pre-recorded audio samples
-const samples = new Float32Array([/* your audio data */]);
-const sampleRate = 16000;
+// Example: Real-time pitch detection for a tuner app
+const audioBuffer = new Float32Array(2048); // Your audio samples
+// ... fill buffer with microphone data ...
 
-// Pitch detection
-const pitch = detectPitch(samples, sampleRate, { minFreq: 80, maxFreq: 400 });
-console.log(`Pitch: ${pitch.frequency} Hz`);
+const pitch = await detectPitch(audioBuffer, 44100, {
+  minFrequency: 80,   // Minimum pitch (human voice range)
+  maxFrequency: 400   // Maximum pitch (human voice range)
+});
 
-// FFT analysis
-const fft = await computeFFT(samples, { fftSize: 2048 });
-console.log(`Frequency spectrum has ${fft.magnitude.length} bins`);
+if (pitch.isVoiced) {
+  console.log(`Detected pitch: ${pitch.frequency.toFixed(2)} Hz`);
+  console.log(`Confidence: ${(pitch.confidence * 100).toFixed(1)}%`);
 
-// Formant extraction
-const formants = extractFormants(samples, sampleRate, { lpcOrder: 12 });
-console.log(`F1: ${formants.f1} Hz, F2: ${formants.f2} Hz, F3: ${formants.f3} Hz`);
+  // Convert to musical note for tuner display
+  const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const a4 = 440;
+  const semitones = 12 * Math.log2(pitch.frequency / a4);
+  const noteIndex = Math.round(semitones) % 12;
+  console.log(`Closest note: ${noteNames[noteIndex]}`);
+} else {
+  console.log('No pitch detected (silence or unvoiced segment)');
+}
+```
 
-// Spectral analysis
-const spectral = analyzeSpectrum(samples, sampleRate, 2048);
-console.log(`Spectral centroid: ${spectral.centroid} Hz`);
+### Formant Extraction Example (Vowel Analysis)
+
+```typescript
+import { extractFormants } from '@loqalabs/loqa-audio-dsp';
+
+// Example: Analyze vowel formants for pronunciation feedback
+const voiceBuffer = new Float32Array(2048); // Your voice samples
+// ... fill buffer with voiced audio (vowel sound) ...
+
+const formants = await extractFormants(voiceBuffer, 16000, {
+  lpcOrder: 14  // Optional: defaults to sampleRate/1000 + 2
+});
+
+console.log(`Formant frequencies:`);
+console.log(`  F1: ${formants.f1.toFixed(1)} Hz (bandwidth: ${formants.bandwidths.f1.toFixed(1)} Hz)`);
+console.log(`  F2: ${formants.f2.toFixed(1)} Hz (bandwidth: ${formants.bandwidths.f2.toFixed(1)} Hz)`);
+console.log(`  F3: ${formants.f3.toFixed(1)} Hz (bandwidth: ${formants.bandwidths.f3.toFixed(1)} Hz)`);
+
+// Identify vowel based on F1/F2 values (simplified example)
+if (formants.f1 < 400 && formants.f2 > 2000) {
+  console.log('Detected vowel: /i/ (as in "see")');
+} else if (formants.f1 > 700 && formants.f2 < 1200) {
+  console.log('Detected vowel: /a/ (as in "father")');
+}
+```
+
+### Complete Voice Analysis Example
+
+```typescript
+import { detectPitch, extractFormants, computeFFT } from '@loqalabs/loqa-audio-dsp';
+
+// Example: Comprehensive voice analysis for coaching apps
+async function analyzeVoice(samples: Float32Array, sampleRate: number) {
+  // 1. Detect pitch
+  const pitch = await detectPitch(samples, sampleRate, {
+    minFrequency: 80,
+    maxFrequency: 400
+  });
+
+  // 2. Extract formants (for voiced segments only)
+  let formants = null;
+  if (pitch.isVoiced) {
+    formants = await extractFormants(samples, sampleRate);
+  }
+
+  // 3. Compute frequency spectrum
+  const fft = await computeFFT(samples, { fftSize: 2048 });
+
+  return {
+    pitch: {
+      frequency: pitch.frequency,
+      confidence: pitch.confidence,
+      isVoiced: pitch.isVoiced
+    },
+    formants: formants ? {
+      f1: formants.f1,
+      f2: formants.f2,
+      f3: formants.f3
+    } : null,
+    spectrum: {
+      bins: fft.magnitude.length,
+      dominantFreq: fft.frequencies[
+        fft.magnitude.indexOf(Math.max(...fft.magnitude))
+      ]
+    }
+  };
+}
+
+// Usage
+const result = await analyzeVoice(audioSamples, 16000);
+console.log('Voice analysis:', result);
 ```
 
 ## Documentation

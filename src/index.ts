@@ -24,8 +24,8 @@ export { logDebug, logWarning } from './utils';
 
 // Export DSP functions
 export { computeFFT } from './computeFFT';
+export { detectPitch } from './detectPitch';
+export { extractFormants } from './extractFormants';
 
-// Placeholder for future DSP function exports (Epic 2+)
-// export { detectPitch } from './detectPitch';
-// export { extractFormants } from './extractFormants';
+// Placeholder for future DSP function exports (Epic 4+)
 // export { analyzeSpectrum } from './analyzeSpectrum';

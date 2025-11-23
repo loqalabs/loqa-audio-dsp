@@ -3,4 +3,6 @@ export type { FFTOptions, FFTResult, PitchDetectionOptions, PitchResult, Formant
 export { LoqaAudioDspError, ValidationError, NativeModuleError } from './errors';
 export { logDebug, logWarning } from './utils';
 export { computeFFT } from './computeFFT';
+export { detectPitch } from './detectPitch';
+export { extractFormants } from './extractFormants';
 //# sourceMappingURL=index.d.ts.map
