@@ -8,6 +8,7 @@
     "lib",
     "ios",
     "android",
+    "expo-module.config.json",
     "README.md",
     "docs/API.md",
     "docs/INTEGRATION_GUIDE.md",
