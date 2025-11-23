@@ -9,7 +9,8 @@
     "ios",
     "android",
     "README.md",
-    "API.md",
+    "docs/API.md",
+    "docs/INTEGRATION_GUIDE.md",
     "LICENSE"
   ],
   "publishConfig": {
@@ -41,7 +42,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/loqalabs/loqa-audio-dsp.git"
+    "url": "git+https://github.com/loqalabs/loqa-audio-dsp.git"
   },
   "bugs": {
     "url": "https://github.com/loqalabs/loqa-audio-dsp/issues"
