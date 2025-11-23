@@ -145,7 +145,7 @@ export function VoiceRecorderWithAnalysis() {
       // Analyze pitch
       const pitchResult = await detectPitch(audioSamples, sampleRate, {
         minFrequency: 80,
-        maxFrequency: 400
+        maxFrequency: 400,
       });
 
       // Analyze formants (if voiced)
@@ -156,11 +156,13 @@ export function VoiceRecorderWithAnalysis() {
 
       setAnalysis({
         pitch: pitchResult.frequency,
-        formants: formantsResult ? {
-          f1: formantsResult.f1,
-          f2: formantsResult.f2,
-          f3: formantsResult.f3
-        } : null
+        formants: formantsResult
+          ? {
+              f1: formantsResult.f1,
+              f2: formantsResult.f2,
+              f3: formantsResult.f3,
+            }
+          : null,
       });
 
       setRecording(null);
@@ -176,7 +178,7 @@ export function VoiceRecorderWithAnalysis() {
   return (
     <View>
       <Button
-        title={recording ? "Stop & Analyze" : "Start Recording"}
+        title={recording ? 'Stop & Analyze' : 'Start Recording'}
         onPress={recording ? stopRecordingAndAnalyze : startRecording}
         disabled={isProcessing}
       />
@@ -225,8 +227,8 @@ async function extractPCMFromRecording(uri: string): Promise<Float32Array> {
 
   throw new Error(
     'PCM extraction not implemented. ' +
-    'Use @loqalabs/loqa-audio-bridge for real-time analysis (see Pattern 2) ' +
-    'or implement one of the alternative approaches listed in the function comments.'
+      'Use @loqalabs/loqa-audio-bridge for real-time analysis (see Pattern 2) ' +
+      'or implement one of the alternative approaches listed in the function comments.'
   );
 }
 ```
@@ -252,7 +254,12 @@ npx expo install @loqalabs/loqa-audio-bridge @loqalabs/loqa-audio-dsp
 #### Complete Implementation
 
 ```typescript
-import { startAudioStream, stopAudioStream, addAudioSampleListener, removeAudioSampleListener } from '@loqalabs/loqa-audio-bridge';
+import {
+  startAudioStream,
+  stopAudioStream,
+  addAudioSampleListener,
+  removeAudioSampleListener,
+} from '@loqalabs/loqa-audio-bridge';
 import { detectPitch, analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
 import { useEffect, useState } from 'react';
 import { View, Button, Text } from 'react-native';
@@ -276,7 +283,7 @@ export function RealtimePitchTracker() {
       // Detect pitch
       const pitch = await detectPitch(samples, sampleRate, {
         minFrequency: 80,
-        maxFrequency: 1000
+        maxFrequency: 1000,
       });
 
       if (pitch.isVoiced && pitch.confidence > 0.5) {
@@ -288,7 +295,6 @@ export function RealtimePitchTracker() {
       // Analyze spectrum for brightness
       const spectrum = await analyzeSpectrum(samples, sampleRate);
       setSpectralCentroid(spectrum.centroid);
-
     } catch (error) {
       console.error('Analysis failed:', error);
     }
@@ -300,7 +306,7 @@ export function RealtimePitchTracker() {
       await startAudioStream({
         sampleRate: 16000,
         bufferSize: 2048,
-        channels: 1
+        channels: 1,
       });
 
       const listener = addAudioSampleListener(handleAudioSample);
@@ -345,17 +351,13 @@ export function RealtimePitchTracker() {
   return (
     <View>
       <Button
-        title={isListening ? "Stop Listening" : "Start Listening"}
+        title={isListening ? 'Stop Listening' : 'Start Listening'}
         onPress={() => setIsListening(!isListening)}
       />
       {isListening && (
         <View>
-          <Text>
-            Pitch: {currentPitch ? `${currentPitch.toFixed(1)} Hz` : 'No pitch detected'}
-          </Text>
-          <Text>
-            Brightness: {spectralCentroid?.toFixed(0) ?? 'N/A'} Hz
-          </Text>
+          <Text>Pitch: {currentPitch ? `${currentPitch.toFixed(1)} Hz` : 'No pitch detected'}</Text>
+          <Text>Brightness: {spectralCentroid?.toFixed(0) ?? 'N/A'} Hz</Text>
         </View>
       )}
     </View>
@@ -399,7 +401,6 @@ export async function analyzeBatchAudioFile(
   fileUri: string,
   sampleRate: number = 16000
 ): Promise<AudioAnalysisResult[]> {
-
   // 1. Load and decode audio file to PCM
   const pcmData = await loadAndDecodeToPCM(fileUri, sampleRate);
 
@@ -414,7 +415,7 @@ export async function analyzeBatchAudioFile(
     // Run all analyses in parallel for efficiency
     const [pitch, fft] = await Promise.all([
       detectPitch(window, sampleRate),
-      computeFFT(window, { fftSize: 2048, windowType: 'hanning' })
+      computeFFT(window, { fftSize: 2048, windowType: 'hanning' }),
     ]);
 
     // Extract formants only for voiced segments
@@ -426,17 +427,19 @@ export async function analyzeBatchAudioFile(
     results.push({
       pitch: {
         frequency: pitch.frequency,
-        confidence: pitch.confidence
+        confidence: pitch.confidence,
       },
-      formants: formants ? {
-        f1: formants.f1,
-        f2: formants.f2,
-        f3: formants.f3
-      } : null,
+      formants: formants
+        ? {
+            f1: formants.f1,
+            f2: formants.f2,
+            f3: formants.f3,
+          }
+        : null,
       spectrum: {
         magnitude: fft.magnitude,
-        frequencies: fft.frequencies
-      }
+        frequencies: fft.frequencies,
+      },
     });
   }
 
@@ -449,7 +452,6 @@ async function loadAndDecodeToPCM(
   fileUri: string,
   targetSampleRate: number
 ): Promise<Float32Array> {
-
   // EXAMPLE IMPLEMENTATION FOR WAV FILES:
   // This shows how to decode uncompressed WAV files using expo-file-system
   /*
@@ -491,8 +493,8 @@ async function loadAndDecodeToPCM(
 
   throw new Error(
     'Audio decoding not implemented. ' +
-    'See function comments for WAV file example and alternative approaches. ' +
-    'For real-time analysis, use @loqalabs/loqa-audio-bridge (Pattern 2).'
+      'See function comments for WAV file example and alternative approaches. ' +
+      'For real-time analysis, use @loqalabs/loqa-audio-bridge (Pattern 2).'
   );
 }
 
@@ -501,25 +503,23 @@ export async function generateAudioReport(fileUri: string) {
   const results = await analyzeBatchAudioFile(fileUri, 16000);
 
   // Calculate statistics
-  const pitches = results
-    .map(r => r.pitch.frequency)
-    .filter((f): f is number => f !== null);
+  const pitches = results.map((r) => r.pitch.frequency).filter((f): f is number => f !== null);
 
   const avgPitch = pitches.reduce((a, b) => a + b, 0) / pitches.length;
   const minPitch = Math.min(...pitches);
   const maxPitch = Math.max(...pitches);
 
-  const voicedFrames = results.filter(r => r.formants !== null).length;
+  const voicedFrames = results.filter((r) => r.formants !== null).length;
   const voicedPercentage = (voicedFrames / results.length) * 100;
 
   return {
-    duration: results.length * 512 / 16000, // in seconds
+    duration: (results.length * 512) / 16000, // in seconds
     avgPitch,
     minPitch,
     maxPitch,
     pitchRange: maxPitch - minPitch,
     voicedPercentage,
-    totalFrames: results.length
+    totalFrames: results.length,
   };
 }
 ```
@@ -542,7 +542,11 @@ A complete musical tuner application that detects pitch in real-time and display
 ```typescript
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { startAudioStream, stopAudioStream, addAudioSampleListener } from '@loqalabs/loqa-audio-bridge';
+import {
+  startAudioStream,
+  stopAudioStream,
+  addAudioSampleListener,
+} from '@loqalabs/loqa-audio-bridge';
 import { detectPitch } from '@loqalabs/loqa-audio-dsp';
 
 // Musical note data
@@ -568,7 +572,7 @@ function frequencyToNote(frequency: number): NoteInfo {
     note: NOTE_NAMES[noteIndex < 0 ? noteIndex + 12 : noteIndex],
     octave,
     cents,
-    frequency
+    frequency,
   };
 }
 
@@ -584,14 +588,14 @@ export default function PitchTrackerApp() {
       await startAudioStream({
         sampleRate: 44100,
         bufferSize: 4096, // Larger buffer for better pitch accuracy
-        channels: 1
+        channels: 1,
       });
 
       listener = addAudioSampleListener(async (event) => {
         try {
           const pitch = await detectPitch(event.samples, event.sampleRate, {
-            minFrequency: 82,   // E2 (low guitar string)
-            maxFrequency: 1047  // C6 (high voice)
+            minFrequency: 82, // E2 (low guitar string)
+            maxFrequency: 1047, // C6 (high voice)
           });
 
           if (pitch.isVoiced && pitch.frequency && pitch.confidence > 0.7) {
@@ -629,9 +633,7 @@ export default function PitchTrackerApp() {
         style={[styles.button, isActive && styles.buttonActive]}
         onPress={() => setIsActive(!isActive)}
       >
-        <Text style={styles.buttonText}>
-          {isActive ? 'Stop' : 'Start'}
-        </Text>
+        <Text style={styles.buttonText}>{isActive ? 'Stop' : 'Start'}</Text>
       </TouchableOpacity>
 
       {isActive && (
@@ -642,18 +644,12 @@ export default function PitchTrackerApp() {
                 {noteInfo.note}
                 <Text style={styles.octaveText}>{noteInfo.octave}</Text>
               </Text>
-              <Text style={styles.frequencyText}>
-                {noteInfo.frequency.toFixed(1)} Hz
-              </Text>
+              <Text style={styles.frequencyText}>{noteInfo.frequency.toFixed(1)} Hz</Text>
               <View style={styles.tuningIndicator}>
-                <View
-                  style={[
-                    styles.tuningNeedle,
-                    { left: `${50 + noteInfo.cents / 2}%` }
-                  ]}
-                />
+                <View style={[styles.tuningNeedle, { left: `${50 + noteInfo.cents / 2}%` }]} />
                 <Text style={styles.centsText}>
-                  {noteInfo.cents > 0 ? '+' : ''}{noteInfo.cents}¢
+                  {noteInfo.cents > 0 ? '+' : ''}
+                  {noteInfo.cents}¢
                 </Text>
               </View>
               <Text style={styles.confidenceText}>
@@ -675,46 +671,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#1a1a1a'
+    backgroundColor: '#1a1a1a',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 40
+    marginBottom: 40,
   },
   button: {
     backgroundColor: '#4CAF50',
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 25,
-    marginBottom: 40
+    marginBottom: 40,
   },
   buttonActive: {
-    backgroundColor: '#f44336'
+    backgroundColor: '#f44336',
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   display: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%'
+    width: '100%',
   },
   noteText: {
     fontSize: 120,
     fontWeight: 'bold',
-    color: '#4CAF50'
+    color: '#4CAF50',
   },
   octaveText: {
-    fontSize: 60
+    fontSize: 60,
   },
   frequencyText: {
     fontSize: 24,
     color: '#ccc',
-    marginTop: 10
+    marginTop: 10,
   },
   tuningIndicator: {
     width: '80%',
@@ -723,7 +719,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginTop: 30,
     position: 'relative',
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   tuningNeedle: {
     position: 'absolute',
@@ -733,23 +729,23 @@ const styles = StyleSheet.create({
     shadowColor: '#4CAF50',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
-    shadowRadius: 10
+    shadowRadius: 10,
   },
   centsText: {
     textAlign: 'center',
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   confidenceText: {
     marginTop: 20,
     color: '#999',
-    fontSize: 14
+    fontSize: 14,
   },
   waitingText: {
     fontSize: 24,
-    color: '#666'
-  }
+    color: '#666',
+  },
 });
 ```
 
@@ -763,7 +759,11 @@ A vowel analysis app that visualizes formants on an F1-F2 chart.
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import Svg, { Circle, Text as SvgText, Line } from 'react-native-svg';
-import { startAudioStream, stopAudioStream, addAudioSampleListener } from '@loqalabs/loqa-audio-bridge';
+import {
+  startAudioStream,
+  stopAudioStream,
+  addAudioSampleListener,
+} from '@loqalabs/loqa-audio-bridge';
 import { extractFormants, detectPitch } from '@loqalabs/loqa-audio-dsp';
 
 const { width } = Dimensions.get('window');
@@ -771,14 +771,14 @@ const CHART_SIZE = width - 40;
 
 // Vowel reference points (F1, F2) for English vowels
 const VOWEL_REFERENCES = {
-  'i': { f1: 280, f2: 2250, label: 'i (beat)' },   // /i/ as in "beat"
-  'ɪ': { f1: 400, f2: 1920, label: 'ɪ (bit)' },    // /ɪ/ as in "bit"
-  'ɛ': { f1: 550, f2: 1770, label: 'ɛ (bet)' },    // /ɛ/ as in "bet"
-  'æ': { f1: 690, f2: 1660, label: 'æ (bat)' },    // /æ/ as in "bat"
-  'ɑ': { f1: 710, f2: 1100, label: 'ɑ (father)' }, // /ɑ/ as in "father"
-  'ɔ': { f1: 590, f2: 880, label: 'ɔ (bought)' },  // /ɔ/ as in "bought"
-  'ʊ': { f1: 450, f2: 1030, label: 'ʊ (book)' },   // /ʊ/ as in "book"
-  'u': { f1: 310, f2: 870, label: 'u (boot)' }     // /u/ as in "boot"
+  i: { f1: 280, f2: 2250, label: 'i (beat)' }, // /i/ as in "beat"
+  ɪ: { f1: 400, f2: 1920, label: 'ɪ (bit)' }, // /ɪ/ as in "bit"
+  ɛ: { f1: 550, f2: 1770, label: 'ɛ (bet)' }, // /ɛ/ as in "bet"
+  æ: { f1: 690, f2: 1660, label: 'æ (bat)' }, // /æ/ as in "bat"
+  ɑ: { f1: 710, f2: 1100, label: 'ɑ (father)' }, // /ɑ/ as in "father"
+  ɔ: { f1: 590, f2: 880, label: 'ɔ (bought)' }, // /ɔ/ as in "bought"
+  ʊ: { f1: 450, f2: 1030, label: 'ʊ (book)' }, // /ʊ/ as in "book"
+  u: { f1: 310, f2: 870, label: 'u (boot)' }, // /u/ as in "boot"
 };
 
 interface FormantPoint {
@@ -799,7 +799,7 @@ export default function FormantVisualizerApp() {
       await startAudioStream({
         sampleRate: 16000,
         bufferSize: 2048,
-        channels: 1
+        channels: 1,
       });
 
       listener = addAudioSampleListener(async (event) => {
@@ -814,11 +814,11 @@ export default function FormantVisualizerApp() {
             const point: FormantPoint = {
               f1: formants.f1,
               f2: formants.f2,
-              timestamp: Date.now()
+              timestamp: Date.now(),
             };
 
             setCurrentFormants(point);
-            setFormantHistory(prev => [...prev.slice(-50), point]); // Keep last 50 points
+            setFormantHistory((prev) => [...prev.slice(-50), point]); // Keep last 50 points
           }
         } catch (error) {
           console.error('Formant extraction error:', error);
@@ -857,30 +857,33 @@ export default function FormantVisualizerApp() {
         style={[styles.button, isActive && styles.buttonActive]}
         onPress={() => setIsActive(!isActive)}
       >
-        <Text style={styles.buttonText}>
-          {isActive ? 'Stop' : 'Start'}
-        </Text>
+        <Text style={styles.buttonText}>{isActive ? 'Stop' : 'Start'}</Text>
       </TouchableOpacity>
 
       <View style={styles.chartContainer}>
         <Svg width={CHART_SIZE} height={CHART_SIZE}>
           {/* Background grid */}
-          <Line x1="0" y1={CHART_SIZE/2} x2={CHART_SIZE} y2={CHART_SIZE/2} stroke="#333" strokeWidth="1" />
-          <Line x1={CHART_SIZE/2} y1="0" x2={CHART_SIZE/2} y2={CHART_SIZE} stroke="#333" strokeWidth="1" />
+          <Line
+            x1="0"
+            y1={CHART_SIZE / 2}
+            x2={CHART_SIZE}
+            y2={CHART_SIZE / 2}
+            stroke="#333"
+            strokeWidth="1"
+          />
+          <Line
+            x1={CHART_SIZE / 2}
+            y1="0"
+            x2={CHART_SIZE / 2}
+            y2={CHART_SIZE}
+            stroke="#333"
+            strokeWidth="1"
+          />
 
           {/* Vowel reference points */}
           {Object.entries(VOWEL_REFERENCES).map(([key, vowel]) => {
             const { x, y } = formantToCoords(vowel.f1, vowel.f2);
-            return (
-              <Circle
-                key={key}
-                cx={x}
-                cy={y}
-                r="6"
-                fill="#666"
-                opacity="0.5"
-              />
-            );
+            return <Circle key={key} cx={x} cy={y} r="6" fill="#666" opacity="0.5" />;
           })}
 
           {/* Formant history trail (fading) */}
@@ -888,31 +891,16 @@ export default function FormantVisualizerApp() {
             const { x, y } = formantToCoords(point.f1, point.f2);
             const opacity = (idx / formantHistory.length) * 0.5;
             return (
-              <Circle
-                key={point.timestamp}
-                cx={x}
-                cy={y}
-                r="3"
-                fill="#4CAF50"
-                opacity={opacity}
-              />
+              <Circle key={point.timestamp} cx={x} cy={y} r="3" fill="#4CAF50" opacity={opacity} />
             );
           })}
 
           {/* Current formant point */}
-          {currentFormants && (() => {
-            const { x, y } = formantToCoords(currentFormants.f1, currentFormants.f2);
-            return (
-              <Circle
-                cx={x}
-                cy={y}
-                r="8"
-                fill="#4CAF50"
-                stroke="#fff"
-                strokeWidth="2"
-              />
-            );
-          })()}
+          {currentFormants &&
+            (() => {
+              const { x, y } = formantToCoords(currentFormants.f1, currentFormants.f2);
+              return <Circle cx={x} cy={y} r="8" fill="#4CAF50" stroke="#fff" strokeWidth="2" />;
+            })()}
         </Svg>
 
         {/* Axis labels */}
@@ -922,12 +910,8 @@ export default function FormantVisualizerApp() {
 
       {currentFormants && (
         <View style={styles.infoPanel}>
-          <Text style={styles.infoText}>
-            F1: {currentFormants.f1.toFixed(0)} Hz
-          </Text>
-          <Text style={styles.infoText}>
-            F2: {currentFormants.f2.toFixed(0)} Hz
-          </Text>
+          <Text style={styles.infoText}>F1: {currentFormants.f1.toFixed(0)} Hz</Text>
+          <Text style={styles.infoText}>F2: {currentFormants.f2.toFixed(0)} Hz</Text>
         </View>
       )}
     </View>
@@ -939,59 +923,59 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#1a1a1a'
+    backgroundColor: '#1a1a1a',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 20
+    marginBottom: 20,
   },
   button: {
     backgroundColor: '#4CAF50',
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 20,
-    marginBottom: 20
+    marginBottom: 20,
   },
   buttonActive: {
-    backgroundColor: '#f44336'
+    backgroundColor: '#f44336',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   chartContainer: {
     backgroundColor: '#222',
     borderRadius: 10,
     padding: 10,
-    position: 'relative'
+    position: 'relative',
   },
   axisLabel: {
     color: '#999',
     fontSize: 12,
-    marginTop: 5
+    marginTop: 5,
   },
   verticalLabel: {
     position: 'absolute',
     left: 0,
     top: '50%',
-    transform: [{ rotate: '-90deg' }]
+    transform: [{ rotate: '-90deg' }],
   },
   infoPanel: {
     marginTop: 20,
     backgroundColor: '#333',
     padding: 15,
     borderRadius: 10,
-    width: '100%'
+    width: '100%',
   },
   infoText: {
     color: '#4CAF50',
     fontSize: 18,
     fontWeight: 'bold',
-    marginVertical: 5
-  }
+    marginVertical: 5,
+  },
 });
 ```
 
@@ -1005,7 +989,11 @@ A frequency spectrum visualizer with real-time FFT display.
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import Svg, { Rect } from 'react-native-svg';
-import { startAudioStream, stopAudioStream, addAudioSampleListener } from '@loqalabs/loqa-audio-bridge';
+import {
+  startAudioStream,
+  stopAudioStream,
+  addAudioSampleListener,
+} from '@loqalabs/loqa-audio-bridge';
 import { computeFFT, analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
 
 const { width } = Dimensions.get('window');
@@ -1019,7 +1007,7 @@ export default function SpectralAnalyzerApp() {
   const [spectralFeatures, setSpectralFeatures] = useState({
     centroid: 0,
     rolloff: 0,
-    tilt: 0
+    tilt: 0,
   });
 
   useEffect(() => {
@@ -1029,7 +1017,7 @@ export default function SpectralAnalyzerApp() {
       await startAudioStream({
         sampleRate: 44100,
         bufferSize: 4096,
-        channels: 1
+        channels: 1,
       });
 
       listener = addAudioSampleListener(async (event) => {
@@ -1038,7 +1026,7 @@ export default function SpectralAnalyzerApp() {
           const fft = await computeFFT(event.samples, {
             fftSize: 4096,
             windowType: 'hanning',
-            includePhase: false
+            includePhase: false,
           });
 
           // Downsample magnitude spectrum to NUM_BARS
@@ -1055,7 +1043,7 @@ export default function SpectralAnalyzerApp() {
 
           // Normalize to 0-1 range
           const maxMag = Math.max(...bars, 1);
-          const normalized = bars.map(m => m / maxMag);
+          const normalized = bars.map((m) => m / maxMag);
 
           setMagnitudes(normalized);
 
@@ -1064,9 +1052,8 @@ export default function SpectralAnalyzerApp() {
           setSpectralFeatures({
             centroid: spectrum.centroid,
             rolloff: spectrum.rolloff,
-            tilt: spectrum.tilt
+            tilt: spectrum.tilt,
           });
-
         } catch (error) {
           console.error('FFT error:', error);
         }
@@ -1097,9 +1084,7 @@ export default function SpectralAnalyzerApp() {
         style={[styles.button, isActive && styles.buttonActive]}
         onPress={() => setIsActive(!isActive)}
       >
-        <Text style={styles.buttonText}>
-          {isActive ? 'Stop' : 'Start'}
-        </Text>
+        <Text style={styles.buttonText}>{isActive ? 'Stop' : 'Start'}</Text>
       </TouchableOpacity>
 
       <View style={styles.spectrumContainer}>
@@ -1121,24 +1106,18 @@ export default function SpectralAnalyzerApp() {
           })}
         </Svg>
         <Text style={styles.frequencyLabel}>0 Hz</Text>
-        <Text style={[styles.frequencyLabel, styles.frequencyLabelRight]}>
-          22 kHz
-        </Text>
+        <Text style={[styles.frequencyLabel, styles.frequencyLabelRight]}>22 kHz</Text>
       </View>
 
       {isActive && (
         <View style={styles.featuresPanel}>
           <View style={styles.feature}>
             <Text style={styles.featureLabel}>Centroid (Brightness)</Text>
-            <Text style={styles.featureValue}>
-              {spectralFeatures.centroid.toFixed(0)} Hz
-            </Text>
+            <Text style={styles.featureValue}>{spectralFeatures.centroid.toFixed(0)} Hz</Text>
           </View>
           <View style={styles.feature}>
             <Text style={styles.featureLabel}>Rolloff (95% Energy)</Text>
-            <Text style={styles.featureValue}>
-              {spectralFeatures.rolloff.toFixed(0)} Hz
-            </Text>
+            <Text style={styles.featureValue}>{spectralFeatures.rolloff.toFixed(0)} Hz</Text>
           </View>
           <View style={styles.feature}>
             <Text style={styles.featureLabel}>Tilt (Timbre)</Text>
@@ -1160,70 +1139,70 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#1a1a1a'
+    backgroundColor: '#1a1a1a',
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 20
+    marginBottom: 20,
   },
   button: {
     backgroundColor: '#4CAF50',
     paddingHorizontal: 30,
     paddingVertical: 12,
     borderRadius: 20,
-    marginBottom: 20
+    marginBottom: 20,
   },
   buttonActive: {
-    backgroundColor: '#f44336'
+    backgroundColor: '#f44336',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   spectrumContainer: {
     backgroundColor: '#111',
     borderRadius: 10,
     padding: 10,
-    position: 'relative'
+    position: 'relative',
   },
   frequencyLabel: {
     color: '#666',
     fontSize: 10,
     position: 'absolute',
     bottom: 5,
-    left: 10
+    left: 10,
   },
   frequencyLabelRight: {
     left: undefined,
-    right: 10
+    right: 10,
   },
   featuresPanel: {
     marginTop: 20,
     width: '100%',
     backgroundColor: '#222',
     borderRadius: 10,
-    padding: 15
+    padding: 15,
   },
   feature: {
-    marginVertical: 8
+    marginVertical: 8,
   },
   featureLabel: {
     color: '#999',
     fontSize: 12,
-    marginBottom: 4
+    marginBottom: 4,
   },
   featureValue: {
     color: '#4CAF50',
     fontSize: 20,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   featureHint: {
     fontSize: 14,
-    color: '#666'
-  }
+    color: '#666',
+  },
 });
 ```
 
@@ -1234,38 +1213,42 @@ const styles = StyleSheet.create({
 ### Buffer Sizing Strategies
 
 **Real-Time Analysis (Low Latency):**
+
 ```typescript
 // Optimize for responsiveness
 const config = {
-  bufferSize: 1024,    // ~23ms at 44.1kHz
-  sampleRate: 16000,   // Lower sample rate for voice
-  fftSize: 1024        // Match buffer size
+  bufferSize: 1024, // ~23ms at 44.1kHz
+  sampleRate: 16000, // Lower sample rate for voice
+  fftSize: 1024, // Match buffer size
 };
 ```
 
 **Pitch Detection (Accuracy):**
+
 ```typescript
 // Optimize for pitch accuracy
 const config = {
-  bufferSize: 2048,    // ~46ms at 44.1kHz
+  bufferSize: 2048, // ~46ms at 44.1kHz
   sampleRate: 44100,
-  fftSize: 2048
+  fftSize: 2048,
 };
 ```
 
 **Spectral Analysis (Frequency Resolution):**
+
 ```typescript
 // Optimize for frequency resolution
 const config = {
-  bufferSize: 4096,    // ~93ms at 44.1kHz
+  bufferSize: 4096, // ~93ms at 44.1kHz
   sampleRate: 44100,
-  fftSize: 4096        // More frequency bins
+  fftSize: 4096, // More frequency bins
 };
 ```
 
 ### Memory Optimization
 
 **Reuse Buffers:**
+
 ```typescript
 // Bad: Creates new array every frame
 listener = addAudioSampleListener(async (event) => {
@@ -1280,16 +1263,18 @@ listener = addAudioSampleListener(async (event) => {
 ```
 
 **Batch Processing:**
+
 ```typescript
 // Process multiple analyses in parallel
 const [pitch, spectrum, fft] = await Promise.all([
   detectPitch(samples, sampleRate),
   analyzeSpectrum(samples, sampleRate),
-  computeFFT(samples, { fftSize: 2048 })
+  computeFFT(samples, { fftSize: 2048 }),
 ]);
 ```
 
 **Throttle Updates:**
+
 ```typescript
 // Avoid overwhelming UI with updates
 let lastUpdateTime = 0;
@@ -1310,11 +1295,13 @@ listener = addAudioSampleListener(async (event) => {
 ### CPU Optimization
 
 **Sample Rate Selection:**
+
 - **Voice analysis**: 16 kHz is sufficient (saves 64% CPU vs 44.1 kHz)
 - **Music/instruments**: 44.1 kHz for full frequency range
 - **High-fidelity**: 48 kHz only if absolutely necessary
 
 **Conditional Analysis:**
+
 ```typescript
 // Run expensive analyses only when needed
 listener = addAudioSampleListener(async (event) => {
@@ -1330,6 +1317,7 @@ listener = addAudioSampleListener(async (event) => {
 ```
 
 **Window Type Trade-offs:**
+
 ```typescript
 // Fast but less accurate
 await computeFFT(samples, { windowType: 'none' });
@@ -1354,11 +1342,10 @@ async function analyzeWithFallback(samples: Float32Array, sampleRate: number) {
     const [pitch, formants, spectrum] = await Promise.all([
       detectPitch(samples, sampleRate),
       extractFormants(samples, sampleRate),
-      analyzeSpectrum(samples, sampleRate)
+      analyzeSpectrum(samples, sampleRate),
     ]);
 
     return { pitch, formants, spectrum, error: null };
-
   } catch (error) {
     // Fallback: Try simpler analysis
     console.warn('Full analysis failed, trying pitch only:', error);
@@ -1390,7 +1377,7 @@ function validateAudioInput(samples: Float32Array, sampleRate: number): boolean 
   }
 
   // Check for invalid values
-  const hasInvalidValues = Array.from(samples).some(v => !isFinite(v));
+  const hasInvalidValues = Array.from(samples).some((v) => !isFinite(v));
   if (hasInvalidValues) {
     throw new ValidationError('Buffer contains NaN or Infinity');
   }
@@ -1426,16 +1413,13 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
     promise,
     new Promise<T>((_, reject) =>
       setTimeout(() => reject(new Error('Analysis timeout')), timeoutMs)
-    )
+    ),
   ]);
 }
 
 // Usage: Ensure analysis completes within 10ms
 try {
-  const pitch = await withTimeout(
-    detectPitch(samples, sampleRate),
-    10
-  );
+  const pitch = await withTimeout(detectPitch(samples, sampleRate), 10);
 } catch (error) {
   console.error('Analysis took too long:', error);
 }
@@ -1448,6 +1432,7 @@ try {
 ### iOS Considerations
 
 **Audio Session Configuration:**
+
 ```typescript
 // Configure audio session before starting analysis
 import { Audio } from 'expo-av';
@@ -1456,11 +1441,12 @@ await Audio.setAudioModeAsync({
   allowsRecordingIOS: true,
   playsInSilentModeIOS: true,
   staysActiveInBackground: false,
-  shouldDuckAndroid: false
+  shouldDuckAndroid: false,
 });
 ```
 
 **Background Processing:**
+
 - iOS suspends apps in background - analysis will pause
 - For continuous analysis, implement background audio session
 - Consider using background tasks for batch processing
@@ -1468,12 +1454,14 @@ await Audio.setAudioModeAsync({
 ### Android Considerations
 
 **Audio Permissions:**
+
 ```xml
 <!-- android/app/src/main/AndroidManifest.xml -->
 <uses-permission android:name="android.permission.RECORD_AUDIO" />
 ```
 
 **Runtime Permission Request:**
+
 ```typescript
 import { PermissionsAndroid, Platform } from 'react-native';
 
@@ -1483,16 +1471,13 @@ async function requestMicrophonePermission(): Promise<boolean> {
   }
 
   try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-      {
-        title: 'Microphone Permission',
-        message: 'This app needs access to your microphone for audio analysis.',
-        buttonNeutral: 'Ask Me Later',
-        buttonNegative: 'Cancel',
-        buttonPositive: 'OK',
-      }
-    );
+    const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO, {
+      title: 'Microphone Permission',
+      message: 'This app needs access to your microphone for audio analysis.',
+      buttonNeutral: 'Ask Me Later',
+      buttonNegative: 'Cancel',
+      buttonPositive: 'OK',
+    });
 
     return granted === PermissionsAndroid.RESULTS.GRANTED;
   } catch (error) {
@@ -1516,11 +1501,13 @@ async function startAnalysis() {
 ```
 
 **Buffer Size Limitations:**
+
 - Some Android devices have minimum buffer size requirements
 - Test on multiple devices (especially older ones)
 - Use dynamic buffer sizing based on device capabilities
 
 **Memory Constraints:**
+
 - Lower-end Android devices may have limited memory
 - Use smaller buffer sizes on older devices
 - Monitor memory usage and throttle processing if needed
@@ -1528,6 +1515,7 @@ async function startAnalysis() {
 ### Cross-Platform Testing
 
 **Key Test Scenarios:**
+
 1. **Different sample rates**: 8000, 16000, 22050, 44100, 48000 Hz
 2. **Different buffer sizes**: 512, 1024, 2048, 4096, 8192 samples
 3. **Edge cases**: Silence, noise, very low/high pitches

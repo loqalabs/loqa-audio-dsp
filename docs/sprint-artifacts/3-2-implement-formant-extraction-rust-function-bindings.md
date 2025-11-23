@@ -3,9 +3,11 @@
 Status: done
 
 ## Story
+
 As a developer, I want loqa-voice-dsp LPC formant extraction exposed via FFI/JNI, so that iOS and Android can extract formants from audio buffers.
 
 ## Acceptance Criteria
+
 1. **Given** Rust compiled **When** exposing LPC **Then** exports extract_formants_rust with FormantsResult struct
 2. **Given** function exposed **When** calling **Then** uses LPC analysis from loqa-voice-dsp
 3. **Given** processing **When** validating **Then** validates audio appropriate for formant analysis
@@ -13,6 +15,7 @@ As a developer, I want loqa-voice-dsp LPC formant extraction exposed via FFI/JNI
 5. **Given** result **When** returning **Then** returns formant frequencies in Hz
 
 ## Tasks / Subtasks
+
 - [x] Create Rust FFI for extract_formants_rust
 - [x] Define FormantsResult struct (f1, f2, f3, bandwidths)
 - [x] Implement LPC analysis call
@@ -21,10 +24,13 @@ As a developer, I want loqa-voice-dsp LPC formant extraction exposed via FFI/JNI
 - [x] Test with vowel samples
 
 ## Dev Notes
+
 ### Learnings from Previous Story
+
 **From Story 3-1**: Pitch detection FFI established. Formants follow same pattern with different algorithm (LPC vs YIN).
 
 ### References
+
 - [Architecture - Rust FFI/JNI](../architecture.md#rust-ffijni-integration)
 - [PRD - FR9-FR12](../prd.md#core-dsp-analysis-capabilities)
 - [Epics - Story 3.2](../epics.md#story-32-implement-formant-extraction-rust-function-bindings)
@@ -42,6 +48,7 @@ As a developer, I want loqa-voice-dsp LPC formant extraction exposed via FFI/JNI
 ### Debug Log References
 
 **Implementation Notes:**
+
 - Implemented `FormantsResult` struct with f1, f2, f3, and bw1, bw2, bw3 fields (AC1)
 - Created `extract_formants_rust` FFI function with LPC analysis call to loqa-voice-dsp (AC2)
 - Added comprehensive input validation for sample rate (8000-48000 Hz) and buffer length (AC3)
@@ -51,11 +58,13 @@ As a developer, I want loqa-voice-dsp LPC formant extraction exposed via FFI/JNI
 - Added Android JNI native method `Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeExtractFormants`
 
 **Testing:**
+
 - Created 10 comprehensive tests covering null buffers, invalid inputs, LPC order defaults, sample rates, and synthetic vowel signals
 - All 33 Rust tests passing (10 formant-specific tests)
 - Tests validate error handling, valid ranges, and basic LPC functionality
 
 **Technical Decisions:**
+
 - LPC order range adjusted to [8, 24] to match loqa-voice-dsp library constraints
 - Default LPC order clamped to valid range rather than using raw calculation
 - Synthetic vowel test uses more lenient validation due to limitations of synthetic signals with LPC analysis
@@ -63,6 +72,7 @@ As a developer, I want loqa-voice-dsp LPC formant extraction exposed via FFI/JNI
 ### Completion Notes List
 
 ✅ **Story 3.2 Complete** - All acceptance criteria met:
+
 - AC1: FormantsResult struct exported with f1, f2, f3 and bandwidth fields
 - AC2: Uses LPC analysis from loqa-voice-dsp crate
 - AC3: Validates sample rate range and audio buffer appropriateness
@@ -95,6 +105,7 @@ The implementation follows established patterns from Story 3.1, maintains excell
 ### Key Findings
 
 **Strengths:**
+
 - ✅ Complete AC implementation with evidence
 - ✅ Comprehensive input validation (null checks, sample rate range, buffer length)
 - ✅ Excellent test coverage with edge cases
@@ -103,37 +114,39 @@ The implementation follows established patterns from Story 3.1, maintains excell
 - ✅ Memory-safe implementation with struct-by-value return
 
 **Observations (Low Severity):**
+
 - Bandwidth fields (bw1, bw2, bw3) not yet implemented - set to 0.0 with TODO comment. This is documented and acceptable for v0.1 per implementation notes
 - Synthetic vowel test uses lenient validation due to LPC limitations with synthetic signals
 
 ### Acceptance Criteria Coverage
 
-| AC# | Description | Status | Evidence |
-|-----|-------------|--------|----------|
-| **AC1** | Given Rust compiled, When exposing LPC, Then exports extract_formants_rust with FormantsResult struct | ✅ IMPLEMENTED | [rust/src/lib.rs:340-349](rust/src/lib.rs#L340-L349) - FormantsResult struct; [rust/src/lib.rs:380](rust/src/lib.rs#L380) - extract_formants_rust function |
-| **AC2** | Given function exposed, When calling, Then uses LPC analysis from loqa-voice-dsp | ✅ IMPLEMENTED | [rust/src/lib.rs:447-451](rust/src/lib.rs#L447-L451) - loqa_voice_dsp::extract_formants() call |
-| **AC3** | Given processing, When validating, Then validates audio appropriate for formant analysis | ✅ IMPLEMENTED | [rust/src/lib.rs:407-413](rust/src/lib.rs#L407-L413) - Sample rate validation; [rust/src/lib.rs:434-441](rust/src/lib.rs#L434-L441) - Buffer length validation |
-| **AC4** | Given defaults, When not specified, Then default LPC order is (sample_rate / 1000) + 2 | ✅ IMPLEMENTED | [rust/src/lib.rs:418-423](rust/src/lib.rs#L418-L423) - Default LPC order calculation with clamping |
-| **AC5** | Given result, When returning, Then returns formant frequencies in Hz | ✅ IMPLEMENTED | [rust/src/lib.rs:460-463](rust/src/lib.rs#L460-L463) - Returns f1, f2, f3 frequencies |
+| AC#     | Description                                                                                           | Status         | Evidence                                                                                                                                                       |
+| ------- | ----------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AC1** | Given Rust compiled, When exposing LPC, Then exports extract_formants_rust with FormantsResult struct | ✅ IMPLEMENTED | [rust/src/lib.rs:340-349](rust/src/lib.rs#L340-L349) - FormantsResult struct; [rust/src/lib.rs:380](rust/src/lib.rs#L380) - extract_formants_rust function     |
+| **AC2** | Given function exposed, When calling, Then uses LPC analysis from loqa-voice-dsp                      | ✅ IMPLEMENTED | [rust/src/lib.rs:447-451](rust/src/lib.rs#L447-L451) - loqa_voice_dsp::extract_formants() call                                                                 |
+| **AC3** | Given processing, When validating, Then validates audio appropriate for formant analysis              | ✅ IMPLEMENTED | [rust/src/lib.rs:407-413](rust/src/lib.rs#L407-L413) - Sample rate validation; [rust/src/lib.rs:434-441](rust/src/lib.rs#L434-L441) - Buffer length validation |
+| **AC4** | Given defaults, When not specified, Then default LPC order is (sample_rate / 1000) + 2                | ✅ IMPLEMENTED | [rust/src/lib.rs:418-423](rust/src/lib.rs#L418-L423) - Default LPC order calculation with clamping                                                             |
+| **AC5** | Given result, When returning, Then returns formant frequencies in Hz                                  | ✅ IMPLEMENTED | [rust/src/lib.rs:460-463](rust/src/lib.rs#L460-L463) - Returns f1, f2, f3 frequencies                                                                          |
 
 **Summary:** ✅ **5 of 5 acceptance criteria fully implemented**
 
 ### Task Completion Validation
 
-| Task | Marked As | Verified As | Evidence |
-|------|-----------|-------------|----------|
-| Create Rust FFI for extract_formants_rust | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:380](rust/src/lib.rs#L380) - FFI function signature |
+| Task                                                  | Marked As   | Verified As | Evidence                                                                               |
+| ----------------------------------------------------- | ----------- | ----------- | -------------------------------------------------------------------------------------- |
+| Create Rust FFI for extract_formants_rust             | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:380](rust/src/lib.rs#L380) - FFI function signature                   |
 | Define FormantsResult struct (f1, f2, f3, bandwidths) | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:342-349](rust/src/lib.rs#L342-L349) - Complete struct with #[repr(C)] |
-| Implement LPC analysis call | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:447-451](rust/src/lib.rs#L447-L451) - loqa_voice_dsp integration |
-| Add input validation for voiced audio | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:397-413](rust/src/lib.rs#L397-L413) - Comprehensive validation |
-| Set default LPC order | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:418-423](rust/src/lib.rs#L418-L423) - Formula implementation |
-| Test with vowel samples | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:1123-1214](rust/src/lib.rs#L1123-L1214) - Synthetic vowel test |
+| Implement LPC analysis call                           | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:447-451](rust/src/lib.rs#L447-L451) - loqa_voice_dsp integration      |
+| Add input validation for voiced audio                 | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:397-413](rust/src/lib.rs#L397-L413) - Comprehensive validation        |
+| Set default LPC order                                 | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:418-423](rust/src/lib.rs#L418-L423) - Formula implementation          |
+| Test with vowel samples                               | ✅ Complete | ✅ VERIFIED | [rust/src/lib.rs:1123-1214](rust/src/lib.rs#L1123-L1214) - Synthetic vowel test        |
 
 **Summary:** ✅ **6 of 6 completed tasks verified, 0 questionable, 0 falsely marked complete**
 
 ### Test Coverage and Gaps
 
 **Test Coverage:** ✅ **Excellent** - 10 formant-specific tests covering:
+
 - Null buffer handling
 - Invalid length validation
 - Sample rate range validation (8000-48000 Hz)
@@ -156,6 +169,7 @@ The implementation follows established patterns from Story 3.1, maintains excell
 ✅ **Fully Aligned** with architecture and tech-spec requirements:
 
 **Architecture Compliance:**
+
 - Follows FFI pattern established in Story 3.1 (pitch detection)
 - Uses loqa-voice-dsp v0.1 as specified in architecture
 - Implements #[repr(C)] for FFI compatibility
@@ -163,12 +177,14 @@ The implementation follows established patterns from Story 3.1, maintains excell
 - JNI binding implemented for Android
 
 **Pattern Consistency:**
+
 - Consistent with `detect_pitch_rust` pattern
 - Same validation approach (sample rate, buffer validation)
 - Same error handling pattern (error_result with zeros)
 - Same FFI safety documentation style
 
 **LPC Order Calculation:**
+
 - Implements specified formula: `(sample_rate / 1000) + 2`
 - Adds appropriate clamping to [8, 24] range per loqa-voice-dsp constraints
 - Default behavior documented in code comments
@@ -178,6 +194,7 @@ The implementation follows established patterns from Story 3.1, maintains excell
 ✅ **No security concerns**
 
 **Security Review:**
+
 - ✅ Proper null pointer validation
 - ✅ Buffer bounds checking
 - ✅ Sample rate range validation prevents integer overflow
@@ -189,6 +206,7 @@ The implementation follows established patterns from Story 3.1, maintains excell
 ### Best-Practices and References
 
 **Best Practices Applied:**
+
 - ✅ Memory safety with FFI-safe struct layout
 - ✅ Comprehensive input validation before processing
 - ✅ Descriptive error messages with eprintln! logging
@@ -197,11 +215,13 @@ The implementation follows established patterns from Story 3.1, maintains excell
 - ✅ Consistent coding patterns across codebase
 
 **Technology Stack:**
+
 - Rust 1.x (stable edition 2021)
 - loqa-voice-dsp v0.1 - Core DSP library
 - JNI bindings for Android compatibility
 
 **References:**
+
 - [Rust FFI Nomicon](https://doc.rust-lang.org/nomicon/ffi.html) - FFI safety guidelines
 - [Expo Modules API](https://docs.expo.dev/modules/overview/) - Native module patterns
 - [LPC Analysis](https://en.wikipedia.org/wiki/Linear_predictive_coding) - Algorithm background
@@ -209,5 +229,6 @@ The implementation follows established patterns from Story 3.1, maintains excell
 ### Action Items
 
 **Advisory Notes:**
+
 - Note: Consider adding real vowel audio file tests in future stories for more realistic formant validation (current synthetic signal test is adequate but has limitations)
 - Note: Track bandwidth estimation feature for future enhancement when loqa-voice-dsp library supports it (currently documented with TODO comments at [rust/src/lib.rs:464-466](rust/src/lib.rs#L464-L466))

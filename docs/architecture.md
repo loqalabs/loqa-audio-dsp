@@ -28,6 +28,7 @@ npx create-expo-module@latest loqa-audio-dsp \
 ```
 
 This establishes:
+
 - Standard Expo module project structure
 - iOS module template with Swift
 - Android module template with Kotlin
@@ -39,24 +40,24 @@ This establishes:
 
 ## Decision Summary
 
-| Category | Decision | Version | Affects FRs | Rationale |
-|----------|----------|---------|-------------|-----------|
-| **Project Foundation** | Expo Module (create-expo-module) | Latest | All FRs | Standard Expo module structure, automatic native integration |
-| **TypeScript** | TypeScript strict mode | 5.3+ | FR28-FR43, FR67-FR70 | Type safety, IDE support, developer experience |
-| **iOS Language** | Swift | 5.5+ | FR17-FR20 | Modern iOS development, FFI to Rust |
-| **Android Language** | Kotlin | 1.9+ | FR21-FR24 | Modern Android development, JNI to Rust |
-| **Rust DSP Core** | loqa-voice-dsp crate | 0.x (external) | FR1-FR16 | Battle-tested DSP algorithms |
-| **iOS FFI** | Swift FFI (UniFFI or manual) | N/A | FR18-FR19 | Memory-safe Rust interop |
-| **Android JNI** | Kotlin JNI via Gradle | N/A | FR22-FR23 | Memory-safe Rust interop |
-| **Package Manager** | npm | N/A | FR44-FR51 | Standard JavaScript package distribution |
-| **Testing - TypeScript** | Jest | 29+ | FR76-FR77 | Standard React Native testing |
-| **Testing - iOS** | XCTest | Xcode default | FR77 | Native iOS unit tests |
-| **Testing - Android** | JUnit | 4.13+ | FR77 | Native Android unit tests |
-| **CI/CD** | GitHub Actions | N/A | FR75-FR78 | Automated build, test, publish |
-| **Linting** | ESLint + Prettier | Latest | FR72 | Code quality and formatting |
-| **Documentation** | TypeDoc + JSDoc | Latest | FR67-FR68 | API documentation generation |
-| **Versioning** | Semantic Versioning | N/A | FR52-FR54 | Standard npm versioning |
-| **Changelog** | Conventional Commits | N/A | FR53 | Automated changelog generation |
+| Category                 | Decision                         | Version        | Affects FRs          | Rationale                                                    |
+| ------------------------ | -------------------------------- | -------------- | -------------------- | ------------------------------------------------------------ |
+| **Project Foundation**   | Expo Module (create-expo-module) | Latest         | All FRs              | Standard Expo module structure, automatic native integration |
+| **TypeScript**           | TypeScript strict mode           | 5.3+           | FR28-FR43, FR67-FR70 | Type safety, IDE support, developer experience               |
+| **iOS Language**         | Swift                            | 5.5+           | FR17-FR20            | Modern iOS development, FFI to Rust                          |
+| **Android Language**     | Kotlin                           | 1.9+           | FR21-FR24            | Modern Android development, JNI to Rust                      |
+| **Rust DSP Core**        | loqa-voice-dsp crate             | 0.x (external) | FR1-FR16             | Battle-tested DSP algorithms                                 |
+| **iOS FFI**              | Swift FFI (UniFFI or manual)     | N/A            | FR18-FR19            | Memory-safe Rust interop                                     |
+| **Android JNI**          | Kotlin JNI via Gradle            | N/A            | FR22-FR23            | Memory-safe Rust interop                                     |
+| **Package Manager**      | npm                              | N/A            | FR44-FR51            | Standard JavaScript package distribution                     |
+| **Testing - TypeScript** | Jest                             | 29+            | FR76-FR77            | Standard React Native testing                                |
+| **Testing - iOS**        | XCTest                           | Xcode default  | FR77                 | Native iOS unit tests                                        |
+| **Testing - Android**    | JUnit                            | 4.13+          | FR77                 | Native Android unit tests                                    |
+| **CI/CD**                | GitHub Actions                   | N/A            | FR75-FR78            | Automated build, test, publish                               |
+| **Linting**              | ESLint + Prettier                | Latest         | FR72                 | Code quality and formatting                                  |
+| **Documentation**        | TypeDoc + JSDoc                  | Latest         | FR67-FR68            | API documentation generation                                 |
+| **Versioning**           | Semantic Versioning              | N/A            | FR52-FR54            | Standard npm versioning                                      |
+| **Changelog**            | Conventional Commits             | N/A            | FR53                 | Automated changelog generation                               |
 
 ---
 
@@ -166,15 +167,15 @@ This establishes:
 
 ## FR Category to Architecture Mapping
 
-| FR Category | Architecture Component | Location |
-|-------------|------------------------|----------|
-| **Core DSP Capabilities (FR1-FR16)** | Rust loqa-voice-dsp crate via FFI/JNI | `ios/RustFFI/`, `android/src/main/java/.../RustJNI/` |
-| **Native Platform Integration (FR17-FR27)** | Swift/Kotlin Expo Modules | `ios/LoqaAudioDspModule.swift`, `android/.../LoqaAudioDspModule.kt` |
-| **TypeScript API Layer (FR28-FR43)** | TypeScript API with validation | `src/index.ts`, `src/validation.ts`, `src/types.ts` |
-| **Package Distribution (FR44-FR54)** | npm configuration and metadata | `package.json`, `CHANGELOG.md` |
-| **Example Application (FR55-FR62)** | Expo example app | `example/` |
-| **Documentation (FR63-FR70)** | Markdown docs + JSDoc | `README.md`, `API.md`, `docs/`, inline comments |
-| **Build & CI/CD (FR71-FR82)** | GitHub Actions + package scripts | `.github/workflows/`, `package.json` scripts |
+| FR Category                                 | Architecture Component                | Location                                                            |
+| ------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------- |
+| **Core DSP Capabilities (FR1-FR16)**        | Rust loqa-voice-dsp crate via FFI/JNI | `ios/RustFFI/`, `android/src/main/java/.../RustJNI/`                |
+| **Native Platform Integration (FR17-FR27)** | Swift/Kotlin Expo Modules             | `ios/LoqaAudioDspModule.swift`, `android/.../LoqaAudioDspModule.kt` |
+| **TypeScript API Layer (FR28-FR43)**        | TypeScript API with validation        | `src/index.ts`, `src/validation.ts`, `src/types.ts`                 |
+| **Package Distribution (FR44-FR54)**        | npm configuration and metadata        | `package.json`, `CHANGELOG.md`                                      |
+| **Example Application (FR55-FR62)**         | Expo example app                      | `example/`                                                          |
+| **Documentation (FR63-FR70)**               | Markdown docs + JSDoc                 | `README.md`, `API.md`, `docs/`, inline comments                     |
+| **Build & CI/CD (FR71-FR82)**               | GitHub Actions + package scripts      | `.github/workflows/`, `package.json` scripts                        |
 
 ---
 
@@ -183,11 +184,13 @@ This establishes:
 ### Core Technologies
 
 **Runtime Environment:**
+
 - **Node.js**: 18+ (for development, build, and CI)
 - **React Native**: 0.76+ (peer dependency)
 - **Expo SDK**: 54+ (peer dependency)
 
 **Language Stack:**
+
 - **TypeScript**: 5.3+ with strict mode enabled
   - Rationale: Type safety, IDE autocomplete, prevents runtime errors
 - **Swift**: 5.5+ (iOS)
@@ -198,10 +201,12 @@ This establishes:
   - Rationale: High-performance DSP, memory safety
 
 **Native Module Framework:**
+
 - **Expo Modules API**: Latest
   - Rationale: Standardized module creation, automatic linking, turbo module support
 
 **DSP Core:**
+
 - **loqa-voice-dsp**: 0.x (external crate)
   - Provides: YIN pitch detection, LPC formants, FFT, spectral analysis
   - Rationale: Battle-tested algorithms, proven performance
@@ -209,16 +214,19 @@ This establishes:
 ### Build Tools
 
 **iOS:**
+
 - **Xcode**: 15.0+
 - **CocoaPods**: 1.12+ (dependency management)
 - **Swift Package Manager**: For potential future dependencies
 
 **Android:**
+
 - **Gradle**: 8.0+
 - **Android Studio**: 2023.1+
 - **NDK**: r26+ (for JNI compilation)
 
 **JavaScript/TypeScript:**
+
 - **npm**: 9+ (package management)
 - **TypeScript Compiler**: 5.3+
 - **Rollup or TSC**: For TypeScript compilation
@@ -226,25 +234,30 @@ This establishes:
 ### Testing & Quality Tools
 
 **TypeScript Testing:**
+
 - **Jest**: 29+ (unit testing framework)
 - **ts-jest**: Latest (TypeScript preprocessor for Jest)
 
 **Native Testing:**
+
 - **XCTest**: Built-in (iOS unit testing)
 - **JUnit**: 4.13+ (Android unit testing)
 
 **Code Quality:**
+
 - **ESLint**: 8+ with TypeScript support
 - **Prettier**: Latest (code formatting)
 - **TypeDoc**: Latest (API documentation generation)
 
 **CI/CD:**
+
 - **GitHub Actions**: Workflow automation
 - **npm scripts**: Build automation
 
 ### Integration Points
 
 **Expo Modules API Integration:**
+
 - TypeScript layer uses `requireNativeModule('LoqaAudioDsp')` to access native bindings
 - Swift/Kotlin modules implement Expo Module Definition protocol
 - Supports both old and new architecture (bridge + turbo modules)
@@ -252,6 +265,7 @@ This establishes:
 **Rust FFI/JNI Integration:**
 
 **iOS (Swift FFI):**
+
 ```swift
 // RustBridge.swift - FFI declarations
 @_silgen_name("compute_fft_rust")
@@ -274,6 +288,7 @@ public func computeFFT(
 ```
 
 **Android (Kotlin JNI):**
+
 ```kotlin
 // RustBridge.kt - JNI declarations
 object RustBridge {
@@ -304,6 +319,7 @@ fun computeFFT(
 ```
 
 **TypeScript to Native Bridge:**
+
 ```typescript
 // src/LoqaAudioDspModule.ts
 import { requireNativeModule } from 'expo-modules-core';
@@ -325,15 +341,12 @@ export async function computeFFT(
   const fftSize = options?.fftSize || audioBuffer.length;
   validateFFTSize(fftSize);
 
-  const result = await LoqaAudioDspModule.computeFFT(
-    Array.from(audioBuffer),
-    fftSize
-  );
+  const result = await LoqaAudioDspModule.computeFFT(Array.from(audioBuffer), fftSize);
 
   return {
     magnitude: new Float32Array(result.magnitude),
     phase: result.phase ? new Float32Array(result.phase) : undefined,
-    frequencies: new Float32Array(result.frequencies)
+    frequencies: new Float32Array(result.frequencies),
   };
 }
 ```
@@ -345,17 +358,20 @@ export async function computeFFT(
 ### Naming Conventions
 
 **TypeScript:**
+
 - **Functions**: camelCase (`computeFFT`, `detectPitch`)
 - **Types/Interfaces**: PascalCase (`FFTResult`, `PitchResult`)
 - **Constants**: UPPER_SNAKE_CASE (`MAX_SAMPLE_RATE`)
 - **Files**: kebab-case for utilities (`audio-validation.ts`), PascalCase for types (`FFTResult.ts`)
 
 **Swift:**
+
 - **Functions**: camelCase (`computeFFT`, `detectPitch`)
 - **Classes/Structs**: PascalCase (`LoqaAudioDspModule`)
 - **Files**: PascalCase (`LoqaAudioDspModule.swift`)
 
 **Kotlin:**
+
 - **Functions**: camelCase (`computeFFT`, `detectPitch`)
 - **Classes**: PascalCase (`LoqaAudioDspModule`)
 - **Files**: PascalCase (`LoqaAudioDspModule.kt`)
@@ -363,11 +379,13 @@ export async function computeFFT(
 ### Code Organization
 
 **Test Co-location:**
+
 - TypeScript tests: `__tests__/` directory (Jest convention)
 - iOS tests: `ios/Tests/` directory (Xcode convention)
 - Android tests: `android/src/test/` directory (Gradle convention)
 
 **Component Organization:**
+
 - By feature: Each DSP function has its own test file
 - Shared utilities in `src/utils.ts`, `src/validation.ts`
 
@@ -378,11 +396,7 @@ export async function computeFFT(
 ```typescript
 // src/errors.ts
 export class LoqaAudioDspError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public details?: Record<string, unknown>
-  ) {
+  constructor(message: string, public code: string, public details?: Record<string, unknown>) {
     super(message);
     this.name = 'LoqaAudioDspError';
   }
@@ -408,25 +422,24 @@ export async function computeFFT(
   options?: FFTOptions
 ): Promise<FFTResult> {
   if (!audioBuffer || audioBuffer.length === 0) {
-    throw new ValidationError(
-      'Audio buffer cannot be empty',
-      { bufferLength: audioBuffer?.length || 0 }
-    );
+    throw new ValidationError('Audio buffer cannot be empty', {
+      bufferLength: audioBuffer?.length || 0,
+    });
   }
 
   try {
     const result = await LoqaAudioDspModule.computeFFT(/*...*/);
     return result;
   } catch (error) {
-    throw new NativeModuleError(
-      `FFT computation failed: ${error.message}`,
-      { originalError: error }
-    );
+    throw new NativeModuleError(`FFT computation failed: ${error.message}`, {
+      originalError: error,
+    });
   }
 }
 ```
 
 **Error Handling Strategy:**
+
 - All validation errors thrown synchronously before native calls
 - Native errors wrapped in `NativeModuleError` with context
 - All errors include actionable messages
@@ -457,13 +470,13 @@ export async function computeFFT(
 ): Promise<FFTResult> {
   logDebug('computeFFT called', {
     bufferLength: audioBuffer.length,
-    fftSize: options?.fftSize
+    fftSize: options?.fftSize,
   });
 
   const result = await LoqaAudioDspModule.computeFFT(/*...*/);
 
   logDebug('computeFFT completed', {
-    resultLength: result.magnitude.length
+    resultLength: result.magnitude.length,
   });
 
   return result;
@@ -471,6 +484,7 @@ export async function computeFFT(
 ```
 
 **Logging Conventions:**
+
 - Prefix all logs with `[LoqaAudioDsp]`
 - Use `logDebug` for development info (gated by DEBUG flag)
 - Use `logWarning` for non-critical issues
@@ -481,6 +495,7 @@ export async function computeFFT(
 **Critical Pattern: Explicit Memory Lifecycle**
 
 **iOS (Swift FFI):**
+
 ```swift
 public func computeFFT(buffer: [Float], fftSize: Int) throws -> [Float] {
     var rustBuffer: UnsafePointer<Float>? = nil
@@ -516,6 +531,7 @@ public func computeFFT(buffer: [Float], fftSize: Int) throws -> [Float] {
 ```
 
 **Android (Kotlin JNI):**
+
 ```kotlin
 @ExpoMethod
 fun computeFFT(buffer: FloatArray, fftSize: Int, promise: Promise) {
@@ -537,6 +553,7 @@ fun computeFFT(buffer: FloatArray, fftSize: Int, promise: Promise) {
 ```
 
 **Memory Safety Rules:**
+
 - iOS: Use `defer` blocks to guarantee Rust memory is freed
 - Android: Let JNI handle primitive array marshalling
 - Never hold references to Rust-allocated memory beyond function scope
@@ -588,6 +605,7 @@ fun computeFFT(buffer: FloatArray, options: Map<String, Any>, promise: Promise) 
 ```
 
 **Async Rules:**
+
 - All native processing happens off main thread
 - Use appropriate QoS/priority (`.userInitiated` for real-time analysis)
 - Never block UI thread
@@ -685,6 +703,7 @@ export interface SpectrumResult {
 ### Data Flow
 
 **computeFFT Flow:**
+
 ```
 User Code
   ↓ (Float32Array | number[])
@@ -713,6 +732,7 @@ User Code
 ### TypeScript Public API
 
 **Module Exports:**
+
 ```typescript
 // src/index.ts - Public API
 export { computeFFT } from './computeFFT';
@@ -728,14 +748,10 @@ export type {
   FormantExtractionOptions,
   FormantsResult,
   SpectrumAnalysisOptions,
-  SpectrumResult
+  SpectrumResult,
 } from './types';
 
-export {
-  LoqaAudioDspError,
-  ValidationError,
-  NativeModuleError
-} from './errors';
+export { LoqaAudioDspError, ValidationError, NativeModuleError } from './errors';
 ```
 
 **Function Signatures:**
@@ -797,6 +813,7 @@ export async function analyzeSpectrum(
 ### Native Module Interface
 
 **iOS (Swift):**
+
 ```swift
 @objc(LoqaAudioDspModule)
 public class LoqaAudioDspModule: Module {
@@ -823,6 +840,7 @@ public class LoqaAudioDspModule: Module {
 ```
 
 **Android (Kotlin):**
+
 ```kotlin
 class LoqaAudioDspModule : Module() {
     override fun definition() = ModuleDefinition {
@@ -863,16 +881,13 @@ export function validateAudioBuffer(buffer: Float32Array | number[]): void {
   }
 
   if (buffer.length > 16384) {
-    throw new ValidationError(
-      'Buffer too large (max 16384 samples)',
-      { bufferLength: buffer.length }
-    );
+    throw new ValidationError('Buffer too large (max 16384 samples)', {
+      bufferLength: buffer.length,
+    });
   }
 
   // Check for NaN or Infinity
-  const hasInvalidValues = Array.from(buffer).some(
-    v => !isFinite(v)
-  );
+  const hasInvalidValues = Array.from(buffer).some((v) => !isFinite(v));
 
   if (hasInvalidValues) {
     throw new ValidationError('Buffer contains NaN or Infinity values');
@@ -885,10 +900,7 @@ export function validateSampleRate(sampleRate: number): void {
   }
 
   if (sampleRate < 8000 || sampleRate > 48000) {
-    throw new ValidationError(
-      'Sample rate must be between 8000 and 48000 Hz',
-      { sampleRate }
-    );
+    throw new ValidationError('Sample rate must be between 8000 and 48000 Hz', { sampleRate });
   }
 }
 
@@ -899,27 +911,23 @@ export function validateFFTSize(fftSize: number): void {
 
   // Check if power of 2
   if (fftSize <= 0 || (fftSize & (fftSize - 1)) !== 0) {
-    throw new ValidationError(
-      'FFT size must be a power of 2',
-      { fftSize }
-    );
+    throw new ValidationError('FFT size must be a power of 2', { fftSize });
   }
 
   if (fftSize < 256 || fftSize > 8192) {
-    throw new ValidationError(
-      'FFT size must be between 256 and 8192',
-      { fftSize }
-    );
+    throw new ValidationError('FFT size must be between 256 and 8192', { fftSize });
   }
 }
 ```
 
 **Buffer Overflow Protection:**
+
 - TypeScript layer validates all buffer sizes before native calls
 - Native layer performs additional bounds checking
 - Rust code uses safe array indexing (no unsafe indexing)
 
 **No Arbitrary Code Execution:**
+
 - Audio data treated as pure data, never evaluated
 - No dynamic code generation or eval
 - All function calls statically typed
@@ -927,11 +935,13 @@ export function validateFFTSize(fftSize: number): void {
 ### Dependency Security
 
 **npm Audit:**
+
 - CI pipeline runs `npm audit` on every build
 - Fail build if critical/high severity vulnerabilities detected
 - Dependencies from trusted sources only (npm registry)
 
 **Dependency Management:**
+
 ```json
 // package.json
 {
@@ -943,6 +953,7 @@ export function validateFFTSize(fftSize: number): void {
 ```
 
 **GitHub Actions Security Check:**
+
 ```yaml
 # .github/workflows/ci.yml
 - name: Security Audit
@@ -952,11 +963,13 @@ export function validateFFTSize(fftSize: number): void {
 ### Data Privacy
 
 **No Data Transmission:**
+
 - All audio processing happens on-device
 - No network calls from native module
 - No telemetry or analytics collection
 
 **No Data Storage:**
+
 - Audio buffers processed in memory only
 - No automatic file system writes
 - Buffers released after processing
@@ -972,14 +985,17 @@ export function validateFFTSize(fftSize: number): void {
 **Optimization Strategies:**
 
 1. **Pre-allocated Buffers:**
+
    - Rust DSP core reuses buffers where possible
    - Minimize memory allocations in hot path
 
 2. **Zero-Copy Where Possible:**
+
    - iOS: Use `UnsafeBufferPointer` to avoid copying input
    - Android: JNI automatically handles primitive arrays efficiently
 
 3. **Async/Off-Main-Thread:**
+
    - All processing on background threads
    - Use appropriate QoS (`.userInitiated` for iOS)
 
@@ -993,6 +1009,7 @@ export function validateFFTSize(fftSize: number): void {
 **Target: <50MB peak memory usage**
 
 **Memory Management:**
+
 - Immediate deallocation after processing
 - No caching of processed results (user's responsibility)
 - Explicit `defer` blocks (iOS) to guarantee cleanup
@@ -1003,6 +1020,7 @@ export function validateFFTSize(fftSize: number): void {
 **Target: Package import <200ms, first call <10ms overhead**
 
 **Lazy Initialization:**
+
 - Native modules loaded on-demand by Expo
 - Rust library initialization happens on first call
 - No expensive setup in module initialization
@@ -1014,6 +1032,7 @@ export function validateFFTSize(fftSize: number): void {
 ### npm Package Structure
 
 **Published Files:**
+
 ```
 @loqalabs/loqa-audio-dsp/
 ├── lib/                    # Compiled TypeScript
@@ -1029,6 +1048,7 @@ export function validateFFTSize(fftSize: number): void {
 ```
 
 **package.json Configuration:**
+
 ```json
 {
   "name": "@loqalabs/loqa-audio-dsp",
@@ -1036,14 +1056,7 @@ export function validateFFTSize(fftSize: number): void {
   "description": "Production-grade audio DSP analysis for React Native/Expo",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "files": [
-    "lib",
-    "ios",
-    "android",
-    "README.md",
-    "API.md",
-    "LICENSE"
-  ],
+  "files": ["lib", "ios", "android", "README.md", "API.md", "LICENSE"],
   "peerDependencies": {
     "expo": "^54.0.0",
     "react": "*",
@@ -1061,6 +1074,7 @@ export function validateFFTSize(fftSize: number): void {
 **GitHub Actions Workflows:**
 
 **1. CI Workflow (`.github/workflows/ci.yml`):**
+
 ```yaml
 name: CI
 
@@ -1104,6 +1118,7 @@ jobs:
 ```
 
 **2. Publish Workflow (`.github/workflows/publish.yml`):**
+
 ```yaml
 name: Publish to npm
 
@@ -1134,15 +1149,18 @@ jobs:
 **Steps (documented in RELEASING.md):**
 
 1. **Version Bump:**
+
    ```bash
    npm version patch|minor|major
    ```
 
 2. **Update CHANGELOG:**
+
    - Document all changes since last release
    - Follow Conventional Commits format
 
 3. **Tag and Push:**
+
    ```bash
    git push origin main --tags
    ```
@@ -1158,16 +1176,19 @@ jobs:
 ### Prerequisites
 
 **System Requirements:**
+
 - macOS 13+ (for iOS development)
 - Node.js 18+
 - npm 9+
 
 **iOS Development:**
+
 - Xcode 15.0+
 - CocoaPods 1.12+
 - iOS Simulator or physical device (iOS 15.1+)
 
 **Android Development:**
+
 - Android Studio 2023.1+
 - Android SDK (API 24+)
 - Android NDK r26+
@@ -1176,6 +1197,7 @@ jobs:
 ### Setup Commands
 
 **Initial Setup:**
+
 ```bash
 # Clone repository
 git clone https://github.com/loqalabs/loqa-audio-dsp.git
@@ -1207,6 +1229,7 @@ npx expo run:android
 ```
 
 **Development Workflow:**
+
 ```bash
 # Watch mode for TypeScript
 npm run dev
@@ -1222,6 +1245,7 @@ npm run validate
 ```
 
 **Building Rust Libraries (if modifying Rust):**
+
 ```bash
 # iOS
 cd rust
@@ -1242,6 +1266,7 @@ cd rust
 **Decision:** Use Expo Modules API instead of legacy React Native native modules.
 
 **Rationale:**
+
 - Standard approach for modern Expo development
 - Automatic linking and configuration
 - Turbo module support for future compatibility
@@ -1249,6 +1274,7 @@ cd rust
 - Simpler setup for end users
 
 **Consequences:**
+
 - Requires Expo SDK 54+ (acceptable constraint)
 - Slightly different API than pure React Native modules
 - Better developer experience overall
@@ -1260,12 +1286,14 @@ cd rust
 **Decision:** Use native FFI/JNI bindings to Rust loqa-voice-dsp crate.
 
 **Rationale:**
+
 - JavaScript DSP too slow for real-time (<5ms target)
 - Rust provides memory safety and performance
 - loqa-voice-dsp is battle-tested and proven
 - Matches architecture of @loqalabs/loqa-audio-bridge
 
 **Consequences:**
+
 - More complex build process (Rust compilation)
 - Requires careful memory management at FFI/JNI boundary
 - Much better performance (meets <5ms target)
@@ -1277,12 +1305,14 @@ cd rust
 **Decision:** Perform all validation in TypeScript layer before calling native code.
 
 **Rationale:**
+
 - Fail fast with clear error messages
 - Reduce native code complexity
 - Better error messages (can reference documentation)
 - Easier to test validation logic
 
 **Consequences:**
+
 - Slight overhead for validation
 - Requires TypeScript and native validation to stay in sync
 - Much better developer experience
@@ -1294,12 +1324,14 @@ cd rust
 **Decision:** Accept Float32Array or number[] in TypeScript API, convert to native arrays for bridge.
 
 **Rationale:**
+
 - Float32Array is standard for Web Audio API
 - Efficient typed array for audio samples
 - Easy conversion to Swift/Kotlin arrays
 - Familiar to audio developers
 
 **Consequences:**
+
 - Must convert between TypeScript and native representations
 - Slight memory overhead for conversion
 - Industry-standard API
@@ -1311,12 +1343,14 @@ cd rust
 **Decision:** All DSP functions return Promises and run on background threads.
 
 **Rationale:**
+
 - Prevents UI blocking
 - Standard React Native async pattern
 - Allows concurrent processing
 - Better user experience
 
 **Consequences:**
+
 - Slightly more complex API (async/await required)
 - Must manage promise lifecycle
 - Better app responsiveness

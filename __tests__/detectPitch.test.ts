@@ -159,11 +159,7 @@ describe('detectPitch', () => {
 
       // Assert
       expect(result).toBeDefined();
-      expect(mockDetectPitch).toHaveBeenCalledWith(
-        audioBuffer,
-        44100,
-        expect.any(Object)
-      );
+      expect(mockDetectPitch).toHaveBeenCalledWith(audioBuffer, 44100, expect.any(Object));
     });
 
     it('should validate sample rate is within valid range', async () => {
@@ -296,9 +292,7 @@ describe('detectPitch', () => {
 
       // Act & Assert
       await expect(detectPitch(emptyBuffer, 44100)).rejects.toThrow(ValidationError);
-      await expect(detectPitch(emptyBuffer, 44100)).rejects.toThrow(
-        'Audio buffer cannot be empty'
-      );
+      await expect(detectPitch(emptyBuffer, 44100)).rejects.toThrow('Audio buffer cannot be empty');
     });
 
     it('should throw ValidationError for buffer larger than 16384 samples', async () => {
@@ -340,9 +334,7 @@ describe('detectPitch', () => {
       const invalidSampleRate = 7999;
 
       // Act & Assert
-      await expect(detectPitch(audioBuffer, invalidSampleRate)).rejects.toThrow(
-        ValidationError
-      );
+      await expect(detectPitch(audioBuffer, invalidSampleRate)).rejects.toThrow(ValidationError);
       await expect(detectPitch(audioBuffer, invalidSampleRate)).rejects.toThrow(
         'Sample rate must be between 8000 and 48000 Hz'
       );
@@ -354,9 +346,7 @@ describe('detectPitch', () => {
       const invalidSampleRate = 48001;
 
       // Act & Assert
-      await expect(detectPitch(audioBuffer, invalidSampleRate)).rejects.toThrow(
-        ValidationError
-      );
+      await expect(detectPitch(audioBuffer, invalidSampleRate)).rejects.toThrow(ValidationError);
       await expect(detectPitch(audioBuffer, invalidSampleRate)).rejects.toThrow(
         'Sample rate must be between 8000 and 48000 Hz'
       );
@@ -368,9 +358,7 @@ describe('detectPitch', () => {
       const invalidSampleRate = 44100.5;
 
       // Act & Assert
-      await expect(detectPitch(audioBuffer, invalidSampleRate)).rejects.toThrow(
-        ValidationError
-      );
+      await expect(detectPitch(audioBuffer, invalidSampleRate)).rejects.toThrow(ValidationError);
       await expect(detectPitch(audioBuffer, invalidSampleRate)).rejects.toThrow(
         'Sample rate must be an integer'
       );

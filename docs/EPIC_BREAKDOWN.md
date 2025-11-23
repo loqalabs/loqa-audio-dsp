@@ -11,6 +11,7 @@
 This package provides DSP (Digital Signal Processing) analysis functions as a companion to [@loqalabs/loqa-audio-bridge](https://github.com/loqalabs/loqa-audio-bridge). It wraps the high-performance [loqa-voice-dsp](https://github.com/loqalabs/loqa) Rust crate with native iOS (Swift FFI) and Android (Kotlin JNI) bindings.
 
 **Why Separate Package:**
+
 - Focused, composable architecture
 - Smaller bundle sizes (use only what you need)
 - Independent versioning and release cycles
@@ -20,21 +21,25 @@ This package provides DSP (Digital Signal Processing) analysis functions as a co
 ## Epic Overview
 
 ### Epic 1: Foundation & Scaffolding ✅
+
 **Status:** COMPLETE  
 **Duration:** 1 day  
 **Goal:** Project structure, repository, initial documentation
 
 **Stories:**
+
 - ✅ 1.1: Create repository and initial package.json
 - ✅ 1.2: Add README, LICENSE, .gitignore
 - ✅ 1.3: Push to GitHub
 
 ### Epic 2: Native Module Implementation
+
 **Status:** TODO  
 **Duration:** 2-3 weeks  
 **Goal:** Implement FFI/JNI bindings to loqa-voice-dsp Rust crate
 
 **Stories:**
+
 - 2.1: Set up Expo module scaffolding with create-expo-module
 - 2.2: iOS Swift FFI bindings
   - 2.2.1: Implement computeFFT Swift → Rust FFI
@@ -56,11 +61,13 @@ This package provides DSP (Digital Signal Processing) analysis functions as a co
   - 2.5.3: Android native tests
 
 ### Epic 3: Example App & Integration Testing
+
 **Status:** TODO  
 **Duration:** 1 week  
 **Goal:** Demonstrate all DSP functions with real-time audio
 
 **Stories:**
+
 - 3.1: Create example app structure
 - 3.2: Implement FFT spectrum visualizer
 - 3.3: Implement pitch detection demo
@@ -70,11 +77,13 @@ This package provides DSP (Digital Signal Processing) analysis functions as a co
 - 3.7: Performance benchmarking
 
 ### Epic 4: Documentation
+
 **Status:** TODO  
 **Duration:** 3-5 days  
 **Goal:** Comprehensive docs for developers
 
 **Stories:**
+
 - 4.1: Write README.md with quick start
 - 4.2: Create API.md reference documentation
 - 4.3: Write INTEGRATION_GUIDE.md
@@ -82,11 +91,13 @@ This package provides DSP (Digital Signal Processing) analysis functions as a co
 - 4.5: Document performance characteristics
 
 ### Epic 5: Distribution & CI/CD
+
 **Status:** TODO  
 **Duration:** 3-5 days  
 **Goal:** Automated testing, publishing, release process
 
 **Stories:**
+
 - 5.1: Configure npm package for publishing
 - 5.2: Create GitHub Actions CI pipeline
 - 5.3: Create automated npm publishing workflow
@@ -154,12 +165,14 @@ This package provides DSP (Digital Signal Processing) analysis functions as a co
 ## Dependencies
 
 **External:**
+
 - loqa-voice-dsp (Rust crate) - DSP algorithms
 - Expo Modules Core - Native module framework
 - React Native 0.72+
 - Expo SDK 52+
 
 **Internal:**
+
 - @loqalabs/loqa-audio-bridge (optional but recommended for streaming)
 
 ---
@@ -167,14 +180,17 @@ This package provides DSP (Digital Signal Processing) analysis functions as a co
 ## Risk Assessment
 
 **High Risk:**
+
 - FFI/JNI complexity (mitigated: we have v0.2.0 implementation to reference)
 - Cross-platform consistency (mitigated: comprehensive test suite)
 
 **Medium Risk:**
+
 - Performance on older devices (mitigated: benchmark tests + optimization)
 - Memory management in FFI/JNI (mitigated: careful pointer handling)
 
 **Low Risk:**
+
 - npm publishing (mitigated: reuse loqa-audio-bridge workflow)
 - Documentation (mitigated: reuse loqa-audio-bridge patterns)
 

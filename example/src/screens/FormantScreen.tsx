@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { extractFormants } from '@loqalabs/loqa-audio-dsp';
-import { startAudioStream, stopAudioStream, addAudioSampleListener } from '@loqalabs/loqa-audio-bridge';
+import {
+  startAudioStream,
+  stopAudioStream,
+  addAudioSampleListener,
+} from '@loqalabs/loqa-audio-bridge';
 import type { EventSubscription } from 'expo-modules-core';
 import Svg, { Circle, Text as SvgText, Line } from 'react-native-svg';
 
@@ -153,11 +157,12 @@ export function FormantScreen() {
       <View style={styles.infoContainer}>
         <Text style={styles.infoTitle}>About Formants</Text>
         <Text style={styles.infoText}>
-          Formants are resonant frequencies of the vocal tract. F1, F2, and F3 are the first three formants,
-          which are crucial for vowel identification and speaker characteristics.
+          Formants are resonant frequencies of the vocal tract. F1, F2, and F3 are the first three
+          formants, which are crucial for vowel identification and speaker characteristics.
         </Text>
         <Text style={styles.infoText}>
-          The F1-F2 plot shows where your sound falls in the vowel space, with reference vowels marked.
+          The F1-F2 plot shows where your sound falls in the vowel space, with reference vowels
+          marked.
         </Text>
         <Text style={styles.infoText}>
           This demo uses real-time audio from your microphone via @loqalabs/loqa-audio-bridge,
@@ -179,8 +184,10 @@ function FormantChart({ f1, f2 }: { f1: number; f2: number }) {
   const f2Min = 700;
   const f2Max = 2500;
 
-  const scaleX = (f2Val: number) => padding + ((f2Max - f2Val) / (f2Max - f2Min)) * (width - 2 * padding);
-  const scaleY = (f1Val: number) => padding + ((f1Val - f1Min) / (f1Max - f1Min)) * (height - 2 * padding);
+  const scaleX = (f2Val: number) =>
+    padding + ((f2Max - f2Val) / (f2Max - f2Min)) * (width - 2 * padding);
+  const scaleY = (f1Val: number) =>
+    padding + ((f1Val - f1Min) / (f1Max - f1Min)) * (height - 2 * padding);
 
   const userX = scaleX(f2);
   const userY = scaleY(f1);
@@ -189,8 +196,22 @@ function FormantChart({ f1, f2 }: { f1: number; f2: number }) {
     <View style={styles.chartContainer}>
       <Svg width={width} height={height}>
         {/* Grid lines */}
-        <Line x1={padding} y1={padding} x2={padding} y2={height - padding} stroke="#CCC" strokeWidth="1" />
-        <Line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#CCC" strokeWidth="1" />
+        <Line
+          x1={padding}
+          y1={padding}
+          x2={padding}
+          y2={height - padding}
+          stroke="#CCC"
+          strokeWidth="1"
+        />
+        <Line
+          x1={padding}
+          y1={height - padding}
+          x2={width - padding}
+          y2={height - padding}
+          stroke="#CCC"
+          strokeWidth="1"
+        />
 
         {/* Reference vowels */}
         {VOWEL_REFERENCES.map((vowel, index) => {
@@ -199,7 +220,14 @@ function FormantChart({ f1, f2 }: { f1: number; f2: number }) {
           return (
             <React.Fragment key={index}>
               <Circle cx={x} cy={y} r="8" fill={vowel.color} opacity="0.6" />
-              <SvgText x={x} y={y + 25} fontSize="14" fill={vowel.color} fontWeight="bold" textAnchor="middle">
+              <SvgText
+                x={x}
+                y={y + 25}
+                fontSize="14"
+                fill={vowel.color}
+                fontWeight="bold"
+                textAnchor="middle"
+              >
                 {vowel.vowel}
               </SvgText>
             </React.Fragment>
@@ -208,7 +236,14 @@ function FormantChart({ f1, f2 }: { f1: number; f2: number }) {
 
         {/* User's result */}
         <Circle cx={userX} cy={userY} r="12" fill="#27AE60" stroke="#fff" strokeWidth="2" />
-        <SvgText x={userX} y={userY - 20} fontSize="12" fill="#27AE60" fontWeight="bold" textAnchor="middle">
+        <SvgText
+          x={userX}
+          y={userY - 20}
+          fontSize="12"
+          fill="#27AE60"
+          fontWeight="bold"
+          textAnchor="middle"
+        >
           You
         </SvgText>
 
@@ -216,7 +251,14 @@ function FormantChart({ f1, f2 }: { f1: number; f2: number }) {
         <SvgText x={width / 2} y={height - 5} fontSize="12" fill="#666" textAnchor="middle">
           F2 (Hz) →
         </SvgText>
-        <SvgText x={15} y={height / 2} fontSize="12" fill="#666" textAnchor="middle" transform={`rotate(-90, 15, ${height / 2})`}>
+        <SvgText
+          x={15}
+          y={height / 2}
+          fontSize="12"
+          fill="#666"
+          textAnchor="middle"
+          transform={`rotate(-90, 15, ${height / 2})`}
+        >
           F1 (Hz) →
         </SvgText>
       </Svg>

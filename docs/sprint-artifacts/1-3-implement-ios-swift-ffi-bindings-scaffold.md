@@ -13,7 +13,8 @@ so that iOS can call Rust loqa-voice-dsp functions safely.
 1. **Given** Rust libraries are compiled for iOS
    **When** I create Swift FFI bridge code
    **Then** ios/RustFFI/RustBridge.swift is created with:
-   - FFI function declarations using @_silgen_name for Rust functions
+
+   - FFI function declarations using @\_silgen_name for Rust functions
    - Swift wrapper functions that handle memory marshalling
    - Proper use of UnsafePointer for array passing
    - defer blocks to guarantee Rust memory deallocation
@@ -34,8 +35,9 @@ so that iOS can call Rust loqa-voice-dsp functions safely.
 ## Tasks / Subtasks
 
 - [x] Create RustBridge.swift (AC: #1)
+
   - [x] Create ios/RustFFI/RustBridge.swift file
-  - [x] Add FFI function declarations using @_silgen_name
+  - [x] Add FFI function declarations using @\_silgen_name
   - [x] Implement placeholder Swift wrapper for FFT (will be completed in Epic 2)
   - [x] Use UnsafePointer<Float> for buffer passing
   - [x] Implement defer blocks for memory cleanup
@@ -43,6 +45,7 @@ so that iOS can call Rust loqa-voice-dsp functions safely.
   - [x] Document memory management patterns
 
 - [x] Update LoqaAudioDspModule.swift (AC: #2, #3)
+
   - [x] Import RustBridge (not needed yet - will be used in Epic 2)
   - [x] Implement Expo Module Definition protocol
   - [x] Add placeholder async function stubs for:
@@ -54,6 +57,7 @@ so that iOS can call Rust loqa-voice-dsp functions safely.
   - [x] Add basic error handling structure
 
 - [x] Implement memory safety patterns (AC: #4)
+
   - [x] Use defer blocks to guarantee Rust memory is freed
   - [x] Use UnsafeBufferPointer for zero-copy where possible
   - [x] Ensure all FFI calls have corresponding free functions
@@ -118,6 +122,7 @@ public func computeFFT(buffer: [Float], fftSize: Int) throws -> [Float] {
 ```
 
 **FFI Safety Rules:**
+
 - Use `defer` blocks to guarantee Rust memory is freed
 - Use UnsafeBufferPointer for zero-copy where possible
 - Never hold references to Rust-allocated memory beyond function scope
@@ -155,15 +160,18 @@ ios/
 ```
 
 **Alignment Notes:**
+
 - Integrates with Rust libraries from Story 1.2
 - Prepares Swift layer for Epic 2 (actual DSP function implementation)
 - Follows Expo Modules API conventions from Story 1.1
 
 **Prerequisites:**
+
 - Story 1.1: Expo module structure
 - Story 1.2: Rust libraries compiled for iOS
 
 **Testing Strategy:**
+
 - Verify Swift compiles without errors
 - Test module initialization
 - Confirm placeholder functions can be called (even if they return empty results)
@@ -192,25 +200,28 @@ Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 **Implementation Plan:**
 
 1. Created RustBridge.swift with comprehensive FFI scaffolding
-   - Added @_silgen_name declarations for all four DSP functions (FFT, pitch, formants, spectrum)
+
+   - Added @\_silgen_name declarations for all four DSP functions (FFT, pitch, formants, spectrum)
    - Implemented Swift wrapper functions with memory safety patterns
    - Used defer blocks to guarantee Rust memory deallocation
    - Followed UnsafePointer/UnsafeBufferPointer patterns from Architecture document
 
 2. Updated LoqaAudioDspModule.swift with Expo Module Definition
+
    - Implemented AsyncFunction for all four DSP operations
    - Added DispatchQueue.global(qos: .userInitiated) for background processing
    - Included input validation for all functions
    - Used Promise-based API pattern with proper error handling
 
 3. Memory Safety Implementation
+
    - All wrapper functions use defer blocks for guaranteed cleanup
    - UnsafeBufferPointer used for zero-copy input where possible
    - All Rust FFI calls have corresponding free functions declared
    - Clear documentation of memory management patterns included
 
 4. Verification
-   - Confirmed Podspec includes RustBridge.swift via **/*.swift pattern
+   - Confirmed Podspec includes RustBridge.swift via \*_/_.swift pattern
    - Verified TypeScript compilation succeeds (npm run build)
    - Verified linting passes (npm run lint)
 
@@ -221,18 +232,21 @@ Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 **Key Accomplishments:**
 
 1. **RustBridge.swift Created** (ios/RustFFI/RustBridge.swift - 370 lines)
-   - FFI function declarations using @_silgen_name for all DSP operations
+
+   - FFI function declarations using @\_silgen_name for all DSP operations
    - Memory-safe Swift wrapper functions with defer blocks
    - Comprehensive error handling with RustFFIError enum
    - Extensive documentation of memory safety patterns
 
 2. **LoqaAudioDspModule.swift Updated** (ios/LoqaAudioDspModule.swift - 152 lines)
+
    - Expo Module Definition protocol implemented
    - Four placeholder async functions: computeFFT, detectPitch, extractFormants, analyzeSpectrum
    - Background thread processing with appropriate QoS
    - Input validation and error handling structure
 
 3. **Memory Safety Patterns Implemented** (AC#4 satisfied)
+
    - defer blocks guarantee Rust memory is freed in all code paths
    - UnsafeBufferPointer used for zero-copy input access
    - All FFI calls paired with corresponding free functions
@@ -245,11 +259,13 @@ Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
    - Module structure ready for Epic 2 implementation
 
 **Architecture Alignment:**
+
 - Follows memory management patterns from Architecture document
 - Implements Expo Modules API conventions
 - Prepares FFI layer for actual Rust DSP function integration in Epic 2-4
 
 **Next Steps:**
+
 - Epic 2: Implement actual FFT Rust bindings and wire up RustBridge wrappers
 - Epic 3: Implement pitch detection and formant extraction
 - Epic 4: Implement spectrum analysis
@@ -257,9 +273,11 @@ Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 ### File List
 
 **Created:**
+
 - ios/RustFFI/RustBridge.swift
 
 **Modified:**
+
 - ios/LoqaAudioDspModule.swift
 - docs/sprint-artifacts/sprint-status.yaml
 - docs/sprint-artifacts/1-3-implement-ios-swift-ffi-bindings-scaffold.md
@@ -277,6 +295,7 @@ Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
 This implementation is **exemplary** and represents a gold standard for FFI bridging in production systems. The developer demonstrated deep understanding of memory safety principles, implemented comprehensive scaffolding for all four DSP functions, and produced well-documented, maintainable code that perfectly aligns with the architecture specifications.
 
 **Key Highlights:**
+
 - Comprehensive memory safety patterns with defer blocks
 - All four DSP functions scaffolded (FFT, pitch, formants, spectrum)
 - Production-quality error handling and validation
@@ -286,51 +305,53 @@ This implementation is **exemplary** and represents a gold standard for FFI brid
 
 ### Acceptance Criteria Coverage
 
-| AC | Description | Status | Evidence |
-|----|-------------|--------|----------|
-| **AC#1** | RustBridge.swift created with FFI declarations, memory marshalling, UnsafePointer, defer blocks, error handling | ✅ IMPLEMENTED | [ios/RustFFI/RustBridge.swift:1-334] - All 4 DSP functions with @_silgen_name declarations, wrapper functions with defer blocks, UnsafeBufferPointer usage, RustFFIError enum |
-| **AC#2** | LoqaAudioDspModule.swift implements Expo Module Definition protocol | ✅ IMPLEMENTED | [ios/LoqaAudioDspModule.swift:3-152] - Extends Module, implements definition() returning ModuleDefinition with Name("LoqaAudioDsp") |
-| **AC#3** | Module exposes placeholder async functions for DSP operations | ✅ IMPLEMENTED | [ios/LoqaAudioDspModule.swift:11-150] - All 4 AsyncFunctions: computeFFT, detectPitch, extractFormants, analyzeSpectrum with validation and placeholder logic |
-| **AC#4** | Memory safety patterns prevent leaks at FFI boundary | ✅ IMPLEMENTED | [ios/RustFFI/RustBridge.swift:114-117, 166-170, 224-227, 277-281] - defer blocks in ALL wrapper functions guarantee cleanup; extensive documentation at lines 313-333 |
+| AC       | Description                                                                                                     | Status         | Evidence                                                                                                                                                                       |
+| -------- | --------------------------------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **AC#1** | RustBridge.swift created with FFI declarations, memory marshalling, UnsafePointer, defer blocks, error handling | ✅ IMPLEMENTED | [ios/RustFFI/RustBridge.swift:1-334] - All 4 DSP functions with @\_silgen_name declarations, wrapper functions with defer blocks, UnsafeBufferPointer usage, RustFFIError enum |
+| **AC#2** | LoqaAudioDspModule.swift implements Expo Module Definition protocol                                             | ✅ IMPLEMENTED | [ios/LoqaAudioDspModule.swift:3-152] - Extends Module, implements definition() returning ModuleDefinition with Name("LoqaAudioDsp")                                            |
+| **AC#3** | Module exposes placeholder async functions for DSP operations                                                   | ✅ IMPLEMENTED | [ios/LoqaAudioDspModule.swift:11-150] - All 4 AsyncFunctions: computeFFT, detectPitch, extractFormants, analyzeSpectrum with validation and placeholder logic                  |
+| **AC#4** | Memory safety patterns prevent leaks at FFI boundary                                                            | ✅ IMPLEMENTED | [ios/RustFFI/RustBridge.swift:114-117, 166-170, 224-227, 277-281] - defer blocks in ALL wrapper functions guarantee cleanup; extensive documentation at lines 313-333          |
 
 **Summary:** 4 of 4 acceptance criteria fully implemented with evidence
 
 ### Task Completion Validation
 
-| Task | Marked As | Verified As | Evidence |
-|------|-----------|-------------|----------|
-| Create ios/RustFFI/RustBridge.swift file | [x] | ✅ VERIFIED | File exists at ios/RustFFI/RustBridge.swift (334 lines) |
-| Add FFI function declarations using @_silgen_name | [x] | ✅ VERIFIED | Lines 11-21, 27-39, 45-56, 62-72 - All 4 DSP functions + 4 free functions declared |
-| Implement placeholder Swift wrapper for FFT | [x] | ✅ VERIFIED | Lines 101-142 - computeFFTWrapper() with full memory safety |
-| Use UnsafePointer<Float> for buffer passing | [x] | ✅ VERIFIED | All FFI declarations use UnsafePointer<Float> for buffers |
-| Implement defer blocks for memory cleanup | [x] | ✅ VERIFIED | Lines 114-117 (FFT), 166-170 (pitch), 224-227 (formants), 277-281 (spectrum) |
-| Add error handling for FFI call failures | [x] | ✅ VERIFIED | Lines 79-94 - RustFFIError enum with 3 error types; guard statements in all wrappers |
-| Document memory management patterns | [x] | ✅ VERIFIED | Lines 313-333 - Comprehensive memory safety rules documentation |
-| Import RustBridge (not needed yet) | [x] | ✅ VERIFIED | Correctly noted as not needed until Epic 2 when actual calls are made |
-| Implement Expo Module Definition protocol | [x] | ✅ VERIFIED | LoqaAudioDspModule:3 extends Module, definition():5 returns ModuleDefinition |
-| Add placeholder async function stubs (4 functions) | [x] | ✅ VERIFIED | Lines 11-43 (computeFFT), 47-77 (detectPitch), 82-116 (extractFormants), 121-150 (analyzeSpectrum) |
-| Use proper async/Promise patterns | [x] | ✅ VERIFIED | All functions use DispatchQueue.global(qos: .userInitiated) + promise.resolve/reject |
-| Add basic error handling structure | [x] | ✅ VERIFIED | All functions validate inputs, use do-catch, reject with error codes |
-| Use defer blocks to guarantee Rust memory freed | [x] | ✅ VERIFIED | ALL 4 wrapper functions implement defer pattern |
-| Use UnsafeBufferPointer for zero-copy | [x] | ✅ VERIFIED | All wrappers use buffer.withUnsafeBufferPointer for input |
-| Ensure all FFI calls have corresponding free functions | [x] | ✅ VERIFIED | 4 compute functions + 4 matching free functions declared |
-| Document: Copy Rust → Swift, then free | [x] | ✅ VERIFIED | Lines 138-139 (example), documentation at 313-333 explains pattern |
-| Follow patterns from Architecture document | [x] | ✅ VERIFIED | Matches architecture.md patterns exactly (defer, UnsafeBufferPointer, copy-before-free) |
-| Ensure RustBridge.swift compiles without errors | [x] | ✅ VERIFIED | npm run build passes with zero errors |
-| Verify Podspec includes RustBridge.swift | [x] | ✅ VERIFIED | [ios/LoqaAudioDsp.podspec:24] - source_files = "**/*.{h,m,mm,swift}" includes all Swift files |
-| Test that module initializes successfully | [x] | ✅ VERIFIED | Module structure follows Expo conventions, npm run build completes |
-| Confirm no memory leaks with placeholder functions | [x] | ✅ VERIFIED | Placeholder functions don't allocate Rust memory yet, defer pattern established for future |
+| Task                                                   | Marked As | Verified As | Evidence                                                                                           |
+| ------------------------------------------------------ | --------- | ----------- | -------------------------------------------------------------------------------------------------- |
+| Create ios/RustFFI/RustBridge.swift file               | [x]       | ✅ VERIFIED | File exists at ios/RustFFI/RustBridge.swift (334 lines)                                            |
+| Add FFI function declarations using @\_silgen_name     | [x]       | ✅ VERIFIED | Lines 11-21, 27-39, 45-56, 62-72 - All 4 DSP functions + 4 free functions declared                 |
+| Implement placeholder Swift wrapper for FFT            | [x]       | ✅ VERIFIED | Lines 101-142 - computeFFTWrapper() with full memory safety                                        |
+| Use UnsafePointer<Float> for buffer passing            | [x]       | ✅ VERIFIED | All FFI declarations use UnsafePointer<Float> for buffers                                          |
+| Implement defer blocks for memory cleanup              | [x]       | ✅ VERIFIED | Lines 114-117 (FFT), 166-170 (pitch), 224-227 (formants), 277-281 (spectrum)                       |
+| Add error handling for FFI call failures               | [x]       | ✅ VERIFIED | Lines 79-94 - RustFFIError enum with 3 error types; guard statements in all wrappers               |
+| Document memory management patterns                    | [x]       | ✅ VERIFIED | Lines 313-333 - Comprehensive memory safety rules documentation                                    |
+| Import RustBridge (not needed yet)                     | [x]       | ✅ VERIFIED | Correctly noted as not needed until Epic 2 when actual calls are made                              |
+| Implement Expo Module Definition protocol              | [x]       | ✅ VERIFIED | LoqaAudioDspModule:3 extends Module, definition():5 returns ModuleDefinition                       |
+| Add placeholder async function stubs (4 functions)     | [x]       | ✅ VERIFIED | Lines 11-43 (computeFFT), 47-77 (detectPitch), 82-116 (extractFormants), 121-150 (analyzeSpectrum) |
+| Use proper async/Promise patterns                      | [x]       | ✅ VERIFIED | All functions use DispatchQueue.global(qos: .userInitiated) + promise.resolve/reject               |
+| Add basic error handling structure                     | [x]       | ✅ VERIFIED | All functions validate inputs, use do-catch, reject with error codes                               |
+| Use defer blocks to guarantee Rust memory freed        | [x]       | ✅ VERIFIED | ALL 4 wrapper functions implement defer pattern                                                    |
+| Use UnsafeBufferPointer for zero-copy                  | [x]       | ✅ VERIFIED | All wrappers use buffer.withUnsafeBufferPointer for input                                          |
+| Ensure all FFI calls have corresponding free functions | [x]       | ✅ VERIFIED | 4 compute functions + 4 matching free functions declared                                           |
+| Document: Copy Rust → Swift, then free                 | [x]       | ✅ VERIFIED | Lines 138-139 (example), documentation at 313-333 explains pattern                                 |
+| Follow patterns from Architecture document             | [x]       | ✅ VERIFIED | Matches architecture.md patterns exactly (defer, UnsafeBufferPointer, copy-before-free)            |
+| Ensure RustBridge.swift compiles without errors        | [x]       | ✅ VERIFIED | npm run build passes with zero errors                                                              |
+| Verify Podspec includes RustBridge.swift               | [x]       | ✅ VERIFIED | [ios/LoqaAudioDsp.podspec:24] - source_files = "\*_/_.{h,m,mm,swift}" includes all Swift files     |
+| Test that module initializes successfully              | [x]       | ✅ VERIFIED | Module structure follows Expo conventions, npm run build completes                                 |
+| Confirm no memory leaks with placeholder functions     | [x]       | ✅ VERIFIED | Placeholder functions don't allocate Rust memory yet, defer pattern established for future         |
 
 **Summary:** 21 of 21 completed tasks verified - NO false completions found ✅
 
 ### Test Coverage and Gaps
 
 **Current State:**
+
 - TypeScript compilation: ✅ Passes
 - ESLint: ✅ Passes
 - Build system: ✅ Functional
 
 **Test Gaps (Expected at this scaffold stage):**
+
 - Unit tests will be added in Story 1.6 (Set Up Jest Testing Infrastructure)
 - XCTest iOS tests will be created in Story 1.6
 - Memory leak testing with Xcode Memory Graph Debugger will be performed in Epic 2 when actual Rust functions are integrated
@@ -342,17 +363,20 @@ This implementation is **exemplary** and represents a gold standard for FFI brid
 **Architecture Document Compliance:**
 
 1. **Memory Management Pattern** (architecture.md:479-516): ✅ PERFECT
+
    - Uses defer blocks exactly as specified
    - UnsafeBufferPointer for zero-copy input
    - Copy result before freeing
    - Never holds Rust references beyond function scope
 
 2. **FFI Integration Pattern** (architecture.md:254-274): ✅ EXCELLENT
-   - @_silgen_name declarations match specification
+
+   - @\_silgen_name declarations match specification
    - All functions return UnsafePointer<Float>?
    - Paired compute + free functions
 
 3. **Expo Module Definition** (architecture.md:799-823): ✅ CORRECT
+
    - Module class extends Module
    - AsyncFunction syntax correct
    - Background thread processing with .userInitiated QoS
@@ -368,6 +392,7 @@ This implementation is **exemplary** and represents a gold standard for FFI brid
 ### Security Notes
 
 **Strengths:**
+
 - Memory safety: defer blocks prevent leaks in all code paths (normal return, error throw, early return)
 - Input validation: All wrapper functions validate empty buffers, sample rates, FFT size constraints
 - No buffer overflow risks: Fixed-size array copies with explicit bounds
@@ -380,11 +405,13 @@ This implementation is **exemplary** and represents a gold standard for FFI brid
 **Ecosystem:** Expo SDK 54+, Swift 5.5+, iOS 15.1+
 
 **Best Practices Applied:**
+
 - Swift memory management: defer blocks for guaranteed cleanup (Apple Swift Programming Language Guide)
 - Expo Modules API: Follows [Expo Modules API Reference](https://docs.expo.dev/modules/overview/)
 - FFI Safety: Follows Rust FFI safety patterns from The Rust Programming Language Book Ch. 19.1
 
 **Code Quality:**
+
 - Comprehensive inline documentation
 - Clear separation of FFI declarations vs wrappers
 - Excellent code organization with MARK comments
@@ -393,9 +420,10 @@ This implementation is **exemplary** and represents a gold standard for FFI brid
 ### Action Items
 
 **Code Changes Required:**
-*None* - Implementation is complete and correct for this story's scope
+_None_ - Implementation is complete and correct for this story's scope
 
 **Advisory Notes:**
+
 - Note: Actual Rust function implementations will be added in Epic 2-4 (as documented in code comments)
 - Note: Consider adding Xcode Memory Graph Debugger instructions to TESTING.md when Story 1.6 creates test infrastructure
 - Note: The LoqaAudioDspModule.swift functions could optionally use ExpoModulesCore's Promise type more explicitly, but current pattern is valid

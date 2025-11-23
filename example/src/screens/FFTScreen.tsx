@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { computeFFT } from '@loqalabs/loqa-audio-dsp';
-import { startAudioStream, stopAudioStream, addAudioSampleListener } from '@loqalabs/loqa-audio-bridge';
+import {
+  startAudioStream,
+  stopAudioStream,
+  addAudioSampleListener,
+} from '@loqalabs/loqa-audio-bridge';
 import type { EventSubscription } from 'expo-modules-core';
 
 export function FFTScreen() {
@@ -74,17 +78,19 @@ export function FFTScreen() {
   }
 
   // Find peak frequency
-  const peakFrequency = fftResult ? (() => {
-    let maxIndex = 0;
-    let maxValue = 0;
-    for (let i = 0; i < fftResult.magnitude.length; i++) {
-      if (fftResult.magnitude[i] > maxValue) {
-        maxValue = fftResult.magnitude[i];
-        maxIndex = i;
-      }
-    }
-    return fftResult.frequencies[maxIndex];
-  })() : null;
+  const peakFrequency = fftResult
+    ? (() => {
+        let maxIndex = 0;
+        let maxValue = 0;
+        for (let i = 0; i < fftResult.magnitude.length; i++) {
+          if (fftResult.magnitude[i] > maxValue) {
+            maxValue = fftResult.magnitude[i];
+            maxIndex = i;
+          }
+        }
+        return fftResult.frequencies[maxIndex];
+      })()
+    : null;
 
   return (
     <ScrollView style={styles.container}>
@@ -130,15 +136,18 @@ export function FFTScreen() {
           </View>
 
           <Text style={styles.visualizationTitle}>Frequency Spectrum</Text>
-          <FrequencyVisualization magnitude={fftResult.magnitude} frequencies={fftResult.frequencies} />
+          <FrequencyVisualization
+            magnitude={fftResult.magnitude}
+            frequencies={fftResult.frequencies}
+          />
         </View>
       )}
 
       <View style={styles.infoContainer}>
         <Text style={styles.infoTitle}>About FFT</Text>
         <Text style={styles.infoText}>
-          The Fast Fourier Transform (FFT) converts audio from the time domain to the frequency domain,
-          showing which frequencies are present in the signal.
+          The Fast Fourier Transform (FFT) converts audio from the time domain to the frequency
+          domain, showing which frequencies are present in the signal.
         </Text>
         <Text style={styles.infoText}>
           This demo uses real-time audio from your microphone via @loqalabs/loqa-audio-bridge,
@@ -150,7 +159,13 @@ export function FFTScreen() {
 }
 
 // Simple visualization component
-function FrequencyVisualization({ magnitude, frequencies }: { magnitude: Float32Array; frequencies: Float32Array }) {
+function FrequencyVisualization({
+  magnitude,
+  frequencies,
+}: {
+  magnitude: Float32Array;
+  frequencies: Float32Array;
+}) {
   const screenWidth = Dimensions.get('window').width - 40;
   const barWidth = screenWidth / Math.min(magnitude.length, 64); // Show max 64 bins
   const maxMagnitude = Math.max(...Array.from(magnitude));

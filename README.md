@@ -58,18 +58,20 @@ const audioBuffer = new Float32Array(2048); // Your audio samples
 const result = await computeFFT(audioBuffer, {
   fftSize: 2048,
   windowType: 'hanning',
-  includePhase: false
+  includePhase: false,
 });
 
 // Find the dominant frequency
-const maxMagnitudeIndex = result.magnitude.indexOf(
-  Math.max(...result.magnitude)
-);
+const maxMagnitudeIndex = result.magnitude.indexOf(Math.max(...result.magnitude));
 const dominantFrequency = result.frequencies[maxMagnitudeIndex];
 
 console.log(`Dominant frequency: ${dominantFrequency.toFixed(2)} Hz`);
 console.log(`Magnitude bins: ${result.magnitude.length}`);
-console.log(`Frequency range: ${result.frequencies[0]} Hz - ${result.frequencies[result.frequencies.length - 1]} Hz`);
+console.log(
+  `Frequency range: ${result.frequencies[0]} Hz - ${
+    result.frequencies[result.frequencies.length - 1]
+  } Hz`
+);
 ```
 
 ### Pitch Detection Example (Voice Analysis)
@@ -82,8 +84,8 @@ const audioBuffer = new Float32Array(2048); // Your audio samples
 // ... fill buffer with microphone data ...
 
 const pitch = await detectPitch(audioBuffer, 44100, {
-  minFrequency: 80,   // Minimum pitch (human voice range)
-  maxFrequency: 400   // Maximum pitch (human voice range)
+  minFrequency: 80, // Minimum pitch (human voice range)
+  maxFrequency: 400, // Maximum pitch (human voice range)
 });
 
 if (pitch.isVoiced) {
@@ -111,13 +113,19 @@ const voiceBuffer = new Float32Array(2048); // Your voice samples
 // ... fill buffer with voiced audio (vowel sound) ...
 
 const formants = await extractFormants(voiceBuffer, 16000, {
-  lpcOrder: 14  // Optional: defaults to sampleRate/1000 + 2
+  lpcOrder: 14, // Optional: defaults to sampleRate/1000 + 2
 });
 
 console.log(`Formant frequencies:`);
-console.log(`  F1: ${formants.f1.toFixed(1)} Hz (bandwidth: ${formants.bandwidths.f1.toFixed(1)} Hz)`);
-console.log(`  F2: ${formants.f2.toFixed(1)} Hz (bandwidth: ${formants.bandwidths.f2.toFixed(1)} Hz)`);
-console.log(`  F3: ${formants.f3.toFixed(1)} Hz (bandwidth: ${formants.bandwidths.f3.toFixed(1)} Hz)`);
+console.log(
+  `  F1: ${formants.f1.toFixed(1)} Hz (bandwidth: ${formants.bandwidths.f1.toFixed(1)} Hz)`
+);
+console.log(
+  `  F2: ${formants.f2.toFixed(1)} Hz (bandwidth: ${formants.bandwidths.f2.toFixed(1)} Hz)`
+);
+console.log(
+  `  F3: ${formants.f3.toFixed(1)} Hz (bandwidth: ${formants.bandwidths.f3.toFixed(1)} Hz)`
+);
 
 // Identify vowel based on F1/F2 values (simplified example)
 if (formants.f1 < 400 && formants.f2 > 2000) {
@@ -167,7 +175,7 @@ async function analyzeVoice(samples: Float32Array, sampleRate: number) {
   // 1. Detect pitch
   const pitch = await detectPitch(samples, sampleRate, {
     minFrequency: 80,
-    maxFrequency: 400
+    maxFrequency: 400,
   });
 
   // 2. Extract formants (for voiced segments only)
@@ -183,19 +191,19 @@ async function analyzeVoice(samples: Float32Array, sampleRate: number) {
     pitch: {
       frequency: pitch.frequency,
       confidence: pitch.confidence,
-      isVoiced: pitch.isVoiced
+      isVoiced: pitch.isVoiced,
     },
-    formants: formants ? {
-      f1: formants.f1,
-      f2: formants.f2,
-      f3: formants.f3
-    } : null,
+    formants: formants
+      ? {
+          f1: formants.f1,
+          f2: formants.f2,
+          f3: formants.f3,
+        }
+      : null,
     spectrum: {
       bins: fft.magnitude.length,
-      dominantFreq: fft.frequencies[
-        fft.magnitude.indexOf(Math.max(...fft.magnitude))
-      ]
-    }
+      dominantFreq: fft.frequencies[fft.magnitude.indexOf(Math.max(...fft.magnitude))],
+    },
   };
 }
 

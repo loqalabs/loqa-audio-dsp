@@ -253,11 +253,7 @@ describe('analyzeSpectrum', () => {
         // Assert
         expect(result).toBeDefined();
         expect(result.centroid).toBeDefined();
-        expect(mockAnalyzeSpectrum).toHaveBeenCalledWith(
-          expect.any(Array),
-          44100,
-          {}
-        );
+        expect(mockAnalyzeSpectrum).toHaveBeenCalledWith(expect.any(Array), 44100, {});
 
         jest.clearAllMocks();
       }
@@ -313,11 +309,7 @@ describe('analyzeSpectrum', () => {
 
         // Assert
         expect(result).toBeDefined();
-        expect(mockAnalyzeSpectrum).toHaveBeenCalledWith(
-          expect.any(Array),
-          sampleRate,
-          {}
-        );
+        expect(mockAnalyzeSpectrum).toHaveBeenCalledWith(expect.any(Array), sampleRate, {});
 
         jest.clearAllMocks();
       }
@@ -363,9 +355,7 @@ describe('analyzeSpectrum', () => {
       const bufferWithInfinity = new Float32Array([0.1, Infinity, 0.3]);
 
       // Act & Assert
-      await expect(analyzeSpectrum(bufferWithInfinity, 44100)).rejects.toThrow(
-        ValidationError
-      );
+      await expect(analyzeSpectrum(bufferWithInfinity, 44100)).rejects.toThrow(ValidationError);
       await expect(analyzeSpectrum(bufferWithInfinity, 44100)).rejects.toThrow(
         'Buffer contains NaN or Infinity values'
       );
@@ -376,17 +366,11 @@ describe('analyzeSpectrum', () => {
     it('should wrap native module errors in NativeModuleError', async () => {
       // Arrange
       const audioBuffer = new Float32Array(1024);
-      mockAnalyzeSpectrum.mockRejectedValueOnce(
-        new Error('Native spectrum analysis failed')
-      );
+      mockAnalyzeSpectrum.mockRejectedValueOnce(new Error('Native spectrum analysis failed'));
 
       // Act & Assert
-      await expect(analyzeSpectrum(audioBuffer, 44100)).rejects.toThrow(
-        NativeModuleError
-      );
-      await expect(analyzeSpectrum(audioBuffer, 44100)).rejects.toThrow(
-        'Spectrum analysis failed'
-      );
+      await expect(analyzeSpectrum(audioBuffer, 44100)).rejects.toThrow(NativeModuleError);
+      await expect(analyzeSpectrum(audioBuffer, 44100)).rejects.toThrow('Spectrum analysis failed');
     });
 
     it('should include context in NativeModuleError', async () => {
@@ -649,11 +633,7 @@ describe('analyzeSpectrum', () => {
 
       // Assert
       expect(result).toBeDefined();
-      expect(mockAnalyzeSpectrum).toHaveBeenCalledWith(
-        expect.any(Array),
-        44100,
-        {}
-      );
+      expect(mockAnalyzeSpectrum).toHaveBeenCalledWith(expect.any(Array), 44100, {});
     });
 
     it('should handle minimum sample rate (8000 Hz)', async () => {

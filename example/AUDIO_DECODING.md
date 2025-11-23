@@ -22,6 +22,7 @@ npx expo prebuild
 ```
 
 **Implementation:**
+
 ```typescript
 import { Player } from 'react-native-audio-toolkit';
 
@@ -58,6 +59,7 @@ async function extractPCMFromRecording(uri: string): Promise<{
 **Best for:** Full control, optimal performance
 
 **iOS (Swift):**
+
 ```swift
 import AVFoundation
 
@@ -85,6 +87,7 @@ func decodeToPCM(fileURL: URL) throws -> ([Float], Int) {
 ```
 
 **Android (Kotlin):**
+
 ```kotlin
 import android.media.MediaCodec
 import android.media.MediaExtractor
@@ -169,11 +172,13 @@ async function extractPCMViaServer(uri: string): Promise<{
 Once you've chosen an approach, update all four screens:
 
 1. **Import the decoder:**
+
 ```typescript
 import { extractPCMFromRecording } from '../utils/audioDecoder';
 ```
 
 2. **Replace synthetic data generation:**
+
 ```typescript
 // OLD (synthetic data):
 const audioBuffer = new Float32Array(bufferSize);
@@ -188,6 +193,7 @@ const audioBuffer = samples.slice(0, 2048); // Use first 2048 samples
 ```
 
 3. **Add error handling:**
+
 ```typescript
 try {
   const { samples, sampleRate } = await extractPCMFromRecording(uri);
@@ -214,16 +220,19 @@ try {
 ## Recommended Next Steps
 
 **Option A: Accept Synthetic Data for MVP (Quickest)**
+
 - Add prominent "DEMO MODE" banner to all screens
 - Update story documentation to clarify synthetic data is intentional for UI demo
 - Note: Does not fully satisfy AC3 "real-time results" but demonstrates DSP API usage
 
 **Option B: Implement Option 1 (react-native-audio-toolkit)**
+
 - Estimated effort: 4-6 hours
 - Requires: Expo dev client build, device testing
 - Result: Full production-ready audio processing
 
 **Option C: Defer to Separate Story**
+
 - Create "Story 5.4.1: Implement Real Audio Decoding"
 - Current story demonstrates UI/UX and DSP integration patterns
 - New story focuses specifically on audio file decoding
@@ -243,6 +252,7 @@ Despite using synthetic data, Story 5.4 delivers significant value:
 ✅ Demonstrates correct DSP API usage patterns
 
 The synthetic data allows users to immediately see and interact with the visualizations without needing platform-specific audio decoding, making it excellent for:
+
 - API demonstration
 - UI/UX reference
 - Integration pattern examples
@@ -253,6 +263,7 @@ The synthetic data allows users to immediately see and interact with the visuali
 For a production example app that processes real audio, choose **Option 1 (react-native-audio-toolkit)** or **Option 2 (custom native module)**. For a quickstart/demo app that shows API usage and UI patterns, the current synthetic data approach is acceptable with clear documentation.
 
 The decision should be made based on:
+
 - Target audience (SDK users learning APIs vs. production app developers)
 - Distribution method (npm package vs. app store)
 - Maintenance burden (simple vs. native module complexity)

@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { detectPitch } from '@loqalabs/loqa-audio-dsp';
-import { startAudioStream, stopAudioStream, addAudioSampleListener } from '@loqalabs/loqa-audio-bridge';
+import {
+  startAudioStream,
+  stopAudioStream,
+  addAudioSampleListener,
+} from '@loqalabs/loqa-audio-bridge';
 import type { EventSubscription } from 'expo-modules-core';
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -144,7 +148,7 @@ export function PitchScreen() {
                     style={[
                       styles.tunerNeedle,
                       {
-                        left: `${50 + (musicalNote.cents / 2)}%`,
+                        left: `${50 + musicalNote.cents / 2}%`,
                       },
                     ]}
                   />
@@ -170,18 +174,29 @@ export function PitchScreen() {
                         {
                           width: `${pitchResult.confidence * 100}%`,
                           backgroundColor:
-                            pitchResult.confidence > 0.7 ? '#27AE60' : pitchResult.confidence > 0.4 ? '#F39C12' : '#E74C3C',
+                            pitchResult.confidence > 0.7
+                              ? '#27AE60'
+                              : pitchResult.confidence > 0.4
+                              ? '#F39C12'
+                              : '#E74C3C',
                         },
                       ]}
                     />
                   </View>
-                  <Text style={styles.confidenceText}>{(pitchResult.confidence * 100).toFixed(0)}%</Text>
+                  <Text style={styles.confidenceText}>
+                    {(pitchResult.confidence * 100).toFixed(0)}%
+                  </Text>
                 </View>
               </View>
 
               <View style={styles.statRow}>
                 <Text style={styles.statLabel}>Voiced:</Text>
-                <Text style={[styles.statValue, { color: pitchResult.isVoiced ? '#27AE60' : '#E74C3C' }]}>
+                <Text
+                  style={[
+                    styles.statValue,
+                    { color: pitchResult.isVoiced ? '#27AE60' : '#E74C3C' },
+                  ]}
+                >
                   {pitchResult.isVoiced ? 'Yes' : 'No'}
                 </Text>
               </View>
@@ -190,7 +205,9 @@ export function PitchScreen() {
             <View style={styles.noResultContainer}>
               <Text style={styles.noResultText}>No pitch detected</Text>
               <Text style={styles.noResultSubtext}>
-                {pitchResult.isVoiced ? 'Audio might be too quiet or noisy' : 'Unvoiced audio segment detected'}
+                {pitchResult.isVoiced
+                  ? 'Audio might be too quiet or noisy'
+                  : 'Unvoiced audio segment detected'}
               </Text>
             </View>
           )}
@@ -200,12 +217,12 @@ export function PitchScreen() {
       <View style={styles.infoContainer}>
         <Text style={styles.infoTitle}>About Pitch Detection</Text>
         <Text style={styles.infoText}>
-          This demo uses the YIN algorithm to detect the fundamental frequency (pitch) of audio signals.
-          Perfect for tuner apps and voice analysis.
+          This demo uses the YIN algorithm to detect the fundamental frequency (pitch) of audio
+          signals. Perfect for tuner apps and voice analysis.
         </Text>
         <Text style={styles.infoText}>
-          This uses real-time audio from your microphone via @loqalabs/loqa-audio-bridge,
-          providing live pitch detection. Try humming or singing a note!
+          This uses real-time audio from your microphone via @loqalabs/loqa-audio-bridge, providing
+          live pitch detection. Try humming or singing a note!
         </Text>
       </View>
     </ScrollView>

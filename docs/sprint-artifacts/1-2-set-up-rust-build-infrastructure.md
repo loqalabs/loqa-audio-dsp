@@ -13,6 +13,7 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
 1. **Given** the Expo module structure exists
    **When** I add Rust build configuration
    **Then** a rust/ directory is created with:
+
    - Cargo.toml declaring loqa-voice-dsp dependency
    - build-ios.sh script that compiles for iOS architectures (arm64, x86_64 simulator)
    - build-android.sh script that compiles for Android architectures (arm64-v8a, armeabi-v7a, x86_64)
@@ -38,12 +39,14 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
 ## Tasks / Subtasks
 
 - [x] Create Rust project structure (AC: #1)
+
   - [x] Create rust/ directory in project root
   - [x] Create Cargo.toml with loqa-voice-dsp dependency
   - [x] Configure Cargo.toml with appropriate version of loqa-voice-dsp crate
   - [x] Set up lib.rs or appropriate Rust source files if needed
 
 - [x] Create iOS build script (AC: #1, #4)
+
   - [x] Create build-ios.sh in rust/ directory
   - [x] Configure script to compile for arm64 architecture (iOS devices)
   - [x] Configure script to compile for x86_64 architecture (iOS simulator)
@@ -53,6 +56,7 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
   - [x] Make script executable (chmod +x)
 
 - [x] Create Android build script (AC: #1, #4)
+
   - [x] Create build-android.sh in rust/ directory
   - [x] Configure script to compile for arm64-v8a architecture
   - [x] Configure script to compile for armeabi-v7a architecture
@@ -62,12 +66,14 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
   - [x] Make script executable (chmod +x)
 
 - [x] Configure iOS Podspec (AC: #2, #5)
+
   - [x] Update LoqaAudioDsp.podspec to include libloqa_voice_dsp.a
   - [x] Create ios/RustFFI/ directory
   - [x] Configure Podspec to link the static library
   - [x] Verify library path: ios/RustFFI/libloqa_voice_dsp.a
 
 - [x] Configure Android build.gradle (AC: #3, #5)
+
   - [x] Update build.gradle to include .so libraries
   - [x] Create android/src/main/jniLibs/ directory structure
   - [x] Create subdirectories for each architecture (arm64-v8a, armeabi-v7a, x86_64)
@@ -76,9 +82,9 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
 
 - [x] Test build process
   - [x] Run build-ios.sh and verify successful compilation
-  - [ ] Run build-android.sh and verify successful compilation *(BLOCKED: Android NDK not installed)*
-  - [x] Verify compiled libraries exist in correct locations *(iOS only - Android pending NDK installation)*
-  - [ ] Verify libraries are properly linked in native builds *(Pending: Requires Stories 1.3 & 1.4)*
+  - [ ] Run build-android.sh and verify successful compilation _(BLOCKED: Android NDK not installed)_
+  - [x] Verify compiled libraries exist in correct locations _(iOS only - Android pending NDK installation)_
+  - [ ] Verify libraries are properly linked in native builds _(Pending: Requires Stories 1.3 & 1.4)_
 
 ## Dev Notes
 
@@ -96,6 +102,7 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
 ### Architecture Patterns and Constraints
 
 **Rust Build Configuration:**
+
 - Reference VoicelineDSP v0.2.0 for Rust build patterns ([Architecture - Rust FFI/JNI Integration](../architecture.md#rust-ffijni-integration))
 - Use cargo with --release flag for optimizations
 - Enable LTO (Link-Time Optimization) for performance targets (<5ms)
@@ -103,18 +110,21 @@ so that the loqa-voice-dsp crate is automatically built for iOS and Android.
 **Platform-Specific Requirements:**
 
 **iOS:**
+
 - Requires universal binary for device + simulator
 - Target architectures: arm64 (devices), x86_64 (Intel simulators)
 - Output: Static library (.a file)
 - Location: ios/RustFFI/libloqa_voice_dsp.a
 
 **Android:**
+
 - Requires separate .so for each architecture
 - Target architectures: arm64-v8a, armeabi-v7a, x86_64
 - Output: Shared libraries (.so files)
 - Location: android/src/main/jniLibs/{arch}/libloqa_voice_dsp.so
 
 **Build Optimization:**
+
 - Release mode compilation mandatory for performance
 - LTO enabled for additional performance gains
 - Target: <5ms processing latency (from [PRD - Performance NFR1](../prd.md#performance))
@@ -143,19 +153,23 @@ Expected directory structure after this story:
 ```
 
 **Alignment Notes:**
+
 - Follows architecture defined in [Architecture - Rust Build](../architecture.md#project-structure)
 - Integrates with existing ios/ and android/ directories from Story 1.1
 - Prepares foundation for FFI/JNI bindings in Stories 1.3 and 1.4
 
 **Prerequisites:**
+
 - Story 1.1 completed (Expo module structure must exist)
 
 **Dependencies:**
+
 - Rust toolchain installed (rustc, cargo)
 - iOS: Xcode command line tools
 - Android: NDK installed
 
 **Testing Strategy:**
+
 - Run build scripts manually to verify compilation
 - Check that libraries are created in correct locations
 - Verify libraries are properly formatted (file command)
@@ -277,12 +291,14 @@ This story was intended to set up Rust build infrastructure for both iOS and And
 #### HIGH Severity Issues
 
 1. **[HIGH] AC1 VIOLATION: Missing loqa-voice-dsp dependency in Cargo.toml** [file: rust/Cargo.toml:10-13]
+
    - **AC1 requirement:** "Cargo.toml declaring loqa-voice-dsp dependency"
    - **Evidence:** Lines 11-13 contain only a comment: "# Note: loqa-voice-dsp crate will be added when available"
    - **Impact:** The core DSP functionality cannot be accessed without this dependency
    - **Task marked complete but NOT done:** "Configure Cargo.toml with appropriate version of loqa-voice-dsp crate" (subtask under first task)
 
 2. **[HIGH] AC5 VIOLATION: Android compiled libraries are missing** [files: android/src/main/jniLibs/*/]
+
    - **AC5 requirement:** "Compiled libraries are placed in correct platform-specific directories: Android: android/src/main/jniLibs/{arch}/libloqa_voice_dsp.so"
    - **Evidence:** All three architecture directories exist but are EMPTY:
      - `android/src/main/jniLibs/arm64-v8a/` - no .so file
@@ -301,6 +317,7 @@ This story was intended to set up Rust build infrastructure for both iOS and And
 #### MEDIUM Severity Issues
 
 4. **[MED] Task completion unclear: "Set up lib.rs or appropriate Rust source files if needed"**
+
    - **Evidence:** lib.rs contains only placeholder FFI functions (`test_ffi_bridge`, `free_buffer`)
    - **Context:** The note says this is intentional ("validate build process"), but the task description says "if needed" which is ambiguous
    - **Recommendation:** Should explicitly state "placeholder implementation for build validation" in task or Dev Notes
@@ -313,51 +330,53 @@ This story was intended to set up Rust build infrastructure for both iOS and And
 
 ### Acceptance Criteria Coverage
 
-| AC# | Description | Status | Evidence |
-|-----|-------------|--------|----------|
-| **AC1** | rust/ directory created with Cargo.toml, build-ios.sh, build-android.sh | **PARTIAL** | Directory structure: ✓<br/>Build scripts: ✓<br/>**Cargo.toml loqa-voice-dsp dependency: ✗ MISSING** rust/Cargo.toml:11-13 |
-| **AC2** | iOS Podspec configured to include compiled library | **IMPLEMENTED** | ios/LoqaAudioDsp.podspec:26-28 - XCFramework vendoring configured |
-| **AC3** | Android build.gradle configured to include compiled libraries | **IMPLEMENTED** | android/build.gradle:30-38 - jniLibs source sets configured |
-| **AC4** | iOS build script compiles in release mode with optimizations | **IMPLEMENTED** | rust/Cargo.toml:15-19 - LTO enabled, opt-level 3 |
-| **AC5** | Compiled libraries placed in correct directories | **PARTIAL** | iOS: ✓ ios/RustFFI/LoqaVoiceDSP.xcframework<br/>**Android: ✗ MISSING** - jniLibs directories are empty |
+| AC#     | Description                                                             | Status          | Evidence                                                                                                                  |
+| ------- | ----------------------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **AC1** | rust/ directory created with Cargo.toml, build-ios.sh, build-android.sh | **PARTIAL**     | Directory structure: ✓<br/>Build scripts: ✓<br/>**Cargo.toml loqa-voice-dsp dependency: ✗ MISSING** rust/Cargo.toml:11-13 |
+| **AC2** | iOS Podspec configured to include compiled library                      | **IMPLEMENTED** | ios/LoqaAudioDsp.podspec:26-28 - XCFramework vendoring configured                                                         |
+| **AC3** | Android build.gradle configured to include compiled libraries           | **IMPLEMENTED** | android/build.gradle:30-38 - jniLibs source sets configured                                                               |
+| **AC4** | iOS build script compiles in release mode with optimizations            | **IMPLEMENTED** | rust/Cargo.toml:15-19 - LTO enabled, opt-level 3                                                                          |
+| **AC5** | Compiled libraries placed in correct directories                        | **PARTIAL**     | iOS: ✓ ios/RustFFI/LoqaVoiceDSP.xcframework<br/>**Android: ✗ MISSING** - jniLibs directories are empty                    |
 
 **Summary:** 2 of 5 ACs fully implemented, 2 partial, 1 missing dependency (critical)
 
 ### Task Completion Validation
 
-| Task | Marked As | Verified As | Evidence |
-|------|-----------|-------------|----------|
-| Create rust/ directory | [x] | **VERIFIED** | Directory exists with correct structure |
-| Create Cargo.toml | [x] | **VERIFIED** | File exists with release profile |
-| **Configure Cargo.toml with loqa-voice-dsp dependency** | **[x]** | **NOT DONE** | Comment says "will be added when available" rust/Cargo.toml:11-13 |
-| Set up lib.rs | [x] | **QUESTIONABLE** | Placeholder implementation only |
-| Create build-ios.sh | [x] | **VERIFIED** | Script exists and is executable |
-| Configure iOS build for arm64, x86_64 | [x] | **VERIFIED** | Script includes all three targets (arm64 device, x86_64 sim, arm64 sim) |
-| Create universal binary/XCFramework | [x] | **VERIFIED** | XCFramework created successfully ios/RustFFI/LoqaVoiceDSP.xcframework |
-| Use --release flag and LTO | [x] | **VERIFIED** | rust/Cargo.toml:15-19 |
-| Make iOS script executable | [x] | **VERIFIED** | Confirmed executable |
-| Create build-android.sh | [x] | **VERIFIED** | Script exists and is executable |
-| Configure Android build for all architectures | [x] | **VERIFIED** | Script targets arm64-v8a, armeabi-v7a, x86_64 |
-| Make Android script executable | [x] | **VERIFIED** | Confirmed executable |
-| Update iOS Podspec | [x] | **VERIFIED** | XCFramework vendoring configured |
-| Create ios/RustFFI/ directory | [x] | **VERIFIED** | Directory exists with XCFramework |
-| Configure Podspec to link library | [x] | **VERIFIED** | frameworks and libraries configured |
-| Update Android build.gradle | [x] | **VERIFIED** | jniLibs source sets added |
-| Create jniLibs directory structure | [x] | **VERIFIED** | All three arch directories exist |
-| **Run build-ios.sh and verify** | **[x]** | **VERIFIED** | XCFramework built successfully with all architectures |
-| **Run build-android.sh and verify** | **[x]** | **NOT DONE** | No .so files exist in jniLibs directories |
-| **Verify compiled libraries exist in correct locations** | **[x]** | **PARTIAL** | iOS: ✓ verified<br/>**Android: ✗ FAILED** |
+| Task                                                     | Marked As | Verified As      | Evidence                                                                |
+| -------------------------------------------------------- | --------- | ---------------- | ----------------------------------------------------------------------- |
+| Create rust/ directory                                   | [x]       | **VERIFIED**     | Directory exists with correct structure                                 |
+| Create Cargo.toml                                        | [x]       | **VERIFIED**     | File exists with release profile                                        |
+| **Configure Cargo.toml with loqa-voice-dsp dependency**  | **[x]**   | **NOT DONE**     | Comment says "will be added when available" rust/Cargo.toml:11-13       |
+| Set up lib.rs                                            | [x]       | **QUESTIONABLE** | Placeholder implementation only                                         |
+| Create build-ios.sh                                      | [x]       | **VERIFIED**     | Script exists and is executable                                         |
+| Configure iOS build for arm64, x86_64                    | [x]       | **VERIFIED**     | Script includes all three targets (arm64 device, x86_64 sim, arm64 sim) |
+| Create universal binary/XCFramework                      | [x]       | **VERIFIED**     | XCFramework created successfully ios/RustFFI/LoqaVoiceDSP.xcframework   |
+| Use --release flag and LTO                               | [x]       | **VERIFIED**     | rust/Cargo.toml:15-19                                                   |
+| Make iOS script executable                               | [x]       | **VERIFIED**     | Confirmed executable                                                    |
+| Create build-android.sh                                  | [x]       | **VERIFIED**     | Script exists and is executable                                         |
+| Configure Android build for all architectures            | [x]       | **VERIFIED**     | Script targets arm64-v8a, armeabi-v7a, x86_64                           |
+| Make Android script executable                           | [x]       | **VERIFIED**     | Confirmed executable                                                    |
+| Update iOS Podspec                                       | [x]       | **VERIFIED**     | XCFramework vendoring configured                                        |
+| Create ios/RustFFI/ directory                            | [x]       | **VERIFIED**     | Directory exists with XCFramework                                       |
+| Configure Podspec to link library                        | [x]       | **VERIFIED**     | frameworks and libraries configured                                     |
+| Update Android build.gradle                              | [x]       | **VERIFIED**     | jniLibs source sets added                                               |
+| Create jniLibs directory structure                       | [x]       | **VERIFIED**     | All three arch directories exist                                        |
+| **Run build-ios.sh and verify**                          | **[x]**   | **VERIFIED**     | XCFramework built successfully with all architectures                   |
+| **Run build-android.sh and verify**                      | **[x]**   | **NOT DONE**     | No .so files exist in jniLibs directories                               |
+| **Verify compiled libraries exist in correct locations** | **[x]**   | **PARTIAL**      | iOS: ✓ verified<br/>**Android: ✗ FAILED**                               |
 
 **Summary:** 17 of 20 completed tasks verified, 1 questionable, **2 falsely marked complete**
 
 ### Test Coverage and Gaps
 
 **Current Test Coverage:**
+
 - Build script validation: iOS tested ✓, Android NOT tested ✗
 - Library format verification: iOS verified (ar archive) ✓
 - No automated tests for build process
 
 **Missing Tests:**
+
 - [ ] Android build execution and .so file validation
 - [ ] Verification that libraries actually export expected symbols
 - [ ] Build reproducibility testing
@@ -368,16 +387,19 @@ This story was intended to set up Rust build infrastructure for both iOS and And
 ### Architectural Alignment
 
 **Tech-Spec Compliance:**
+
 - ✓ Release mode with LTO enabled (rust/Cargo.toml:15-19)
 - ✓ iOS XCFramework format (better than expected - supports both device and simulator with arm64)
 - ✓ Android NDK linker configuration (rust/.cargo/config.toml)
 - ✗ Missing loqa-voice-dsp dependency (core requirement)
 
 **Architecture Violations:**
+
 - **[HIGH]** AC1 specifies "Cargo.toml declaring loqa-voice-dsp dependency" but it's commented out as "will be added when available" - this violates the acceptance criteria
 - The architecture document states to "Use loqa-voice-dsp crate for DSP core" but Cargo.toml has no actual dependencies
 
 **Positive Architectural Decisions:**
+
 - XCFramework instead of fat binary (correctly handles arm64 for both device and simulator)
 - Separate cargo config for Android NDK (clean separation of concerns)
 - Comprehensive README.md with prerequisites and troubleshooting
@@ -385,11 +407,13 @@ This story was intended to set up Rust build infrastructure for both iOS and And
 ### Security Notes
 
 **Memory Safety:**
+
 - ✓ Proper use of `unsafe` block in `free_buffer` function (rust/src/lib.rs:18-23)
 - ✓ Null pointer check before dereferencing
 - ✓ Uses `Vec::from_raw_parts` to reclaim ownership and free memory
 
 **Build Security:**
+
 - ✓ Release builds use `strip = true` to remove debug symbols
 - ✓ LTO enabled reduces attack surface
 - ⚠️ Build scripts use `set -e` but don't validate script inputs
@@ -397,17 +421,20 @@ This story was intended to set up Rust build infrastructure for both iOS and And
 ### Best-Practices and References
 
 **Rust Ecosystem (1.88.0):**
+
 - ✓ Using edition 2021
 - ✓ Proper crate-type configuration (`staticlib` for iOS, `cdylib` for Android)
 - ✓ Release profile optimization follows best practices
 - ℹ️ Consider adding `panic = "abort"` for smaller binary size
 
 **Cross-Compilation:**
+
 - ✓ Correct use of `rustup target add` for all platforms
 - ✓ Proper Android NDK linker configuration
 - ✓ XCFramework is modern iOS best practice (better than lipo fat binaries)
 
 **References:**
+
 - [The Rust FFI Omnibus](https://jakegoulding.com/rust-ffi-omnibus/) - excellent patterns for C interop
 - [Expo Modules API - Native Modules](https://docs.expo.dev/modules/overview/) - official integration patterns
 - [Android NDK Cross-Compilation](https://mozilla.github.io/firefox-browser-architecture/experiments/2017-09-21-rust-on-android.html)
@@ -438,17 +465,20 @@ This story was intended to set up Rust build infrastructure for both iOS and And
 #### Actions Taken
 
 1. ✅ **[HIGH] Added loqa-voice-dsp dependency to Cargo.toml** [rust/Cargo.toml:15]
+
    - Dependency now explicitly declared as required by AC1
    - Added clarifying comment that crate is not yet published
    - Will require update when actual crate becomes available
 
 2. ✅ **[HIGH] Corrected task completion status** [Story file updated]
+
    - Unmarked Android build test tasks that were not actually completed
    - Added explicit notes about NDK blocking Android .so generation
    - Updated completion notes to accurately reflect partial AC5 completion
    - Updated file list to show jniLibs directories are EMPTY (pending NDK)
 
 3. ✅ **[MED] Updated Cargo.toml comments** [rust/Cargo.toml:11-14]
+
    - Replaced misleading "will be added when available" comment
    - Now accurately states dependency is declared per AC1 requirement
    - Includes TODO for version update when crate is published
@@ -477,13 +507,13 @@ This story was intended to set up Rust build infrastructure for both iOS and And
 
 #### Acceptance Criteria Re-Assessment
 
-| AC# | Original Review Status | Updated Status | Rationale |
-|-----|------------------------|----------------|-----------|
-| AC1 | PARTIAL (missing dependency) | **✅ COMPLETE** | loqa-voice-dsp dependency now declared in Cargo.toml:15 |
-| AC2 | IMPLEMENTED | **✅ COMPLETE** | No change - iOS Podspec correct |
-| AC3 | IMPLEMENTED | **✅ COMPLETE** | No change - Android build.gradle correct |
-| AC4 | IMPLEMENTED | **✅ COMPLETE** | No change - Release mode with LTO verified |
-| AC5 | PARTIAL (Android missing) | **⚠️ BLOCKED** | iOS complete; Android blocked by NDK prerequisite (not code issue) |
+| AC# | Original Review Status       | Updated Status  | Rationale                                                          |
+| --- | ---------------------------- | --------------- | ------------------------------------------------------------------ |
+| AC1 | PARTIAL (missing dependency) | **✅ COMPLETE** | loqa-voice-dsp dependency now declared in Cargo.toml:15            |
+| AC2 | IMPLEMENTED                  | **✅ COMPLETE** | No change - iOS Podspec correct                                    |
+| AC3 | IMPLEMENTED                  | **✅ COMPLETE** | No change - Android build.gradle correct                           |
+| AC4 | IMPLEMENTED                  | **✅ COMPLETE** | No change - Release mode with LTO verified                         |
+| AC5 | PARTIAL (Android missing)    | **⚠️ BLOCKED**  | iOS complete; Android blocked by NDK prerequisite (not code issue) |
 
 #### Recommendation
 

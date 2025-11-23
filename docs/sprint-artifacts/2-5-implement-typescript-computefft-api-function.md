@@ -33,6 +33,7 @@ so that users have a typed, validated interface to FFT analysis.
 ### Learnings from Previous Story
 
 **From Story 2-4-implement-typescript-input-validation (Status: drafted)**
+
 - **Validation Functions Ready**: validateAudioBuffer, validateSampleRate, validateFFTSize available
 - **Error Classes Ready**: ValidationError for input errors, NativeModuleError for native failures
 - **Next Step**: Use these utilities in computeFFT implementation
@@ -58,6 +59,7 @@ claude-sonnet-4-5-20250929
 ### Debug Log
 
 **Implementation Plan:**
+
 1. Created src/computeFFT.ts with complete implementation following architecture patterns
 2. Implemented input validation using existing validateAudioBuffer and validateFFTSize functions
 3. Extracted options with sensible defaults: fftSize (buffer.length), windowType ('hanning'), includePhase (false)
@@ -69,6 +71,7 @@ claude-sonnet-4-5-20250929
 9. Exported computeFFT from src/index.ts
 
 **Key Implementation Details:**
+
 - Default sampleRate set to 44100 Hz for frequency bin calculation (standard audio CD quality)
 - Proper type conversion: Float32Array/number[] → number[] → native → number[] → Float32Array
 - All acceptance criteria satisfied:
@@ -103,6 +106,7 @@ Story 2.5 successfully implements the TypeScript computeFFT API function with co
 ### Key Findings
 
 **✅ Strengths:**
+
 - **Complete AC Coverage:** All 6 acceptance criteria implemented with file:line evidence
 - **Verified Task Completion:** All 8 tasks confirmed complete (0 false completions)
 - **Excellent Documentation:** Comprehensive JSDoc comments with usage examples
@@ -112,33 +116,34 @@ Story 2.5 successfully implements the TypeScript computeFFT API function with co
 - **Comprehensive Logging:** Debug logs at all critical execution points
 
 **ℹ️ Advisory Notes (LOW severity):**
+
 - Sample rate is hardcoded to 44100 Hz without user configuration option (acceptable for MVP; consider making configurable in future epic)
 
 ### Acceptance Criteria Coverage
 
-| AC# | Description | Status | Evidence |
-|-----|-------------|--------|----------|
-| AC1 | Function signature matches specification | ✅ IMPLEMENTED | [src/computeFFT.ts:36-39](src/computeFFT.ts#L36-L39) - Signature: `async function computeFFT(audioBuffer: Float32Array \| number[], options?: FFTOptions): Promise<FFTResult>` |
-| AC2 | Validates audioBuffer using validateAudioBuffer() | ✅ IMPLEMENTED | [src/computeFFT.ts:47](src/computeFFT.ts#L47) - Direct call: `validateAudioBuffer(audioBuffer);` |
-| AC3 | Extracts fftSize, windowType with defaults | ✅ IMPLEMENTED | [src/computeFFT.ts:50-52](src/computeFFT.ts#L50-L52) - Defaults: fftSize=buffer.length, windowType='hanning', includePhase=false |
-| AC4 | Converts Float32Array to number[] for bridge | ✅ IMPLEMENTED | [src/computeFFT.ts:59-60](src/computeFFT.ts#L59-L60) - Conditional: `instanceof Float32Array ? Array.from(audioBuffer) : audioBuffer` |
-| AC5 | Converts to FFTResult with Float32Array | ✅ IMPLEMENTED | [src/computeFFT.ts:88-92](src/computeFFT.ts#L88-L92) - Result uses: `new Float32Array(nativeResult.magnitude)` |
-| AC6 | Wraps native errors in NativeModuleError | ✅ IMPLEMENTED | [src/computeFFT.ts:100-116](src/computeFFT.ts#L100-L116) - try/catch wraps with context |
+| AC# | Description                                       | Status         | Evidence                                                                                                                                                                       |
+| --- | ------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| AC1 | Function signature matches specification          | ✅ IMPLEMENTED | [src/computeFFT.ts:36-39](src/computeFFT.ts#L36-L39) - Signature: `async function computeFFT(audioBuffer: Float32Array \| number[], options?: FFTOptions): Promise<FFTResult>` |
+| AC2 | Validates audioBuffer using validateAudioBuffer() | ✅ IMPLEMENTED | [src/computeFFT.ts:47](src/computeFFT.ts#L47) - Direct call: `validateAudioBuffer(audioBuffer);`                                                                               |
+| AC3 | Extracts fftSize, windowType with defaults        | ✅ IMPLEMENTED | [src/computeFFT.ts:50-52](src/computeFFT.ts#L50-L52) - Defaults: fftSize=buffer.length, windowType='hanning', includePhase=false                                               |
+| AC4 | Converts Float32Array to number[] for bridge      | ✅ IMPLEMENTED | [src/computeFFT.ts:59-60](src/computeFFT.ts#L59-L60) - Conditional: `instanceof Float32Array ? Array.from(audioBuffer) : audioBuffer`                                          |
+| AC5 | Converts to FFTResult with Float32Array           | ✅ IMPLEMENTED | [src/computeFFT.ts:88-92](src/computeFFT.ts#L88-L92) - Result uses: `new Float32Array(nativeResult.magnitude)`                                                                 |
+| AC6 | Wraps native errors in NativeModuleError          | ✅ IMPLEMENTED | [src/computeFFT.ts:100-116](src/computeFFT.ts#L100-L116) - try/catch wraps with context                                                                                        |
 
 **Summary:** ✅ **6 of 6 acceptance criteria fully implemented**
 
 ### Task Completion Validation
 
-| Task | Marked As | Verified As | Evidence |
-|------|-----------|-------------|----------|
-| Create src/computeFFT.ts | [x] COMPLETED | ✅ VERIFIED | File exists: [src/computeFFT.ts](src/computeFFT.ts) with 118 lines |
-| Implement input validation | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:47,55](src/computeFFT.ts#L47) - Both validateAudioBuffer() and validateFFTSize() called |
-| Extract and validate options | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:50-52](src/computeFFT.ts#L50-L52) - All options extracted with defaults |
-| Call LoqaAudioDspModule.computeFFT | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:73-78](src/computeFFT.ts#L73-L78) - Native module called correctly |
-| Convert result to FFTResult type | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:88-92](src/computeFFT.ts#L88-L92) - Proper FFTResult with Float32Array |
-| Wrap errors in NativeModuleError | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:100-116](src/computeFFT.ts#L100-L116) - try/catch with context |
-| Add debug logging | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:41,62,80,94,104](src/computeFFT.ts#L41) - 5 logDebug() calls |
-| Export from src/index.ts | [x] COMPLETED | ✅ VERIFIED | [src/index.ts:26](src/index.ts#L26) - `export { computeFFT } from './computeFFT';` |
+| Task                               | Marked As     | Verified As | Evidence                                                                                                   |
+| ---------------------------------- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------- |
+| Create src/computeFFT.ts           | [x] COMPLETED | ✅ VERIFIED | File exists: [src/computeFFT.ts](src/computeFFT.ts) with 118 lines                                         |
+| Implement input validation         | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:47,55](src/computeFFT.ts#L47) - Both validateAudioBuffer() and validateFFTSize() called |
+| Extract and validate options       | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:50-52](src/computeFFT.ts#L50-L52) - All options extracted with defaults                 |
+| Call LoqaAudioDspModule.computeFFT | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:73-78](src/computeFFT.ts#L73-L78) - Native module called correctly                      |
+| Convert result to FFTResult type   | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:88-92](src/computeFFT.ts#L88-L92) - Proper FFTResult with Float32Array                  |
+| Wrap errors in NativeModuleError   | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:100-116](src/computeFFT.ts#L100-L116) - try/catch with context                          |
+| Add debug logging                  | [x] COMPLETED | ✅ VERIFIED | [src/computeFFT.ts:41,62,80,94,104](src/computeFFT.ts#L41) - 5 logDebug() calls                            |
+| Export from src/index.ts           | [x] COMPLETED | ✅ VERIFIED | [src/index.ts:26](src/index.ts#L26) - `export { computeFFT } from './computeFFT';`                         |
 
 **Summary:** ✅ **8 of 8 completed tasks verified, 0 questionable, 0 falsely marked complete**
 
@@ -176,6 +181,7 @@ Story 2.5 successfully implements the TypeScript computeFFT API function with co
 ### Best-Practices and References
 
 **Code Quality Patterns:**
+
 - ✅ Comprehensive JSDoc documentation with examples
 - ✅ Clear step-by-step code comments
 - ✅ Proper type narrowing for union types
@@ -183,6 +189,7 @@ Story 2.5 successfully implements the TypeScript computeFFT API function with co
 - ✅ Strategic debug logging at key execution points
 
 **Architecture References:**
+
 - [Architecture - TypeScript API Layer](docs/architecture.md#api-contracts)
 - [Architecture - Error Handling](docs/architecture.md#error-handling)
 - [Architecture - Data Marshalling](docs/architecture.md#data-flow)
@@ -190,5 +197,6 @@ Story 2.5 successfully implements the TypeScript computeFFT API function with co
 ### Action Items
 
 **Advisory Notes:**
+
 - Note: Consider adding optional `sampleRate` parameter to FFTOptions in Epic 3+ to allow users to specify their actual audio sample rate for accurate frequency bin calculations (currently defaults to 44100 Hz)
 - Note: Documentation should clarify that the returned frequency array assumes a 44100 Hz sample rate by default

@@ -186,11 +186,7 @@ describe('extractFormants', () => {
 
       // Assert
       expect(result).toBeDefined();
-      expect(mockExtractFormants).toHaveBeenCalledWith(
-        audioBuffer,
-        44100,
-        expect.any(Object)
-      );
+      expect(mockExtractFormants).toHaveBeenCalledWith(audioBuffer, 44100, expect.any(Object));
     });
 
     it('should validate input is appropriate for various sample rates', async () => {
@@ -402,12 +398,12 @@ describe('extractFormants', () => {
       const audioBuffer = new Float32Array(2048);
 
       // Act & Assert
-      await expect(
-        extractFormants(audioBuffer, 44100, { lpcOrder: -5 })
-      ).rejects.toThrow(NativeModuleError);
-      await expect(
-        extractFormants(audioBuffer, 44100, { lpcOrder: -5 })
-      ).rejects.toThrow('LPC order must be positive');
+      await expect(extractFormants(audioBuffer, 44100, { lpcOrder: -5 })).rejects.toThrow(
+        NativeModuleError
+      );
+      await expect(extractFormants(audioBuffer, 44100, { lpcOrder: -5 })).rejects.toThrow(
+        'LPC order must be positive'
+      );
     });
 
     it('should throw NativeModuleError for zero LPC order', async () => {
@@ -428,9 +424,7 @@ describe('extractFormants', () => {
     it('should wrap native module errors in NativeModuleError', async () => {
       // Arrange
       const audioBuffer = new Float32Array(2048);
-      mockExtractFormants.mockRejectedValueOnce(
-        new Error('Native formant extraction failed')
-      );
+      mockExtractFormants.mockRejectedValueOnce(new Error('Native formant extraction failed'));
 
       // Act & Assert
       await expect(extractFormants(audioBuffer, 44100)).rejects.toThrow(NativeModuleError);

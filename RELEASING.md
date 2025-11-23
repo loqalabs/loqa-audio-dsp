@@ -11,6 +11,7 @@ Releases are automated via GitHub Actions. When a version tag is pushed, the CI 
 Before releasing, ensure you have:
 
 1. **NPM_TOKEN Secret**: Configured in GitHub repository settings
+
    - Go to: Settings → Secrets and variables → Actions
    - Add secret named `NPM_TOKEN` with your npm access token
    - Token must have publish permissions for `@loqalabs` scope
@@ -41,15 +42,19 @@ Edit `CHANGELOG.md` to document changes in the new version:
 ## [X.Y.Z] - YYYY-MM-DD
 
 ### Added
+
 - New features
 
 ### Changed
+
 - Changes to existing functionality
 
 ### Fixed
+
 - Bug fixes
 
 ### Removed
+
 - Removed features
 ```
 
@@ -71,6 +76,7 @@ npm version major
 ```
 
 This command will:
+
 - Update `package.json` version
 - Create a git commit with the version change
 - Create a git tag (e.g., `v0.1.1`)
@@ -106,6 +112,7 @@ npm view @loqalabs/loqa-audio-dsp
 ```
 
 Check that:
+
 - Version matches your release
 - Published date is recent
 - Files are correctly included
@@ -149,6 +156,7 @@ After release:
 **Issue**: GitHub Actions publish step fails
 
 **Solution**:
+
 1. Check NPM_TOKEN secret is configured correctly
 2. Verify token has publish permissions
 3. Ensure package name is available on npm
@@ -159,6 +167,7 @@ After release:
 **Issue**: Cannot create tag because it already exists
 
 **Solution**:
+
 ```bash
 # Delete local tag
 git tag -d v0.1.0
@@ -176,6 +185,7 @@ git push origin main --tags
 **Issue**: Tests pass locally but fail in GitHub Actions
 
 **Solution**:
+
 1. Check Node.js version matches CI (18+)
 2. Ensure all dependencies are in `package.json` (not global)
 3. Review CI logs for environment differences
@@ -186,6 +196,7 @@ git push origin main --tags
 **Issue**: Package published but `npm install` fails
 
 **Solution**:
+
 1. Wait a few minutes for npm CDN propagation
 2. Try installing with full version: `npm install @loqalabs/loqa-audio-dsp@0.1.0`
 3. Check package is public: `npm access public @loqalabs/loqa-audio-dsp`
@@ -218,12 +229,14 @@ Follow [Semantic Versioning](https://semver.org/):
 - **PATCH** (0.0.X): Bug fixes, backward compatible
 
 For pre-1.0.0 releases:
+
 - Breaking changes are allowed in MINOR versions
 - We're currently in MVP phase (0.1.x)
 
 ## Questions?
 
 For issues with the release process:
+
 - File an issue: https://github.com/loqalabs/loqa-audio-dsp/issues
 - Contact maintainers: Loqa Labs
 

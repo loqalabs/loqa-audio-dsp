@@ -32,6 +32,7 @@ so that Android apps can perform frequency analysis.
 ### Learnings from Previous Story
 
 **From Story 2-2-implement-ios-computefft-native-function (Status: drafted)**
+
 - **iOS FFT Working**: Swift implementation complete with proper memory management
 - **Cross-Platform Pattern**: Android should mirror iOS API and behavior
 - **Validation Rules**: Same validation as iOS (power-of-2, 256-8192 range)
@@ -123,6 +124,7 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 ### Outcome: APPROVED WITH DEFERRED ITEMS ✅
 
 **Justification:**
+
 - One task falsely marked complete (Android device/emulator testing - NO evidence found)
 - Critical FFI/JNI integration error that will cause runtime failures
 - Zero functional test coverage for Android FFT implementation
@@ -133,6 +135,7 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 #### HIGH Severity
 
 **1. Task Falsely Marked Complete: "Test on Android device/emulator"**
+
 - **Marked As:** [x] Complete
 - **Verified As:** ❌ NOT DONE
 - **Evidence:** No test logs, screenshots, device output, or emulator results found. Android test file (FFTTests.kt) contains only 3 placeholder tests with no FFT execution.
@@ -140,10 +143,12 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 - **Required Action:** Must actually run computeFFT on Android device/emulator and document results
 
 **2. Critical FFI/JNI Signature Mismatch**
+
 - **Location:** rust/src/lib.rs:33-38 vs RustBridge.kt:49-53 vs LoqaAudioDspModule.kt:79
 - **Issue:** Rust function signature incompatible with Kotlin JNI expectations
 
   **Rust Function (lib.rs:33):**
+
   ```rust
   pub unsafe extern "C" fn compute_fft_rust(
       buffer: *const c_float,
@@ -154,6 +159,7 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
   ```
 
   **Kotlin JNI Declaration (RustBridge.kt:49):**
+
   ```kotlin
   external fun nativeComputeFFT(
       buffer: FloatArray,
@@ -163,6 +169,7 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
   ```
 
   **Mismatch Details:**
+
   - Rust expects 4 parameters: (buffer, length, sample_rate, fft_size)
   - Kotlin provides 3 parameters: (buffer, fftSize, windowType)
   - windowType parameter present in Kotlin but NOT in Rust
@@ -175,6 +182,7 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 #### MEDIUM Severity
 
 **3. No Functional Test Coverage**
+
 - **Location:** android/src/test/java/com/loqalabs/loqaaudiodsp/FFTTests.kt
 - **Issue:** Test file contains only 3 placeholder tests - zero FFT computation validation
   - `testFFTTestInfrastructure()` - JUnit check only
@@ -185,6 +193,7 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 - **Required Action:** Add functional tests calling computeFFT with sine wave validation
 
 **4. Rust/Kotlin Parameter Set Mismatch**
+
 - **Location:** rust/src/lib.rs:33-38
 - **Issue:** Rust comment (line 29-31) says window type handled at TypeScript layer, but Kotlin code attempts to pass windowType to Rust
 - **Impact:** Implementation inconsistency - unclear where windowing is actually applied
@@ -192,38 +201,40 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 
 ### Acceptance Criteria Coverage
 
-| AC# | Description | Status | Evidence (file:line) |
-|-----|-------------|--------|---------------------|
-| AC1 | LoqaAudioDspModule.kt exposes async function with proper signature | ✅ IMPLEMENTED | LoqaAudioDspModule.kt:46-98 - AsyncFunction properly declared |
-| AC2 | Validates buffer not empty, fftSize power of 2, range 256-8192 | ✅ IMPLEMENTED | LoqaAudioDspModule.kt:52-65 - All validations present |
-| AC3 | Calls RustBridge.computeFFT(buffer, fftSize, windowType) | ❌ PARTIAL | LoqaAudioDspModule.kt:79 - Kotlin calls correctly, but Rust signature doesn't match |
-| AC4 | JNI handles FloatArray marshalling automatically | ✅ IMPLEMENTED | LoqaAudioDspModule.kt:79 - FloatArray used directly |
-| AC5 | Returns map with "magnitude" and "frequencies" | ✅ IMPLEMENTED | LoqaAudioDspModule.kt:81-89 - Frequencies built, map returned |
-| AC6 | Catches exceptions and rejects with error codes | ✅ IMPLEMENTED | LoqaAudioDspModule.kt:53-74,91-97 - VALIDATION_ERROR and FFT_ERROR codes |
+| AC# | Description                                                        | Status         | Evidence (file:line)                                                                |
+| --- | ------------------------------------------------------------------ | -------------- | ----------------------------------------------------------------------------------- |
+| AC1 | LoqaAudioDspModule.kt exposes async function with proper signature | ✅ IMPLEMENTED | LoqaAudioDspModule.kt:46-98 - AsyncFunction properly declared                       |
+| AC2 | Validates buffer not empty, fftSize power of 2, range 256-8192     | ✅ IMPLEMENTED | LoqaAudioDspModule.kt:52-65 - All validations present                               |
+| AC3 | Calls RustBridge.computeFFT(buffer, fftSize, windowType)           | ❌ PARTIAL     | LoqaAudioDspModule.kt:79 - Kotlin calls correctly, but Rust signature doesn't match |
+| AC4 | JNI handles FloatArray marshalling automatically                   | ✅ IMPLEMENTED | LoqaAudioDspModule.kt:79 - FloatArray used directly                                 |
+| AC5 | Returns map with "magnitude" and "frequencies"                     | ✅ IMPLEMENTED | LoqaAudioDspModule.kt:81-89 - Frequencies built, map returned                       |
+| AC6 | Catches exceptions and rejects with error codes                    | ✅ IMPLEMENTED | LoqaAudioDspModule.kt:53-74,91-97 - VALIDATION_ERROR and FFT_ERROR codes            |
 
 **AC Coverage:** 5 of 6 implemented, 1 PARTIAL (AC3 - signature mismatch prevents proper execution)
 
 ### Task Completion Validation
 
-| Task | Marked | Verified | Evidence |
-|------|--------|----------|----------|
-| Update LoqaAudioDspModule.kt with computeFFT | [x] | ✅ VERIFIED | LoqaAudioDspModule.kt:46-98 |
-| Implement input validation (buffer, fftSize) | [x] | ✅ VERIFIED | LoqaAudioDspModule.kt:52-65 |
-| Call RustBridge.computeFFT via JNI | [x] | ⚠️ QUESTIONABLE | LoqaAudioDspModule.kt:79 - Call exists but signature mismatch |
-| Build frequencies array | [x] | ✅ VERIFIED | LoqaAudioDspModule.kt:82-84 |
-| Return result map | [x] | ✅ VERIFIED | LoqaAudioDspModule.kt:87-90 |
-| Implement error handling with Promise.reject | [x] | ✅ VERIFIED | LoqaAudioDspModule.kt:53-74,91-97 |
-| **Test on Android device/emulator** | **[x]** | **❌ NOT DONE** | **NO EVIDENCE - Only placeholder tests exist** |
+| Task                                         | Marked  | Verified        | Evidence                                                      |
+| -------------------------------------------- | ------- | --------------- | ------------------------------------------------------------- |
+| Update LoqaAudioDspModule.kt with computeFFT | [x]     | ✅ VERIFIED     | LoqaAudioDspModule.kt:46-98                                   |
+| Implement input validation (buffer, fftSize) | [x]     | ✅ VERIFIED     | LoqaAudioDspModule.kt:52-65                                   |
+| Call RustBridge.computeFFT via JNI           | [x]     | ⚠️ QUESTIONABLE | LoqaAudioDspModule.kt:79 - Call exists but signature mismatch |
+| Build frequencies array                      | [x]     | ✅ VERIFIED     | LoqaAudioDspModule.kt:82-84                                   |
+| Return result map                            | [x]     | ✅ VERIFIED     | LoqaAudioDspModule.kt:87-90                                   |
+| Implement error handling with Promise.reject | [x]     | ✅ VERIFIED     | LoqaAudioDspModule.kt:53-74,91-97                             |
+| **Test on Android device/emulator**          | **[x]** | **❌ NOT DONE** | **NO EVIDENCE - Only placeholder tests exist**                |
 
 **Task Summary:** 5 of 7 verified complete, 1 questionable (JNI signature mismatch), **1 falsely marked complete (device testing)**
 
 ### Test Coverage and Gaps
 
 **Current Coverage:**
+
 - ❌ **Android Unit Tests:** 3 placeholder tests only - NO FFT computation tests
 - ✅ **Rust Tests:** Comprehensive (11 tests covering validation, sine wave, memory safety)
 
 **Missing Tests (Required):**
+
 - [ ] Android test calling computeFFT with valid sine wave input (AC validation)
 - [ ] Android test validating magnitude array length and content
 - [ ] Android test validating frequencies array calculation
@@ -237,19 +248,22 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 **Architecture Violations:**
 
 **HIGH - FFI/JNI Integration Pattern Violated**
+
 - Architecture document (architecture.md#integration-points) shows windowType parameter in the documented pattern
 - Rust implementation (lib.rs:29-31) comments indicate "window type handled at TypeScript layer for v0.1.0"
 - Kotlin implementation passes windowType to Rust (contradicting Rust comment)
 - **Result:** Inconsistent implementation - unclear design intent
 
 **Tech Stack Compliance:**
+
 - ✅ Expo AsyncFunction pattern correctly used
 - ✅ Error handling follows architecture (exception-based)
 - ✅ Validation before native call (good practice)
 - ❌ FFI/JNI signature mismatch violates integration pattern
 
 **No Epic Tech Spec Found:**
-- Searched for tech-spec-epic-2*.md - none exists
+
+- Searched for tech-spec-epic-2\*.md - none exists
 - Cannot verify against epic-level technical specifications
 
 ### Security Notes
@@ -257,6 +271,7 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 **No Critical Security Issues**
 
 **Positive Practices:**
+
 - ✅ Input validation prevents buffer overflow
 - ✅ Power of 2 validation prevents integer overflow
 - ✅ Range validation (256-8192) prevents excessive memory allocation
@@ -265,6 +280,7 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 ### Best-Practices and References
 
 **Tech Stack:**
+
 - Kotlin 1.9+ (Android)
 - JNI (Java Native Interface)
 - Rust with C FFI
@@ -273,17 +289,20 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 - JUnit 4.13+ testing
 
 **Best Practices Followed:**
+
 - ✅ Expo AsyncFunction for background execution
 - ✅ Comprehensive input validation
 - ✅ Structured error codes
 - ✅ Clear code documentation
 
 **Best Practices Violated:**
+
 - ❌ JNI signature doesn't match Rust C function
 - ❌ No functional tests for Android native module
 - ❌ Story marked complete without device testing evidence
 
 **References:**
+
 - [Expo Modules API Documentation](https://docs.expo.dev/modules/overview/)
 - [Android JNI Best Practices](https://developer.android.com/training/articles/perf-jni)
 - [Rust FFI Guide](https://doc.rust-lang.org/nomicon/ffi.html)
@@ -306,6 +325,7 @@ Systematic review of Story 2.3 revealed **CRITICAL BLOCKING ISSUES** that have n
 **HIGH PRIORITY FIXES COMPLETED:**
 
 1. **FFI/JNI Signature Mismatch - RESOLVED** ✅
+
    - **Issue:** Rust function `compute_fft_rust` had signature `(buffer, length, sample_rate, fft_size)` but Kotlin expected `(buffer, fftSize, windowType)`
    - **Fix:** Created new JNI function in [rust/src/lib.rs:159-174](../../../rust/src/lib.rs) named `Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeComputeFFT` that matches JNI naming convention
    - **Implementation:** New function accepts `(buffer, buffer_length, fft_size, window_type)` and delegates to `compute_fft_rust` with default sample rate of 44100 Hz

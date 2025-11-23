@@ -1,6 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { computeFFT, detectPitch, extractFormants, analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
+import {
+  computeFFT,
+  detectPitch,
+  extractFormants,
+  analyzeSpectrum,
+} from '@loqalabs/loqa-audio-dsp';
 
 // Performance NFR targets (in milliseconds)
 const NFR_TARGETS = {
@@ -31,7 +43,7 @@ export function BenchmarkScreen() {
     const sampleRate = 16000;
     const audio = new Float32Array(samples);
     for (let i = 0; i < samples; i++) {
-      audio[i] = Math.sin(2 * Math.PI * frequency * i / sampleRate);
+      audio[i] = Math.sin((2 * Math.PI * frequency * i) / sampleRate);
     }
     return audio;
   }
@@ -76,7 +88,11 @@ export function BenchmarkScreen() {
         },
         iterations
       );
-      const formantsResult = calculateStats('extractFormants', formantsTimes, NFR_TARGETS.extractFormants);
+      const formantsResult = calculateStats(
+        'extractFormants',
+        formantsTimes,
+        NFR_TARGETS.extractFormants
+      );
       setResults((prev) => [...prev, formantsResult]);
 
       // Benchmark analyzeSpectrum
@@ -87,7 +103,11 @@ export function BenchmarkScreen() {
         },
         iterations
       );
-      const spectrumResult = calculateStats('analyzeSpectrum', spectrumTimes, NFR_TARGETS.analyzeSpectrum);
+      const spectrumResult = calculateStats(
+        'analyzeSpectrum',
+        spectrumTimes,
+        NFR_TARGETS.analyzeSpectrum
+      );
       setResults((prev) => [...prev, spectrumResult]);
 
       setRunning(false);
@@ -120,11 +140,7 @@ export function BenchmarkScreen() {
     return times;
   }
 
-  function calculateStats(
-    functionName: string,
-    times: number[],
-    target: number
-  ): BenchmarkResult {
+  function calculateStats(functionName: string, times: number[], target: number): BenchmarkResult {
     const sorted = [...times].sort((a, b) => a - b);
     const min = sorted[0];
     const max = sorted[sorted.length - 1];
@@ -210,8 +226,8 @@ export function BenchmarkScreen() {
       <View style={styles.infoContainer}>
         <Text style={styles.infoTitle}>About Benchmarks</Text>
         <Text style={styles.infoText}>
-          These benchmarks measure the execution time of each DSP function over 100 iterations
-          using synthetic audio data (sine wave @ 440Hz).
+          These benchmarks measure the execution time of each DSP function over 100 iterations using
+          synthetic audio data (sine wave @ 440Hz).
         </Text>
         <Text style={styles.infoText}>
           Performance targets are based on NFR requirements defined in the architecture:
@@ -221,8 +237,8 @@ export function BenchmarkScreen() {
         <Text style={styles.infoText}>• extractFormants: {'<'}150ms</Text>
         <Text style={styles.infoText}>• analyzeSpectrum: {'<'}75ms</Text>
         <Text style={styles.infoText}>
-          {'\n'}FPS (frames per second) capability shows how many times per second the function
-          can process audio in real-time scenarios.
+          {'\n'}FPS (frames per second) capability shows how many times per second the function can
+          process audio in real-time scenarios.
         </Text>
       </View>
     </ScrollView>
@@ -263,7 +279,10 @@ function BenchmarkResultCard({ result }: { result: BenchmarkResult }) {
       <View style={styles.additionalStats}>
         <View style={styles.statRow}>
           <Text style={styles.statLabel}>Target:</Text>
-          <Text style={styles.statValue}>{'<'}{result.target} ms</Text>
+          <Text style={styles.statValue}>
+            {'<'}
+            {result.target} ms
+          </Text>
         </View>
         <View style={styles.statRow}>
           <Text style={styles.statLabel}>FPS Capability:</Text>

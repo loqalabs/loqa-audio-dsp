@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
-import { startAudioStream, stopAudioStream, addAudioSampleListener } from '@loqalabs/loqa-audio-bridge';
+import {
+  startAudioStream,
+  stopAudioStream,
+  addAudioSampleListener,
+} from '@loqalabs/loqa-audio-bridge';
 import type { EventSubscription } from 'expo-modules-core';
 
 export function SpectrumScreen() {
@@ -160,7 +164,8 @@ export function SpectrumScreen() {
             </View>
             <Text style={styles.featureValue}>{spectrumResult.rolloff.toFixed(2)} Hz</Text>
             <Text style={styles.featureDescription}>
-              Frequency below which 95% of energy is concentrated. Indicates overall energy distribution.
+              Frequency below which 95% of energy is concentrated. Indicates overall energy
+              distribution.
             </Text>
             <View style={styles.progressBar}>
               <View
@@ -184,7 +189,8 @@ export function SpectrumScreen() {
             </View>
             <Text style={styles.featureValue}>{spectrumResult.tilt.toFixed(3)}</Text>
             <Text style={styles.featureDescription}>
-              Overall slope of the spectrum. Positive = rising (bright), negative = falling (muffled).
+              Overall slope of the spectrum. Positive = rising (bright), negative = falling
+              (muffled).
             </Text>
             <View style={styles.tiltIndicator}>
               <View style={styles.tiltBar}>
@@ -209,7 +215,8 @@ export function SpectrumScreen() {
           <View style={styles.summaryCard}>
             <Text style={styles.summaryTitle}>Audio Characteristics</Text>
             <Text style={styles.summaryText}>
-              Brightness: <Text style={{ fontWeight: 'bold' }}>{interpretation.brightness.label}</Text>
+              Brightness:{' '}
+              <Text style={{ fontWeight: 'bold' }}>{interpretation.brightness.label}</Text>
             </Text>
             <Text style={styles.summaryText}>
               Energy: <Text style={{ fontWeight: 'bold' }}>{interpretation.energy.label}</Text>
@@ -234,7 +241,8 @@ export function SpectrumScreen() {
         <Text style={styles.infoText}>• Tilt: Describes the overall spectral slope</Text>
         <Text style={styles.infoText}>
           This demo uses real-time audio from your microphone via @loqalabs/loqa-audio-bridge,
-          providing live spectral analysis. Try different sounds to see how their characteristics change!
+          providing live spectral analysis. Try different sounds to see how their characteristics
+          change!
         </Text>
       </View>
     </ScrollView>

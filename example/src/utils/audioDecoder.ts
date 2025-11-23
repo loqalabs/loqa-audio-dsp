@@ -17,10 +17,7 @@ export async function extractPCMFromRecording(uri: string): Promise<{
 }> {
   try {
     // Load the audio file
-    const { sound, status } = await Audio.Sound.createAsync(
-      { uri },
-      { shouldPlay: false }
-    );
+    const { sound, status } = await Audio.Sound.createAsync({ uri }, { shouldPlay: false });
 
     if (!status.isLoaded) {
       throw new Error('Failed to load audio file');
@@ -54,14 +51,16 @@ export async function extractPCMFromRecording(uri: string): Promise<{
     // a production-ready solution, but show the structure
     throw new Error(
       'PCM extraction not fully implemented. ' +
-      'This requires a native audio decoder module or library like react-native-audio-toolkit. ' +
-      'For a production implementation, see: ' +
-      'https://docs.expo.dev/versions/latest/sdk/audio/ or ' +
-      'https://github.com/react-native-audio-toolkit/react-native-audio-toolkit'
+        'This requires a native audio decoder module or library like react-native-audio-toolkit. ' +
+        'For a production implementation, see: ' +
+        'https://docs.expo.dev/versions/latest/sdk/audio/ or ' +
+        'https://github.com/react-native-audio-toolkit/react-native-audio-toolkit'
     );
   } catch (error) {
     throw new Error(
-      `Failed to extract PCM from recording: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to extract PCM from recording: ${
+        error instanceof Error ? error.message : String(error)
+      }`
     );
   }
 }

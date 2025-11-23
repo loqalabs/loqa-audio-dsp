@@ -7,6 +7,7 @@ This directory contains the Rust build infrastructure for compiling the loqa-voi
 ### Rust Toolchain
 
 Ensure Rust is installed:
+
 ```bash
 rustc --version  # Should be 1.70+
 cargo --version
@@ -36,6 +37,7 @@ cargo --version
 ## Building
 
 ### iOS
+
 ```bash
 ./build-ios.sh
 ```
@@ -43,11 +45,13 @@ cargo --version
 Output: `../ios/RustFFI/LoqaVoiceDSP.xcframework`
 
 ### Android
+
 ```bash
 ./build-android.sh
 ```
 
 Output:
+
 - `../android/src/main/jniLibs/arm64-v8a/libloqa_voice_dsp.so`
 - `../android/src/main/jniLibs/armeabi-v7a/libloqa_voice_dsp.so`
 - `../android/src/main/jniLibs/x86_64/libloqa_voice_dsp.so`
@@ -61,6 +65,7 @@ Output:
 ## Testing
 
 Run Rust unit tests:
+
 ```bash
 cargo test
 ```
@@ -81,6 +86,7 @@ cargo test
 ## Architecture
 
 The Rust code provides C-compatible FFI exports that are called from:
+
 - iOS: Swift via FFI (in `ios/RustFFI/RustBridge.swift`)
 - Android: Kotlin via JNI (in `android/.../RustJNI/RustBridge.kt`)
 
