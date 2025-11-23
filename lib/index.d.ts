@@ -5,4 +5,5 @@ export { logDebug, logWarning } from './utils';
 export { computeFFT } from './computeFFT';
 export { detectPitch } from './detectPitch';
 export { extractFormants } from './extractFormants';
+export { analyzeSpectrum } from './analyzeSpectrum';
 //# sourceMappingURL=index.d.ts.map
