@@ -27,19 +27,27 @@ echo "Building for iOS arm64 simulator (Apple Silicon)..."
 cargo build --release --target aarch64-apple-ios-sim
 
 # Create universal simulator library
+# IMPORTANT: Use same binary name as device library for CocoaPods compatibility
+# CocoaPods requires all slices in an XCFramework to have identical binary names
 echo "Creating universal simulator library..."
+SIMULATOR_LIB="target/release/libloqa_voice_dsp_universal_sim.a"
 lipo -create \
     target/x86_64-apple-ios/release/libloqa_voice_dsp.a \
     target/aarch64-apple-ios-sim/release/libloqa_voice_dsp.a \
-    -output target/release/libloqa_voice_dsp_sim.a
+    -output "$SIMULATOR_LIB"
 
 # Create XCFramework (supports both device and simulator)
 echo "Creating XCFramework..."
 rm -rf "$OUTPUT_DIR/LoqaVoiceDSP.xcframework"
 xcodebuild -create-xcframework \
     -library target/aarch64-apple-ios/release/libloqa_voice_dsp.a \
-    -library target/release/libloqa_voice_dsp_sim.a \
+    -library "$SIMULATOR_LIB" \
     -output "$OUTPUT_DIR/LoqaVoiceDSP.xcframework"
+
+# Rename simulator binary to match device binary name (required by CocoaPods)
+echo "Renaming simulator binary for CocoaPods compatibility..."
+mv "$OUTPUT_DIR/LoqaVoiceDSP.xcframework/ios-arm64_x86_64-simulator/libloqa_voice_dsp_universal_sim.a" \
+   "$OUTPUT_DIR/LoqaVoiceDSP.xcframework/ios-arm64_x86_64-simulator/libloqa_voice_dsp.a"
 
 echo "✅ iOS library built successfully"
 echo "  XCFramework: $OUTPUT_DIR/LoqaVoiceDSP.xcframework"
