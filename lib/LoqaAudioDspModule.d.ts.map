@@ -1,1 +1,10 @@
-{"version":3,"file":"LoqaAudioDspModule.d.ts","sourceRoot":"","sources":["../src/LoqaAudioDspModule.ts"],"names":[],"mappings":"AAGA,QAAA,MAAM,kBAAkB,KAAsC,CAAC;AAE/D,eAAe,kBAAkB,CAAC"}
+{
+  "version": 3,
+  "file": "LoqaExpoDspModule.d.ts",
+  "sourceRoot": "",
+  "sources": [
+    "../src/LoqaExpoDspModule.ts"
+  ],
+  "names": [],
+  "mappings": "AAGA,QAAA,MAAM,kBAAkB,KAAsC,CAAC;AAE/D,eAAe,kBAAkB,CAAC"
+}

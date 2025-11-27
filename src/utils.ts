@@ -1,18 +1,18 @@
-// Utility functions for LoqaAudioDsp module
+// Utility functions for LoqaExpoDsp module
 
 /**
  * Debug mode flag - enabled in development or when explicitly set
  * Controls whether debug logs are output
  */
-const DEBUG = __DEV__ || process.env.LOQA_AUDIO_DSP_DEBUG === 'true';
+const DEBUG = __DEV__ || process.env.LOQA_EXPO_DSP_DEBUG === 'true';
 
 /**
  * Logs a debug message with optional data
  *
  * Debug logs are only output when DEBUG mode is enabled (__DEV__ === true
- * or LOQA_AUDIO_DSP_DEBUG environment variable is set to 'true').
+ * or LOQA_EXPO_DSP_DEBUG environment variable is set to 'true').
  *
- * All logs are prefixed with [LoqaAudioDsp] for easy identification.
+ * All logs are prefixed with [LoqaExpoDsp] for easy identification.
  *
  * @param message - Debug message to log
  * @param data - Optional data to include in the log
@@ -27,7 +27,7 @@ const DEBUG = __DEV__ || process.env.LOQA_AUDIO_DSP_DEBUG === 'true';
  */
 export function logDebug(message: string, data?: unknown): void {
   if (DEBUG) {
-    console.log(`[LoqaAudioDsp] ${message}`, data || '');
+    console.log(`[LoqaExpoDsp] ${message}`, data || '');
   }
 }
 
@@ -37,7 +37,7 @@ export function logDebug(message: string, data?: unknown): void {
  * Warnings are always output, regardless of DEBUG mode, as they indicate
  * potential issues or sub-optimal configurations that should be addressed.
  *
- * All logs are prefixed with [LoqaAudioDsp] for easy identification.
+ * All logs are prefixed with [LoqaExpoDsp] for easy identification.
  *
  * @param message - Warning message to log
  * @param data - Optional data to include in the log
@@ -51,5 +51,5 @@ export function logDebug(message: string, data?: unknown): void {
  * ```
  */
 export function logWarning(message: string, data?: unknown): void {
-  console.warn(`[LoqaAudioDsp] ${message}`, data || '');
+  console.warn(`[LoqaExpoDsp] ${message}`, data || '');
 }

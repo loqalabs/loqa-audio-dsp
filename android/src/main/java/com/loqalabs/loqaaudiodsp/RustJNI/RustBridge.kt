@@ -1,4 +1,4 @@
-package com.loqalabs.loqaaudiodsp.RustJNI
+package com.loqalabs.loqaexpodsp.RustJNI
 
 /**
  * PitchResult data class matching Rust #[repr(C)] PitchResult struct.
@@ -64,7 +64,7 @@ object RustBridge {
      * JNI native function for FFT computation.
      *
      * Implemented in Story 2.3. Maps to Rust function:
-     * Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeComputeFFT
+     * Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeComputeFFT
      *
      * This external function is resolved by JNI to the Rust implementation in lib.rs.
      * The Rust function delegates to compute_fft_rust with a default sample rate of 44100 Hz.
@@ -84,7 +84,7 @@ object RustBridge {
      * JNI native function for pitch detection.
      *
      * Implemented in Story 3.1/3.3. Maps to Rust function:
-     * Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeDetectPitch
+     * Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeDetectPitch
      *
      * This external function is resolved by JNI to the Rust implementation in lib.rs.
      * The Rust function uses YIN algorithm for pitch detection.
@@ -102,7 +102,7 @@ object RustBridge {
      * JNI native function for formant extraction.
      *
      * Implemented in Story 3.2/3.3. Maps to Rust function:
-     * Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeExtractFormants
+     * Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeExtractFormants
      *
      * This external function is resolved by JNI to the Rust implementation in lib.rs.
      * The Rust function uses LPC analysis for formant extraction.

@@ -1,11 +1,11 @@
-package com.loqalabs.loqaaudiodsp
+package com.loqalabs.loqaexpodsp
 
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import com.loqalabs.loqaaudiodsp.RustJNI.RustBridge
+import com.loqalabs.loqaexpodsp.RustJNI.RustBridge
 
 /**
- * LoqaAudioDspModule provides Expo Module API for accessing Rust DSP functions.
+ * LoqaExpoDspModule provides Expo Module API for accessing Rust DSP functions.
  *
  * This module exposes async functions for:
  * - computeFFT: Fast Fourier Transform analysis
@@ -22,11 +22,11 @@ import com.loqalabs.loqaaudiodsp.RustJNI.RustBridge
  * - Story 3.3: Real pitch and formant implementations
  * - Story 4.2: Real spectrum analysis implementation
  */
-class LoqaAudioDspModule : Module() {
+class LoqaExpoDspModule : Module() {
   // Module definition for Expo Modules API
   override fun definition() = ModuleDefinition {
     // Module name that JavaScript will use to require this module
-    Name("LoqaAudioDsp")
+    Name("LoqaExpoDsp")
 
     // ============================================================================
     // Async Function: computeFFT

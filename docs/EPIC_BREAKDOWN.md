@@ -1,4 +1,4 @@
-# @loqalabs/loqa-audio-dsp - Epic Breakdown
+# @loqalabs/loqa-expo-dsp - Epic Breakdown
 
 **Project:** Production-Grade DSP Analysis Expo Module
 **Timeline:** 6-8 weeks (Target: v0.1.0 by mid-December 2025)
@@ -121,7 +121,7 @@ This package provides DSP (Digital Signal Processing) analysis functions as a co
 
 **User Experience Goals:**
 
-- Installation: `npx expo install @loqalabs/loqa-audio-dsp`
+- Installation: `npx expo install @loqalabs/loqa-expo-dsp`
 - Integration time: <15 minutes from install to working DSP
 - Works seamlessly with loqa-audio-bridge for real-time analysis
 
@@ -133,7 +133,7 @@ This package provides DSP (Digital Signal Processing) analysis functions as a co
 ┌─────────────────────────────────────────┐
 │  React Native / Expo Application        │
 │  ┌───────────────────────────────────┐  │
-│  │  @loqalabs/loqa-audio-dsp (TS)   │  │
+│  │  @loqalabs/loqa-expo-dsp (TS)   │  │
 │  │  - computeFFT()                   │  │
 │  │  - detectPitch()                  │  │
 │  │  - extractFormants()              │  │

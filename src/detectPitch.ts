@@ -1,5 +1,5 @@
 // detectPitch - Pitch detection API using YIN algorithm
-import LoqaAudioDspModule from './LoqaAudioDspModule';
+import LoqaExpoDspModule from './LoqaExpoDspModule';
 import { NativeModuleError } from './errors';
 import type { PitchDetectionOptions, PitchResult } from './types';
 import { logDebug } from './utils';
@@ -87,7 +87,7 @@ export async function detectPitch(
 
   try {
     // Step 4: Call native module
-    const nativeResult = await LoqaAudioDspModule.detectPitch(bufferArray, sampleRate, {
+    const nativeResult = await LoqaExpoDspModule.detectPitch(bufferArray, sampleRate, {
       minFrequency,
       maxFrequency,
     });

@@ -1,5 +1,5 @@
 import XCTest
-@testable import LoqaAudioDsp
+@testable import LoqaExpoDsp
 
 /// Comprehensive tests for formant extraction functionality (Story 3.5)
 class FormantExtractionTests: XCTestCase {

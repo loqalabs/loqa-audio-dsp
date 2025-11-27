@@ -1,10 +1,10 @@
 import ExpoModulesCore
 
-public class LoqaAudioDspModule: Module {
+public class LoqaExpoDspModule: Module {
   // Module definition for Expo Modules API
   public func definition() -> ModuleDefinition {
     // Module name that JavaScript will use to require this module
-    Name("LoqaAudioDsp")
+    Name("LoqaExpoDsp")
 
     // MARK: - computeFFT (Implemented in Story 2.2)
     // Calls Rust FFT via RustBridge.computeFFTWrapper()
@@ -218,6 +218,107 @@ public class LoqaAudioDspModule: Module {
       } catch {
         // Handle unexpected errors
         promise.reject("SPECTRUM_ERROR", error.localizedDescription)
+      }
+    }
+
+    // MARK: - calculateHNR (Harmonics-to-Noise Ratio for breathiness analysis)
+    // Calls Rust HNR calculation via RustBridge.calculateHNRWrapper()
+    AsyncFunction("calculateHNR") { (buffer: [Float], sampleRate: Int, options: [String: Any], promise: Promise) in
+      do {
+        // Extract options with defaults
+        let minFreq = options["minFreq"] as? Float ?? 75.0
+        let maxFreq = options["maxFreq"] as? Float ?? 500.0
+
+        // Validate inputs (basic validation - detailed validation in RustBridge)
+        guard !buffer.isEmpty else {
+          promise.reject("VALIDATION_ERROR", "Buffer cannot be empty")
+          return
+        }
+
+        guard sampleRate >= 8000 && sampleRate <= 48000 else {
+          promise.reject("VALIDATION_ERROR", "Sample rate must be between 8000 and 48000 Hz")
+          return
+        }
+
+        // Call Rust HNR calculation via wrapper
+        let (hnr, f0, isVoiced) = try calculateHNRWrapper(
+          buffer: buffer,
+          sampleRate: sampleRate,
+          minFreq: minFreq,
+          maxFreq: maxFreq
+        )
+
+        // Build result dictionary matching HNRResult type
+        let result: [String: Any] = [
+          "hnr": hnr,
+          "f0": f0,
+          "isVoiced": isVoiced
+        ]
+
+        promise.resolve(result)
+      } catch let error as RustFFIError {
+        // Handle Rust FFI errors with specific error codes
+        switch error {
+        case .invalidInput(let message):
+          promise.reject("VALIDATION_ERROR", message)
+        case .computationFailed(let message):
+          promise.reject("HNR_ERROR", message)
+        case .memoryAllocationFailed:
+          promise.reject("HNR_ERROR", "Memory allocation failed in Rust HNR calculation")
+        }
+      } catch {
+        // Handle unexpected errors
+        promise.reject("HNR_ERROR", error.localizedDescription)
+      }
+    }
+
+    // MARK: - calculateH1H2 (H1-H2 amplitude difference for vocal weight analysis)
+    // Calls Rust H1-H2 calculation via RustBridge.calculateH1H2Wrapper()
+    AsyncFunction("calculateH1H2") { (buffer: [Float], sampleRate: Int, options: [String: Any], promise: Promise) in
+      do {
+        // Extract optional f0 from options (0 or nil means auto-detect)
+        let f0 = options["f0"] as? Float
+
+        // Validate inputs (basic validation - detailed validation in RustBridge)
+        guard !buffer.isEmpty else {
+          promise.reject("VALIDATION_ERROR", "Buffer cannot be empty")
+          return
+        }
+
+        guard sampleRate >= 8000 && sampleRate <= 48000 else {
+          promise.reject("VALIDATION_ERROR", "Sample rate must be between 8000 and 48000 Hz")
+          return
+        }
+
+        // Call Rust H1-H2 calculation via wrapper
+        let (h1h2, h1AmplitudeDb, h2AmplitudeDb, detectedF0) = try calculateH1H2Wrapper(
+          buffer: buffer,
+          sampleRate: sampleRate,
+          f0: f0
+        )
+
+        // Build result dictionary matching H1H2Result type
+        let result: [String: Any] = [
+          "h1h2": h1h2,
+          "h1AmplitudeDb": h1AmplitudeDb,
+          "h2AmplitudeDb": h2AmplitudeDb,
+          "f0": detectedF0
+        ]
+
+        promise.resolve(result)
+      } catch let error as RustFFIError {
+        // Handle Rust FFI errors with specific error codes
+        switch error {
+        case .invalidInput(let message):
+          promise.reject("VALIDATION_ERROR", message)
+        case .computationFailed(let message):
+          promise.reject("H1H2_ERROR", message)
+        case .memoryAllocationFailed:
+          promise.reject("H1H2_ERROR", "Memory allocation failed in Rust H1-H2 calculation")
+        }
+      } catch {
+        // Handle unexpected errors
+        promise.reject("H1H2_ERROR", error.localizedDescription)
       }
     }
   }

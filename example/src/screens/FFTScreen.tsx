@@ -3,7 +3,7 @@ import {
   stopAudioStream,
   addAudioSampleListener,
 } from '@loqalabs/loqa-audio-bridge';
-import { computeFFT } from '@loqalabs/loqa-audio-dsp';
+import { computeFFT } from '@loqalabs/loqa-expo-dsp';
 import type { EventSubscription } from 'expo-modules-core';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';

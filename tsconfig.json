@@ -1,4 +1,4 @@
-// Configuration for @loqalabs/loqa-audio-dsp
+// Configuration for @loqalabs/loqa-expo-dsp
 // Note: Some settings are inherited from expo-module-scripts/tsconfig.base
 {
   "extends": "expo-module-scripts/tsconfig.base",

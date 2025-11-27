@@ -1,5 +1,5 @@
 import XCTest
-@testable import LoqaAudioDsp
+@testable import LoqaExpoDsp
 
 /// Comprehensive tests for pitch detection functionality (Story 3.5)
 /// Tests native iOS pitch detection implementation, FFI bindings, and memory management

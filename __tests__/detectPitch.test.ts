@@ -1,12 +1,12 @@
 // Comprehensive tests for detectPitch function
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-import LoqaAudioDspModule from '../src/LoqaAudioDspModule';
+import LoqaExpoDspModule from '../src/LoqaExpoDspModule';
 import { detectPitch } from '../src/detectPitch';
 import { ValidationError, NativeModuleError } from '../src/errors';
 
 // Mock the native module
-jest.mock('../src/LoqaAudioDspModule', () => ({
+jest.mock('../src/LoqaExpoDspModule', () => ({
   __esModule: true,
   default: {
     detectPitch: jest.fn(),
@@ -50,8 +50,8 @@ function generateSilence(durationSamples: number): Float32Array {
 }
 
 describe('detectPitch', () => {
-  const mockDetectPitch = LoqaAudioDspModule.detectPitch as jest.MockedFunction<
-    typeof LoqaAudioDspModule.detectPitch
+  const mockDetectPitch = LoqaExpoDspModule.detectPitch as jest.MockedFunction<
+    typeof LoqaExpoDspModule.detectPitch
   >;
 
   beforeEach(() => {

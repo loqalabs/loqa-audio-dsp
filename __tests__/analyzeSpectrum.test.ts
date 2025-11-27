@@ -1,12 +1,12 @@
 // Comprehensive tests for analyzeSpectrum function
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-import LoqaAudioDspModule from '../src/LoqaAudioDspModule';
+import LoqaExpoDspModule from '../src/LoqaExpoDspModule';
 import { analyzeSpectrum } from '../src/analyzeSpectrum';
 import { ValidationError, NativeModuleError } from '../src/errors';
 
 // Mock the native module
-jest.mock('../src/LoqaAudioDspModule', () => ({
+jest.mock('../src/LoqaExpoDspModule', () => ({
   __esModule: true,
   default: {
     analyzeSpectrum: jest.fn(),
@@ -88,8 +88,8 @@ function generatePinkNoise(durationSamples: number, sampleRate: number): Float32
 }
 
 describe('analyzeSpectrum', () => {
-  const mockAnalyzeSpectrum = LoqaAudioDspModule.analyzeSpectrum as jest.MockedFunction<
-    typeof LoqaAudioDspModule.analyzeSpectrum
+  const mockAnalyzeSpectrum = LoqaExpoDspModule.analyzeSpectrum as jest.MockedFunction<
+    typeof LoqaExpoDspModule.analyzeSpectrum
   >;
 
   beforeEach(() => {

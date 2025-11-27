@@ -1,14 +1,14 @@
-# @loqalabs/loqa-audio-dsp
+# @loqalabs/loqa-expo-dsp
 
-[![npm version](https://img.shields.io/npm/v/@loqalabs/loqa-audio-dsp.svg)](https://www.npmjs.com/package/@loqalabs/loqa-audio-dsp)
-[![license](https://img.shields.io/npm/l/@loqalabs/loqa-audio-dsp.svg)](https://github.com/loqalabs/loqa-audio-dsp/blob/main/LICENSE)
-[![npm downloads](https://img.shields.io/npm/dm/@loqalabs/loqa-audio-dsp.svg)](https://www.npmjs.com/package/@loqalabs/loqa-audio-dsp)
+[![npm version](https://img.shields.io/npm/v/@loqalabs/loqa-expo-dsp.svg)](https://www.npmjs.com/package/@loqalabs/loqa-expo-dsp)
+[![license](https://img.shields.io/npm/l/@loqalabs/loqa-expo-dsp.svg)](https://github.com/loqalabs/loqa-expo-dsp/blob/main/LICENSE)
+[![npm downloads](https://img.shields.io/npm/dm/@loqalabs/loqa-expo-dsp.svg)](https://www.npmjs.com/package/@loqalabs/loqa-expo-dsp)
 
 Production-grade Expo native module for audio DSP analysis.
 
 ## Overview
 
-**@loqalabs/loqa-audio-dsp** provides high-performance audio Digital Signal Processing (DSP) functions for React Native/Expo applications. It wraps the [loqa-voice-dsp](https://github.com/loqalabs/loqa) Rust crate with native iOS (Swift) and Android (Kotlin) bindings.
+**@loqalabs/loqa-expo-dsp** provides high-performance audio Digital Signal Processing (DSP) functions for React Native/Expo applications. It wraps the [loqa-voice-dsp](https://github.com/loqalabs/loqa) Rust crate with native iOS (Swift) and Android (Kotlin) bindings.
 
 ### DSP Functions
 
@@ -16,6 +16,8 @@ Production-grade Expo native module for audio DSP analysis.
 - **Pitch Detection** - `detectPitch()`: YIN algorithm for fundamental frequency
 - **Formant Extraction** - `extractFormants()`: LPC-based formant analysis (F1, F2, F3)
 - **Spectral Analysis** - `analyzeSpectrum()`: Spectral centroid, tilt, rolloff
+- **HNR Analysis** - `calculateHNR()`: Harmonics-to-Noise Ratio for breathiness measurement
+- **H1-H2 Calculation** - `calculateH1H2()`: First/second harmonic amplitude difference for vocal weight
 
 ### Companion Package
 
@@ -23,7 +25,7 @@ Works seamlessly with [@loqalabs/loqa-audio-bridge](https://github.com/loqalabs/
 
 ```typescript
 import { startAudioStream, addAudioSampleListener } from '@loqalabs/loqa-audio-bridge';
-import { detectPitch, computeFFT } from '@loqalabs/loqa-audio-dsp';
+import { detectPitch, computeFFT } from '@loqalabs/loqa-expo-dsp';
 
 // Stream audio from microphone
 await startAudioStream({ sampleRate: 16000, bufferSize: 2048 });
@@ -40,7 +42,7 @@ addAudioSampleListener((event) => {
 ## Installation
 
 ```bash
-npx expo install @loqalabs/loqa-audio-dsp
+npx expo install @loqalabs/loqa-expo-dsp
 ```
 
 ## Quick Start
@@ -48,7 +50,7 @@ npx expo install @loqalabs/loqa-audio-dsp
 ### FFT Analysis Example
 
 ```typescript
-import { computeFFT } from '@loqalabs/loqa-audio-dsp';
+import { computeFFT } from '@loqalabs/loqa-expo-dsp';
 
 // Example: Analyze audio frequency content
 const audioBuffer = new Float32Array(2048); // Your audio samples
@@ -77,7 +79,7 @@ console.log(
 ### Pitch Detection Example (Voice Analysis)
 
 ```typescript
-import { detectPitch } from '@loqalabs/loqa-audio-dsp';
+import { detectPitch } from '@loqalabs/loqa-expo-dsp';
 
 // Example: Real-time pitch detection for a tuner app
 const audioBuffer = new Float32Array(2048); // Your audio samples
@@ -106,7 +108,7 @@ if (pitch.isVoiced) {
 ### Formant Extraction Example (Vowel Analysis)
 
 ```typescript
-import { extractFormants } from '@loqalabs/loqa-audio-dsp';
+import { extractFormants } from '@loqalabs/loqa-expo-dsp';
 
 // Example: Analyze vowel formants for pronunciation feedback
 const voiceBuffer = new Float32Array(2048); // Your voice samples
@@ -138,7 +140,7 @@ if (formants.f1 < 400 && formants.f2 > 2000) {
 ### Spectral Analysis Example (Audio Classification)
 
 ```typescript
-import { analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
+import { analyzeSpectrum } from '@loqalabs/loqa-expo-dsp';
 
 // Example: Analyze spectral features for audio classification
 const audioBuffer = new Float32Array(2048); // Your audio samples
@@ -165,10 +167,64 @@ if (spectrum.tilt < -0.01) {
 }
 ```
 
+### HNR Analysis Example (Breathiness Measurement)
+
+```typescript
+import { calculateHNR } from '@loqalabs/loqa-expo-dsp';
+
+// Example: Measure voice breathiness using Harmonics-to-Noise Ratio
+const voiceBuffer = new Float32Array(4096); // Your voice samples
+// ... fill buffer with voiced audio ...
+
+const hnrResult = await calculateHNR(voiceBuffer, { sampleRate: 44100 });
+
+if (hnrResult.isVoiced) {
+  console.log(`HNR: ${hnrResult.hnr.toFixed(1)} dB`);
+  console.log(`Detected F0: ${hnrResult.f0.toFixed(1)} Hz`);
+
+  // Interpret breathiness level
+  if (hnrResult.hnr > 20) {
+    console.log('Clear, less breathy voice');
+  } else if (hnrResult.hnr > 12) {
+    console.log('Moderately breathy voice');
+  } else {
+    console.log('Very breathy voice');
+  }
+} else {
+  console.log('Signal is unvoiced');
+}
+```
+
+### H1-H2 Analysis Example (Vocal Weight)
+
+```typescript
+import { calculateH1H2 } from '@loqalabs/loqa-expo-dsp';
+
+// Example: Measure vocal weight using H1-H2 amplitude difference
+const voiceBuffer = new Float32Array(4096); // Your voice samples
+// ... fill buffer with voiced audio ...
+
+const h1h2Result = await calculateH1H2(voiceBuffer, { sampleRate: 44100 });
+
+console.log(`H1-H2: ${h1h2Result.h1h2.toFixed(1)} dB`);
+console.log(`H1 amplitude: ${h1h2Result.h1AmplitudeDb.toFixed(1)} dB`);
+console.log(`H2 amplitude: ${h1h2Result.h2AmplitudeDb.toFixed(1)} dB`);
+console.log(`Detected F0: ${h1h2Result.f0.toFixed(1)} Hz`);
+
+// Interpret vocal weight
+if (h1h2Result.h1h2 > 5) {
+  console.log('Lighter, breathier voice quality');
+} else if (h1h2Result.h1h2 < -2) {
+  console.log('Heavier, pressed voice quality');
+} else {
+  console.log('Balanced voice quality');
+}
+```
+
 ### Complete Voice Analysis Example
 
 ```typescript
-import { detectPitch, extractFormants, computeFFT } from '@loqalabs/loqa-audio-dsp';
+import { detectPitch, extractFormants, computeFFT, calculateHNR, calculateH1H2 } from '@loqalabs/loqa-expo-dsp';
 
 // Example: Comprehensive voice analysis for coaching apps
 async function analyzeVoice(samples: Float32Array, sampleRate: number) {
@@ -187,6 +243,12 @@ async function analyzeVoice(samples: Float32Array, sampleRate: number) {
   // 3. Compute frequency spectrum
   const fft = await computeFFT(samples, { fftSize: 2048 });
 
+  // 4. Calculate HNR (breathiness)
+  const hnr = await calculateHNR(samples, { sampleRate });
+
+  // 5. Calculate H1-H2 (vocal weight)
+  const h1h2 = await calculateH1H2(samples, { sampleRate });
+
   return {
     pitch: {
       frequency: pitch.frequency,
@@ -203,6 +265,14 @@ async function analyzeVoice(samples: Float32Array, sampleRate: number) {
     spectrum: {
       bins: fft.magnitude.length,
       dominantFreq: fft.frequencies[fft.magnitude.indexOf(Math.max(...fft.magnitude))],
+    },
+    breathiness: {
+      hnr: hnr.hnr,
+      isVoiced: hnr.isVoiced,
+    },
+    vocalWeight: {
+      h1h2: h1h2.h1h2,
+      f0: h1h2.f0,
     },
   };
 }
@@ -227,13 +297,13 @@ console.log('Voice analysis:', result);
 
 ## Architecture
 
-**@loqalabs/loqa-audio-dsp** wraps the high-performance [loqa-voice-dsp](https://github.com/loqalabs/loqa) Rust library:
+**@loqalabs/loqa-expo-dsp** wraps the high-performance [loqa-voice-dsp](https://github.com/loqalabs/loqa) Rust library:
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │  React Native / Expo Application        │
 │  ┌───────────────────────────────────┐  │
-│  │  @loqalabs/loqa-audio-dsp (TS)   │  │
+│  │  @loqalabs/loqa-expo-dsp (TS)     │  │
 │  │  - TypeScript API                 │  │
 │  └────────────┬──────────────────────┘  │
 └───────────────┼──────────────────────────┘
@@ -253,6 +323,8 @@ console.log('Voice analysis:', result);
         │  - YIN pitch   │
         │  - LPC formants│
         │  - FFT/DFT     │
+        │  - HNR         │
+        │  - H1-H2       │
         └────────────────┘
 ```
 
@@ -263,6 +335,8 @@ DSP algorithms are implemented in Rust for optimal performance:
 - **Pitch Detection**: <1ms latency for 2048-sample buffer
 - **FFT Analysis**: <2ms for 4096-point FFT
 - **Formant Extraction**: <3ms with LPC order 12
+- **HNR Calculation**: <2ms for 4096-sample buffer
+- **H1-H2 Calculation**: <2ms for 4096-sample buffer
 - **Memory**: Zero-copy where possible, minimal allocations
 
 ## Development
@@ -307,8 +381,8 @@ Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guideli
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/loqalabs/loqa-audio-dsp/issues)
-- **Documentation**: [GitHub Wiki](https://github.com/loqalabs/loqa-audio-dsp/wiki)
+- **Issues**: [GitHub Issues](https://github.com/loqalabs/loqa-expo-dsp/issues)
+- **Documentation**: [GitHub Wiki](https://github.com/loqalabs/loqa-expo-dsp/wiki)
 
 ---
 

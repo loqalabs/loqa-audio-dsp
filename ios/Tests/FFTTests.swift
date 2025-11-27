@@ -1,5 +1,5 @@
 import XCTest
-@testable import LoqaAudioDsp
+@testable import LoqaExpoDsp
 
 /// Comprehensive tests for FFT functionality (Story 2.6)
 /// Tests native iOS FFT implementation, FFI bindings, and memory management

@@ -3,7 +3,7 @@ require 'json'
 package = JSON.parse(File.read(File.join(__dir__, '../package.json')))
 
 Pod::Spec.new do |s|
-  s.name           = 'LoqaAudioDsp'
+  s.name           = 'LoqaExpoDsp'
   s.version        = package['version']
   s.summary        = package['description']
   s.description    = package['description']
@@ -15,7 +15,7 @@ Pod::Spec.new do |s|
     :tvos => '15.1'
   }
   s.swift_version  = '5.5'
-  s.source         = { git: 'https://github.com/loqalabs/loqa-audio-dsp' }
+  s.source         = { git: 'https://github.com/loqalabs/loqa-expo-dsp' }
   s.static_framework = true
 
   s.dependency 'ExpoModulesCore'

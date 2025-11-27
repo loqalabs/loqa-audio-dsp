@@ -1,14 +1,14 @@
-// Custom error classes for LoqaAudioDsp module
+// Custom error classes for LoqaExpoDsp module
 
 /**
- * Base error class for all LoqaAudioDsp errors
+ * Base error class for all LoqaExpoDsp errors
  *
  * Provides a consistent error structure with error codes and additional details
  * for debugging and error handling.
  */
-export class LoqaAudioDspError extends Error {
+export class LoqaExpoDspError extends Error {
   /**
-   * Creates a new LoqaAudioDspError
+   * Creates a new LoqaExpoDspError
    * @param message - Human-readable error message
    * @param code - Error code for programmatic error handling
    * @param details - Additional error details (optional)
@@ -19,9 +19,12 @@ export class LoqaAudioDspError extends Error {
     public details?: Record<string, unknown>
   ) {
     super(message);
-    this.name = 'LoqaAudioDspError';
+    this.name = 'LoqaExpoDspError';
   }
 }
+
+/** @deprecated Use LoqaExpoDspError instead */
+export const LoqaAudioDspError = LoqaExpoDspError;
 
 /**
  * Error thrown when input validation fails
@@ -29,7 +32,7 @@ export class LoqaAudioDspError extends Error {
  * This error indicates that the provided input parameters did not meet the
  * required constraints (e.g., buffer size, sample rate range, FFT size).
  */
-export class ValidationError extends LoqaAudioDspError {
+export class ValidationError extends LoqaExpoDspError {
   /**
    * Creates a new ValidationError
    * @param message - Description of the validation failure
@@ -47,7 +50,7 @@ export class ValidationError extends LoqaAudioDspError {
  * This error wraps errors that occur in the native iOS or Android code,
  * providing context about the failure and suggestions for resolution.
  */
-export class NativeModuleError extends LoqaAudioDspError {
+export class NativeModuleError extends LoqaExpoDspError {
   /**
    * Creates a new NativeModuleError
    * @param message - Description of the native module failure

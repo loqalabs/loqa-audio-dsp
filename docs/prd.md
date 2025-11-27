@@ -1,4 +1,4 @@
-# loqa-audio-dsp - Product Requirements Document
+# loqa-expo-dsp - Product Requirements Document
 
 **Author:** Anna
 **Date:** 2025-11-20
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-**@loqalabs/loqa-audio-dsp** is a production-grade Expo native module that brings high-performance audio DSP analysis to React Native applications. By wrapping the battle-tested loqa-voice-dsp Rust crate with native iOS and Android bindings, it provides developers with essential DSP functions (FFT, pitch detection, formant extraction, spectral analysis) in a simple, performant package.
+**@loqalabs/loqa-expo-dsp** is a production-grade Expo native module that brings high-performance audio DSP analysis to React Native applications. By wrapping the battle-tested loqa-voice-dsp Rust crate with native iOS and Android bindings, it provides developers with essential DSP functions (FFT, pitch detection, formant extraction, spectral analysis) in a simple, performant package.
 
 This is a companion package to @loqalabs/loqa-audio-bridge, following a composable, single-responsibility architecture that addresses the architectural limitations of VoicelineDSP v0.2.0's monolithic approach.
 
@@ -16,7 +16,7 @@ This is a companion package to @loqalabs/loqa-audio-bridge, following a composab
 
 **Composable Architecture Through Separation of Concerns**
 
-Unlike VoicelineDSP v0.2.0 which combined streaming and analysis into one package, @loqalabs/loqa-audio-dsp implements a focused, modular design:
+Unlike VoicelineDSP v0.2.0 which combined streaming and analysis into one package, @loqalabs/loqa-expo-dsp implements a focused, modular design:
 
 - **Smaller bundle sizes**: Developers install only what they need (streaming OR analysis, not both)
 - **Independent evolution**: Analysis and streaming features can evolve at different paces
@@ -46,7 +46,7 @@ This is a **developer-facing SDK/library** distributed via npm, targeting React 
 
 **Reference Documents:**
 
-- Product Brief: [product-brief-loqa-audio-dsp-2025-11-20.md](product-brief-loqa-audio-dsp-2025-11-20.md)
+- Product Brief: [product-brief-loqa-expo-dsp-2025-11-20.md](product-brief-loqa-expo-dsp-2025-11-20.md)
 - Related Package: [@loqalabs/loqa-audio-bridge](https://github.com/loqalabs/loqa-audio-bridge)
 - Prior Implementation: VoicelineDSP v0.2.0
 
@@ -70,7 +70,7 @@ This is a **developer-facing SDK/library** distributed via npm, targeting React 
 
 **Developer Experience Success:**
 
-- Installation from `npx expo install @loqalabs/loqa-audio-dsp` to working code in <2 minutes
+- Installation from `npx expo install @loqalabs/loqa-expo-dsp` to working code in <2 minutes
 - Integration from zero to first working DSP analysis in <15 minutes
 - Clear, actionable error messages for common integration mistakes
 - Documentation complete, accurate, and accessible
@@ -198,7 +198,7 @@ This is a **developer-facing SDK/library** distributed via npm, targeting React 
 
 - npm as primary distribution channel
 - Compatible with yarn, pnpm
-- Expo CLI integration (`npx expo install @loqalabs/loqa-audio-dsp`)
+- Expo CLI integration (`npx expo install @loqalabs/loqa-expo-dsp`)
 
 ### Installation & Integration
 
@@ -206,10 +206,10 @@ This is a **developer-facing SDK/library** distributed via npm, targeting React 
 
 ```bash
 # Preferred: Expo CLI (auto-configures native dependencies)
-npx expo install @loqalabs/loqa-audio-dsp
+npx expo install @loqalabs/loqa-expo-dsp
 
 # Alternative: npm/yarn (requires manual native setup)
-npm install @loqalabs/loqa-audio-dsp
+npm install @loqalabs/loqa-expo-dsp
 npx expo prebuild
 ```
 
@@ -235,12 +235,7 @@ npx expo prebuild
 
 ```typescript
 // Clean, typed function exports
-import {
-  computeFFT,
-  detectPitch,
-  extractFormants,
-  analyzeSpectrum,
-} from '@loqalabs/loqa-audio-dsp';
+import { computeFFT, detectPitch, extractFormants, analyzeSpectrum } from '@loqalabs/loqa-expo-dsp';
 
 // Simple invocation with sensible defaults
 const fftResult = await computeFFT(audioBuffer);
@@ -382,14 +377,14 @@ const spectrum = await analyzeSpectrum(audioBuffer, sampleRate);
 
 **npm Package:**
 
-- FR44: Package is published to npm registry as @loqalabs/loqa-audio-dsp
+- FR44: Package is published to npm registry as @loqalabs/loqa-expo-dsp
 - FR45: Package includes TypeScript type definitions (.d.ts files)
 - FR46: Package includes source maps for debugging
 - FR47: Package metadata includes correct peer dependencies
 
 **Installation:**
 
-- FR48: Package installs via `npx expo install @loqalabs/loqa-audio-dsp`
+- FR48: Package installs via `npx expo install @loqalabs/loqa-expo-dsp`
 - FR49: Package works with Expo managed workflow without ejecting
 - FR50: Package works with bare React Native after prebuild
 - FR51: Native dependencies are automatically configured for Expo users
@@ -563,7 +558,7 @@ const spectrum = await analyzeSpectrum(audioBuffer, sampleRate);
 
 ## Summary
 
-This PRD defines **@loqalabs/loqa-audio-dsp v0.1.0** - a focused, production-grade audio DSP analysis package for React Native/Expo developers.
+This PRD defines **@loqalabs/loqa-expo-dsp v0.1.0** - a focused, production-grade audio DSP analysis package for React Native/Expo developers.
 
 **Key Capabilities:**
 
@@ -585,6 +580,6 @@ Internal adoption by Voiceline team, technical performance targets met (<5ms lat
 
 ---
 
-_This PRD captures the complete product vision for loqa-audio-dsp - a composable, production-grade DSP analysis package that brings native performance to React Native audio applications._
+_This PRD captures the complete product vision for loqa-expo-dsp - a composable, production-grade DSP analysis package that brings native performance to React Native audio applications._
 
 _Created through collaborative discovery between Anna and AI facilitator._

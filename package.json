@@ -1,7 +1,7 @@
 {
-  "name": "@loqalabs/loqa-audio-dsp",
-  "version": "0.1.9",
-  "description": "Production-grade Expo native module for audio DSP analysis (FFT, pitch detection, formant extraction, spectral analysis)",
+  "name": "@loqalabs/loqa-expo-dsp",
+  "version": "0.2.0",
+  "description": "Production-grade Expo native module wrapping loqa-voice-dsp for audio DSP analysis (FFT, pitch detection, formants, HNR, H1-H2)",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "files": [
@@ -38,19 +38,22 @@
     "pitch",
     "formants",
     "spectrum",
+    "hnr",
+    "h1h2",
+    "voice-analysis",
     "react-native",
     "expo"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/loqalabs/loqa-audio-dsp.git"
+    "url": "git+https://github.com/loqalabs/loqa-expo-dsp.git"
   },
   "bugs": {
-    "url": "https://github.com/loqalabs/loqa-audio-dsp/issues"
+    "url": "https://github.com/loqalabs/loqa-expo-dsp/issues"
   },
   "author": "Loqa Labs <33356887+annabarnes1138@users.noreply.github.com> (https://github.com/loqalabs)",
   "license": "MIT",
-  "homepage": "https://github.com/loqalabs/loqa-audio-dsp#readme",
+  "homepage": "https://github.com/loqalabs/loqa-expo-dsp#readme",
   "peerDependencies": {
     "expo": "^54.0.0",
     "react": "*",

@@ -1,8 +1,8 @@
-// @loqalabs/loqa-audio-dsp
-// Production-grade audio DSP analysis for React Native/Expo
+// @loqalabs/loqa-expo-dsp
+// Expo native module wrapping loqa-voice-dsp for audio DSP analysis
 
 // Export native module (for advanced usage)
-export { default as LoqaAudioDspModule } from './LoqaAudioDspModule';
+export { default as LoqaExpoDspModule } from './LoqaExpoDspModule';
 
 // Export type definitions
 export type {
@@ -14,10 +14,19 @@ export type {
   FormantsResult,
   SpectrumAnalysisOptions,
   SpectrumResult,
+  HNROptions,
+  HNRResult,
+  H1H2Options,
+  H1H2Result,
 } from './types';
 
 // Export error classes
-export { LoqaAudioDspError, ValidationError, NativeModuleError } from './errors';
+export {
+  LoqaExpoDspError,
+  LoqaAudioDspError, // @deprecated alias for backwards compatibility
+  ValidationError,
+  NativeModuleError,
+} from './errors';
 
 // Export utility functions
 export { logDebug, logWarning } from './utils';
@@ -27,3 +36,5 @@ export { computeFFT } from './computeFFT';
 export { detectPitch } from './detectPitch';
 export { extractFormants } from './extractFormants';
 export { analyzeSpectrum } from './analyzeSpectrum';
+export { calculateHNR } from './calculateHNR';
+export { calculateH1H2 } from './calculateH1H2';

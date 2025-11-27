@@ -85,6 +85,48 @@ func analyze_spectrum_rust(
     _ sampleRate: Int32
 ) -> SpectrumResult
 
+// MARK: HNR (Harmonics-to-Noise Ratio) Functions
+
+/// HNRResult struct matching Rust #[repr(C)] layout
+/// Returned by value from calculate_hnr_rust
+public struct HNRResult {
+    public let hnr: Float
+    public let f0: Float
+    public let isVoiced: Bool
+}
+
+/// FFI declaration for HNR calculation using Boersma's autocorrelation method
+/// Note: Rust returns HNRResult by value (small struct, no heap allocation needed)
+@_silgen_name("calculate_hnr_rust")
+func calculate_hnr_rust(
+    _ buffer: UnsafePointer<Float>,
+    _ length: Int32,
+    _ sampleRate: Int32,
+    _ minFreq: Float,
+    _ maxFreq: Float
+) -> HNRResult
+
+// MARK: H1-H2 (Harmonic Amplitude Difference) Functions
+
+/// H1H2Result struct matching Rust #[repr(C)] layout
+/// Returned by value from calculate_h1h2_rust
+public struct H1H2Result {
+    public let h1h2: Float
+    public let h1AmplitudeDb: Float
+    public let h2AmplitudeDb: Float
+    public let f0: Float
+}
+
+/// FFI declaration for H1-H2 calculation for vocal weight analysis
+/// Note: Rust returns H1H2Result by value (small struct, no heap allocation needed)
+@_silgen_name("calculate_h1h2_rust")
+func calculate_h1h2_rust(
+    _ buffer: UnsafePointer<Float>,
+    _ length: Int32,
+    _ sampleRate: Int32,
+    _ f0: Float
+) -> H1H2Result
+
 // MARK: - Swift Wrapper Functions
 // These functions provide memory-safe wrappers around the Rust FFI calls
 // They handle memory marshalling, deallocation, and error handling
@@ -280,6 +322,122 @@ public func analyzeSpectrumWrapper(
         centroid: result.centroid,
         rolloff: result.rolloff,
         tilt: result.tilt
+    )
+}
+
+// MARK: HNR Calculation Wrapper
+
+/// Swift wrapper for HNR (Harmonics-to-Noise Ratio) calculation
+/// MEMORY SAFETY: HNRResult returned by value (no heap allocation, no cleanup needed)
+///
+/// HNR measures the ratio of harmonic to noise energy in voice:
+/// - Higher HNR (18-25 dB): Clear, less breathy voice
+/// - Lower HNR (12-18 dB): Softer, more breathy voice
+///
+/// - Parameters:
+///   - buffer: Audio samples as Float array
+///   - sampleRate: Sample rate in Hz (8000-48000)
+///   - minFreq: Minimum F0 to search (default: 75 Hz)
+///   - maxFreq: Maximum F0 to search (default: 500 Hz)
+/// - Returns: Tuple with hnr (dB), f0 (Hz), and isVoiced flag
+public func calculateHNRWrapper(
+    buffer: [Float],
+    sampleRate: Int,
+    minFreq: Float = 75.0,
+    maxFreq: Float = 500.0
+) throws -> (hnr: Float, f0: Float, isVoiced: Bool) {
+    // Input validation
+    guard !buffer.isEmpty else {
+        throw RustFFIError.invalidInput("Buffer cannot be empty")
+    }
+
+    guard sampleRate >= 8000 && sampleRate <= 48000 else {
+        throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
+    }
+
+    guard minFreq > 0 && maxFreq > minFreq else {
+        throw RustFFIError.invalidInput("Invalid frequency range: minFreq must be > 0 and maxFreq must be > minFreq")
+    }
+
+    // Call Rust function - returns HNRResult by value (no memory management needed)
+    let result = buffer.withUnsafeBufferPointer { bufferPtr -> HNRResult in
+        guard let baseAddress = bufferPtr.baseAddress else {
+            // Return error result if buffer pointer is invalid
+            return HNRResult(hnr: 0.0, f0: 0.0, isVoiced: false)
+        }
+
+        return calculate_hnr_rust(
+            baseAddress,
+            Int32(buffer.count),
+            Int32(sampleRate),
+            minFreq,
+            maxFreq
+        )
+    }
+
+    return (
+        hnr: result.hnr,
+        f0: result.f0,
+        isVoiced: result.isVoiced
+    )
+}
+
+// MARK: H1-H2 Calculation Wrapper
+
+/// Swift wrapper for H1-H2 amplitude difference calculation
+/// MEMORY SAFETY: H1H2Result returned by value (no heap allocation, no cleanup needed)
+///
+/// H1-H2 measures the difference between first and second harmonic amplitudes:
+/// - Higher H1-H2 (>5 dB): Lighter, breathier vocal quality
+/// - Lower H1-H2 (<0 dB): Fuller, heavier vocal quality
+///
+/// - Parameters:
+///   - buffer: Audio samples as Float array
+///   - sampleRate: Sample rate in Hz (8000-48000)
+///   - f0: Optional fundamental frequency. If nil, auto-detects.
+/// - Returns: Tuple with h1h2 (dB), h1AmplitudeDb, h2AmplitudeDb, and f0 (Hz)
+public func calculateH1H2Wrapper(
+    buffer: [Float],
+    sampleRate: Int,
+    f0: Float? = nil
+) throws -> (h1h2: Float, h1AmplitudeDb: Float, h2AmplitudeDb: Float, f0: Float) {
+    // Input validation
+    guard !buffer.isEmpty else {
+        throw RustFFIError.invalidInput("Buffer cannot be empty")
+    }
+
+    guard sampleRate >= 8000 && sampleRate <= 48000 else {
+        throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
+    }
+
+    // Convert f0: nil -> 0.0 (auto-detect), otherwise use provided value
+    let f0Value = f0 ?? 0.0
+
+    // Call Rust function - returns H1H2Result by value (no memory management needed)
+    let result = buffer.withUnsafeBufferPointer { bufferPtr -> H1H2Result in
+        guard let baseAddress = bufferPtr.baseAddress else {
+            // Return error result if buffer pointer is invalid
+            return H1H2Result(h1h2: 0.0, h1AmplitudeDb: 0.0, h2AmplitudeDb: 0.0, f0: 0.0)
+        }
+
+        return calculate_h1h2_rust(
+            baseAddress,
+            Int32(buffer.count),
+            Int32(sampleRate),
+            f0Value
+        )
+    }
+
+    // Check for error (all zeros with f0 = 0 indicates failure if we expected detection)
+    if f0 == nil && result.f0 == 0.0 {
+        throw RustFFIError.computationFailed("H1-H2 calculation failed - could not detect F0 (signal may be unvoiced)")
+    }
+
+    return (
+        h1h2: result.h1h2,
+        h1AmplitudeDb: result.h1AmplitudeDb,
+        h2AmplitudeDb: result.h2AmplitudeDb,
+        f0: result.f0
     )
 }
 

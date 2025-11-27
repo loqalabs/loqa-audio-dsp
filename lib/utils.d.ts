@@ -2,9 +2,9 @@
  * Logs a debug message with optional data
  *
  * Debug logs are only output when DEBUG mode is enabled (__DEV__ === true
- * or LOQA_AUDIO_DSP_DEBUG environment variable is set to 'true').
+ * or LOQA_EXPO_DSP_DEBUG environment variable is set to 'true').
  *
- * All logs are prefixed with [LoqaAudioDsp] for easy identification.
+ * All logs are prefixed with [LoqaExpoDsp] for easy identification.
  *
  * @param message - Debug message to log
  * @param data - Optional data to include in the log
@@ -24,7 +24,7 @@ export declare function logDebug(message: string, data?: unknown): void;
  * Warnings are always output, regardless of DEBUG mode, as they indicate
  * potential issues or sub-optimal configurations that should be addressed.
  *
- * All logs are prefixed with [LoqaAudioDsp] for easy identification.
+ * All logs are prefixed with [LoqaExpoDsp] for easy identification.
  *
  * @param message - Warning message to log
  * @param data - Optional data to include in the log

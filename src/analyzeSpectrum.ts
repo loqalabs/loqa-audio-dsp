@@ -1,5 +1,5 @@
 // analyzeSpectrum - Spectral analysis API
-import LoqaAudioDspModule from './LoqaAudioDspModule';
+import LoqaExpoDspModule from './LoqaExpoDspModule';
 import { NativeModuleError } from './errors';
 import type { SpectrumAnalysisOptions, SpectrumResult } from './types';
 import { logDebug } from './utils';
@@ -62,7 +62,7 @@ export async function analyzeSpectrum(
 
   try {
     // Step 3: Call native module
-    const nativeResult = await LoqaAudioDspModule.analyzeSpectrum(
+    const nativeResult = await LoqaExpoDspModule.analyzeSpectrum(
       bufferArray,
       sampleRate,
       options || {}

@@ -2,25 +2,25 @@
 import PackageDescription
 
 let package = Package(
-    name: "LoqaAudioDsp",
+    name: "LoqaExpoDsp",
     platforms: [
         .iOS(.v13)
     ],
     products: [
         .library(
-            name: "LoqaAudioDsp",
-            targets: ["LoqaAudioDsp"]),
+            name: "LoqaExpoDsp",
+            targets: ["LoqaExpoDsp"]),
     ],
     targets: [
         .target(
-            name: "LoqaAudioDsp",
+            name: "LoqaExpoDsp",
             path: "ios",
-            exclude: ["LoqaAudioDsp.podspec", "Tests"],
-            sources: ["LoqaAudioDspModule.swift", "RustFFI"]
+            exclude: ["LoqaExpoDsp.podspec", "Tests"],
+            sources: ["LoqaExpoDspModule.swift", "RustFFI"]
         ),
         .testTarget(
-            name: "LoqaAudioDspTests",
-            dependencies: ["LoqaAudioDsp"],
+            name: "LoqaExpoDspTests",
+            dependencies: ["LoqaExpoDsp"],
             path: "ios/Tests"
         ),
     ]

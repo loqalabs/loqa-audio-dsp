@@ -127,10 +127,10 @@ pub unsafe extern "C" fn free_fft_result_rust(ptr: *mut c_float, length: c_int) 
 ///
 /// JNI Method Signature Resolution:
 /// - Kotlin declaration: `external fun nativeComputeFFT(buffer: FloatArray, fftSize: Int, windowType: Int): FloatArray`
-/// - Package: com.loqalabs.loqaaudiodsp.RustJNI
+/// - Package: com.loqalabs.loqaexpodsp.RustJNI
 /// - Class: RustBridge (object)
 /// - Method: nativeComputeFFT
-/// - JNI Function Name: Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeComputeFFT
+/// - JNI Function Name: Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeComputeFFT
 ///
 /// # Arguments
 /// * `env` - JNI environment pointer (unused but required by JNI)
@@ -148,7 +148,7 @@ pub unsafe extern "C" fn free_fft_result_rust(ptr: *mut c_float, length: c_int) 
 ///
 /// # Note
 /// For v0.1.0, window_type is accepted but ignored - loqa-voice-dsp applies windowing internally.
-/// Sample rate is hardcoded to 44100 Hz (matches default in LoqaAudioDspModule.kt).
+/// Sample rate is hardcoded to 44100 Hz (matches default in LoqaExpoDspModule.kt).
 /// This function delegates to compute_fft_rust with appropriate parameters.
 ///
 /// # JNI Implementation Note
@@ -156,7 +156,7 @@ pub unsafe extern "C" fn free_fft_result_rust(ptr: *mut c_float, length: c_int) 
 /// which should be implemented using jni-rs crate or manual JNI calls.
 /// For now, we provide the C ABI signature that matches Kotlin expectations.
 #[no_mangle]
-pub unsafe extern "C" fn Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeComputeFFT(
+pub unsafe extern "C" fn Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeComputeFFT(
     _env: *mut std::os::raw::c_void,
     _class: *mut std::os::raw::c_void,
     buffer: *const c_float,
@@ -165,7 +165,7 @@ pub unsafe extern "C" fn Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativ
     _window_type: c_int,  // Accepted but ignored - windowing handled by loqa-voice-dsp
 ) -> *mut c_float {
     // Use default sample rate (44100 Hz) for Android in v0.1.0
-    // Matches the default in LoqaAudioDspModule.kt
+    // Matches the default in LoqaExpoDspModule.kt
     const DEFAULT_SAMPLE_RATE: c_int = 44100;
 
     // Delegate to the main FFT implementation
@@ -290,10 +290,10 @@ pub unsafe extern "C" fn detect_pitch_rust(
 ///
 /// JNI Method Signature Resolution:
 /// - Kotlin declaration: `external fun nativeDetectPitch(buffer: FloatArray, sampleRate: Int): PitchResult`
-/// - Package: com.loqalabs.loqaaudiodsp.RustJNI
+/// - Package: com.loqalabs.loqaexpodsp.RustJNI
 /// - Class: RustBridge (object)
 /// - Method: nativeDetectPitch
-/// - JNI Function Name: Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeDetectPitch
+/// - JNI Function Name: Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeDetectPitch
 ///
 /// # Arguments
 /// * `env` - JNI environment pointer (unused but required by JNI)
@@ -313,7 +313,7 @@ pub unsafe extern "C" fn detect_pitch_rust(
 /// Unlike FFT, PitchResult is returned by value (small struct), not by pointer.
 /// JNI will automatically marshal this back to Kotlin data class.
 #[no_mangle]
-pub unsafe extern "C" fn Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeDetectPitch(
+pub unsafe extern "C" fn Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeDetectPitch(
     _env: *mut std::os::raw::c_void,
     _class: *mut std::os::raw::c_void,
     buffer: *const c_float,
@@ -477,10 +477,10 @@ pub unsafe extern "C" fn extract_formants_rust(
 ///
 /// JNI Method Signature Resolution:
 /// - Kotlin declaration: `external fun nativeExtractFormants(buffer: FloatArray, sampleRate: Int, lpcOrder: Int): FormantsResult`
-/// - Package: com.loqalabs.loqaaudiodsp.RustJNI
+/// - Package: com.loqalabs.loqaexpodsp.RustJNI
 /// - Class: RustBridge (object)
 /// - Method: nativeExtractFormants
-/// - JNI Function Name: Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeExtractFormants
+/// - JNI Function Name: Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeExtractFormants
 ///
 /// # Arguments
 /// * `env` - JNI environment pointer (unused but required by JNI)
@@ -501,7 +501,7 @@ pub unsafe extern "C" fn extract_formants_rust(
 /// FormantsResult is returned by value (small struct), not by pointer.
 /// JNI will automatically marshal this back to Kotlin data class.
 #[no_mangle]
-pub unsafe extern "C" fn Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeExtractFormants(
+pub unsafe extern "C" fn Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeExtractFormants(
     _env: *mut std::os::raw::c_void,
     _class: *mut std::os::raw::c_void,
     buffer: *const c_float,
@@ -646,10 +646,10 @@ pub unsafe extern "C" fn analyze_spectrum_rust(
 ///
 /// JNI Method Signature Resolution:
 /// - Kotlin declaration: `external fun nativeAnalyzeSpectrum(buffer: FloatArray, sampleRate: Int): SpectrumResult`
-/// - Package: com.loqalabs.loqaaudiodsp.RustJNI
+/// - Package: com.loqalabs.loqaexpodsp.RustJNI
 /// - Class: RustBridge (object)
 /// - Method: nativeAnalyzeSpectrum
-/// - JNI Function Name: Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeAnalyzeSpectrum
+/// - JNI Function Name: Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeAnalyzeSpectrum
 ///
 /// # Arguments
 /// * `env` - JNI environment pointer (unused but required by JNI)
@@ -669,7 +669,7 @@ pub unsafe extern "C" fn analyze_spectrum_rust(
 /// SpectrumResult is returned by value (small struct), not by pointer.
 /// JNI will automatically marshal this back to Kotlin data class.
 #[no_mangle]
-pub unsafe extern "C" fn Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativeAnalyzeSpectrum(
+pub unsafe extern "C" fn Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeAnalyzeSpectrum(
     _env: *mut std::os::raw::c_void,
     _class: *mut std::os::raw::c_void,
     buffer: *const c_float,
@@ -679,6 +679,214 @@ pub unsafe extern "C" fn Java_com_loqalabs_loqaaudiodsp_RustJNI_RustBridge_nativ
     // Delegate to the main spectral analysis implementation
     // The JNI framework handles conversion of FloatArray to *const f32
     analyze_spectrum_rust(buffer, buffer_length, sample_rate)
+}
+
+/// Result structure for HNR (Harmonics-to-Noise Ratio) calculation
+///
+/// Returns HNR in decibels, detected F0, and voicing classification.
+/// This struct is C-compatible for FFI/JNI interop.
+///
+/// # Fields
+/// * `hnr` - Harmonics-to-Noise Ratio in dB (higher = clearer voice, lower = breathier)
+/// * `f0` - Detected fundamental frequency in Hz
+/// * `is_voiced` - Whether the signal is voiced (periodic)
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct HNRResult {
+    pub hnr: c_float,
+    pub f0: c_float,
+    pub is_voiced: bool,
+}
+
+/// Calculates Harmonics-to-Noise Ratio using Boersma's autocorrelation method
+///
+/// HNR measures the ratio of harmonic (periodic) to noise (aperiodic) energy in voice.
+/// It is the primary acoustic measure of breathiness:
+/// - Higher HNR (18-25 dB): Clear, less breathy voice
+/// - Lower HNR (12-18 dB): Softer, more breathy voice
+///
+/// # Arguments
+/// * `buffer` - Pointer to input audio samples (Float32 array)
+/// * `length` - Number of samples in input buffer
+/// * `sample_rate` - Sample rate in Hz (must be 8000-48000 Hz)
+/// * `min_freq` - Minimum F0 frequency to search (typically 75 Hz)
+/// * `max_freq` - Maximum F0 frequency to search (typically 500 Hz)
+///
+/// # Returns
+/// * HNRResult struct with hnr (dB), f0 (Hz), and is_voiced flag
+/// * Returns hnr=0.0, f0=0.0, is_voiced=false on error
+///
+/// # Safety
+/// * Caller must ensure `buffer` points to valid memory of at least `length` samples
+/// * This function dereferences raw pointers and is inherently unsafe
+/// * Buffer must remain valid for the duration of this function call
+#[no_mangle]
+pub unsafe extern "C" fn calculate_hnr_rust(
+    buffer: *const c_float,
+    length: c_int,
+    sample_rate: c_int,
+    min_freq: c_float,
+    max_freq: c_float,
+) -> HNRResult {
+    // Default error result
+    let error_result = HNRResult {
+        hnr: 0.0,
+        f0: 0.0,
+        is_voiced: false,
+    };
+
+    // Input validation
+    if buffer.is_null() {
+        eprintln!("[Rust FFI] Error: buffer pointer is null");
+        return error_result;
+    }
+
+    if length <= 0 {
+        eprintln!("[Rust FFI] Error: length must be > 0, got {length}");
+        return error_result;
+    }
+
+    // Validate sample rate range: 8000-48000 Hz
+    if !(8000..=48000).contains(&sample_rate) {
+        eprintln!(
+            "[Rust FFI] Error: sample_rate must be in range [8000, 48000] Hz, got {sample_rate}"
+        );
+        return error_result;
+    }
+
+    // Validate frequency range
+    if min_freq <= 0.0 || max_freq <= min_freq {
+        eprintln!(
+            "[Rust FFI] Error: invalid frequency range: min={min_freq}, max={max_freq}"
+        );
+        return error_result;
+    }
+
+    // Convert raw pointer to Rust slice
+    let input_slice = slice::from_raw_parts(buffer, length as usize);
+
+    // Call loqa-voice-dsp HNR calculation function
+    let hnr_result = loqa_voice_dsp::calculate_hnr(
+        input_slice,
+        sample_rate as u32,
+        min_freq,
+        max_freq,
+    );
+
+    // Handle HNR calculation result
+    match hnr_result {
+        Ok(result) => HNRResult {
+            hnr: result.hnr,
+            f0: result.f0,
+            is_voiced: result.is_voiced,
+        },
+        Err(e) => {
+            eprintln!("[Rust FFI] HNR calculation failed: {e:?}");
+            error_result
+        }
+    }
+}
+
+/// Result structure for H1-H2 amplitude difference calculation
+///
+/// Returns H1-H2 difference and individual harmonic amplitudes in decibels.
+/// This struct is C-compatible for FFI/JNI interop.
+///
+/// # Fields
+/// * `h1h2` - H1-H2 difference in dB (higher = lighter voice, lower = fuller voice)
+/// * `h1_amplitude_db` - First harmonic (fundamental) amplitude in dB
+/// * `h2_amplitude_db` - Second harmonic amplitude in dB
+/// * `f0` - Fundamental frequency used for calculation in Hz
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct H1H2Result {
+    pub h1h2: c_float,
+    pub h1_amplitude_db: c_float,
+    pub h2_amplitude_db: c_float,
+    pub f0: c_float,
+}
+
+/// Calculates H1-H2 amplitude difference for vocal weight analysis
+///
+/// H1-H2 measures the difference in amplitude between the first harmonic (fundamental)
+/// and second harmonic. It correlates with vocal weight:
+/// - Higher H1-H2 (>5 dB): Lighter, breathier vocal quality
+/// - Lower H1-H2 (<0 dB): Fuller, heavier vocal quality
+///
+/// # Arguments
+/// * `buffer` - Pointer to input audio samples (Float32 array)
+/// * `length` - Number of samples in input buffer
+/// * `sample_rate` - Sample rate in Hz (must be 8000-48000 Hz)
+/// * `f0` - Fundamental frequency in Hz, or 0.0 to auto-detect
+///
+/// # Returns
+/// * H1H2Result struct with h1h2, h1_amplitude_db, h2_amplitude_db, and f0
+/// * Returns all zeros on error
+///
+/// # Safety
+/// * Caller must ensure `buffer` points to valid memory of at least `length` samples
+/// * This function dereferences raw pointers and is inherently unsafe
+/// * Buffer must remain valid for the duration of this function call
+#[no_mangle]
+pub unsafe extern "C" fn calculate_h1h2_rust(
+    buffer: *const c_float,
+    length: c_int,
+    sample_rate: c_int,
+    f0: c_float,
+) -> H1H2Result {
+    // Default error result
+    let error_result = H1H2Result {
+        h1h2: 0.0,
+        h1_amplitude_db: 0.0,
+        h2_amplitude_db: 0.0,
+        f0: 0.0,
+    };
+
+    // Input validation
+    if buffer.is_null() {
+        eprintln!("[Rust FFI] Error: buffer pointer is null");
+        return error_result;
+    }
+
+    if length <= 0 {
+        eprintln!("[Rust FFI] Error: length must be > 0, got {length}");
+        return error_result;
+    }
+
+    // Validate sample rate range: 8000-48000 Hz
+    if !(8000..=48000).contains(&sample_rate) {
+        eprintln!(
+            "[Rust FFI] Error: sample_rate must be in range [8000, 48000] Hz, got {sample_rate}"
+        );
+        return error_result;
+    }
+
+    // Convert raw pointer to Rust slice
+    let input_slice = slice::from_raw_parts(buffer, length as usize);
+
+    // Convert f0: 0.0 means auto-detect (None), otherwise Some(f0)
+    let f0_option = if f0 > 0.0 { Some(f0) } else { None };
+
+    // Call loqa-voice-dsp H1-H2 calculation function
+    let h1h2_result = loqa_voice_dsp::calculate_h1h2(
+        input_slice,
+        sample_rate as u32,
+        f0_option,
+    );
+
+    // Handle H1-H2 calculation result
+    match h1h2_result {
+        Ok(result) => H1H2Result {
+            h1h2: result.h1h2,
+            h1_amplitude_db: result.h1_amplitude_db,
+            h2_amplitude_db: result.h2_amplitude_db,
+            f0: result.f0,
+        },
+        Err(e) => {
+            eprintln!("[Rust FFI] H1-H2 calculation failed: {e:?}");
+            error_result
+        }
+    }
 }
 
 /// Placeholder FFI function for testing build infrastructure (retained for backward compatibility)

@@ -1,12 +1,12 @@
 // Comprehensive tests for extractFormants function
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-import LoqaAudioDspModule from '../src/LoqaAudioDspModule';
+import LoqaExpoDspModule from '../src/LoqaExpoDspModule';
 import { ValidationError, NativeModuleError } from '../src/errors';
 import { extractFormants } from '../src/extractFormants';
 
 // Mock the native module
-jest.mock('../src/LoqaAudioDspModule', () => ({
+jest.mock('../src/LoqaExpoDspModule', () => ({
   __esModule: true,
   default: {
     extractFormants: jest.fn(),
@@ -53,8 +53,8 @@ function generateVowelLikeAudio(
 }
 
 describe('extractFormants', () => {
-  const mockExtractFormants = LoqaAudioDspModule.extractFormants as jest.MockedFunction<
-    typeof LoqaAudioDspModule.extractFormants
+  const mockExtractFormants = LoqaExpoDspModule.extractFormants as jest.MockedFunction<
+    typeof LoqaExpoDspModule.extractFormants
   >;
 
   beforeEach(() => {

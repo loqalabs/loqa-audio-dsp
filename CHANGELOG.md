@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-11-26
+
+### Changed
+
+- **Package Renamed**: `@loqalabs/loqa-audio-dsp` → `@loqalabs/loqa-expo-dsp`
+  - Clarifies relationship: `loqa-voice-dsp` (Rust engine) vs `loqa-expo-dsp` (Expo bindings)
+  - All module references updated (Swift, TypeScript, config files)
+  - Backwards compatibility alias: `LoqaAudioDspError` deprecated, use `LoqaExpoDspError`
+
+### Added
+
+- **HNR Analysis** (`calculateHNR()`): Harmonics-to-Noise Ratio for breathiness measurement
+  - Boersma's autocorrelation-based method
+  - Returns HNR in dB, detected F0, and voicing flag
+  - Typical ranges: 18-25 dB (clear), 12-18 dB (soft/breathy), <10 dB (very breathy)
+
+- **H1-H2 Calculation** (`calculateH1H2()`): First/second harmonic amplitude difference
+  - Measures vocal weight using harmonic amplitude analysis
+  - Returns H1-H2 difference in dB, individual harmonic amplitudes, and F0
+  - Higher values = lighter/breathier, lower values = heavier/pressed voice
+
+- New TypeScript types: `HNROptions`, `HNRResult`, `H1H2Options`, `H1H2Result`
+
+### Technical Details
+
+- Updated `loqa-voice-dsp` dependency to v0.2.0
+- Added Rust FFI exports: `calculate_hnr_rust`, `calculate_h1h2_rust`
+- Added Swift FFI declarations and wrappers for iOS
+- Added Expo module AsyncFunction bindings
+
 ## [0.1.9] - 2025-11-23
 
 ### Fixed
@@ -163,14 +193,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Technical Details
 
-- Package name: `@loqalabs/loqa-audio-dsp`
+- Package name: `@loqalabs/loqa-expo-dsp` (formerly `@loqalabs/loqa-audio-dsp`)
 - Expo SDK: 54.0+
 - React Native: 0.76+
 - License: MIT
-- Repository: https://github.com/loqalabs/loqa-audio-dsp
+- Repository: [loqa-expo-dsp](https://github.com/loqalabs/loqa-expo-dsp)
 
 ---
 
+[0.2.0]: https://github.com/loqalabs/loqa-expo-dsp/releases/tag/v0.2.0
 [0.1.9]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.9
 [0.1.8]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.8
 [0.1.7]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.7

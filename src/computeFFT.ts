@@ -1,5 +1,5 @@
 // computeFFT - FFT computation API
-import LoqaAudioDspModule from './LoqaAudioDspModule';
+import LoqaExpoDspModule from './LoqaExpoDspModule';
 import { NativeModuleError } from './errors';
 import type { FFTOptions, FFTResult } from './types';
 import { logDebug } from './utils';
@@ -70,7 +70,7 @@ export async function computeFFT(
     // Default sample rate to 44100 Hz if not provided (used for frequency calculation)
     const sampleRate = 44100; // Default sample rate for frequency bin calculation
 
-    const nativeResult = await LoqaAudioDspModule.computeFFT(bufferArray, {
+    const nativeResult = await LoqaExpoDspModule.computeFFT(bufferArray, {
       fftSize,
       windowType,
       includePhase,

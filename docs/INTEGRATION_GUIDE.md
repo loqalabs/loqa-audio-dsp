@@ -1,8 +1,8 @@
 # Integration Guide
 
-**@loqalabs/loqa-audio-dsp**
+**@loqalabs/loqa-expo-dsp**
 
-This guide provides real-world integration patterns and complete examples for using @loqalabs/loqa-audio-dsp in your React Native/Expo applications.
+This guide provides real-world integration patterns and complete examples for using @loqalabs/loqa-expo-dsp in your React Native/Expo applications.
 
 ---
 
@@ -28,13 +28,13 @@ This guide provides real-world integration patterns and complete examples for us
 Install the package:
 
 ```bash
-npx expo install @loqalabs/loqa-audio-dsp
+npx expo install @loqalabs/loqa-expo-dsp
 ```
 
 Basic usage:
 
 ```typescript
-import { detectPitch } from '@loqalabs/loqa-audio-dsp';
+import { detectPitch } from '@loqalabs/loqa-expo-dsp';
 
 const audioBuffer = new Float32Array(2048);
 // ... fill buffer with audio samples ...
@@ -49,7 +49,7 @@ console.log(`Pitch: ${pitch.frequency} Hz`);
 
 ### Pattern 1: Voice Recording with expo-av
 
-This pattern shows how to record audio using `expo-av` and analyze it with @loqalabs/loqa-audio-dsp.
+This pattern shows how to record audio using `expo-av` and analyze it with @loqalabs/loqa-expo-dsp.
 
 #### Dependencies
 
@@ -61,7 +61,7 @@ npx expo install expo-av
 
 ```typescript
 import { Audio } from 'expo-av';
-import { detectPitch, extractFormants } from '@loqalabs/loqa-audio-dsp';
+import { detectPitch, extractFormants } from '@loqalabs/loqa-expo-dsp';
 import { useState } from 'react';
 import { View, Button, Text } from 'react-native';
 
@@ -248,7 +248,7 @@ This pattern demonstrates real-time audio analysis using [@loqalabs/loqa-audio-b
 #### Dependencies
 
 ```bash
-npx expo install @loqalabs/loqa-audio-bridge @loqalabs/loqa-audio-dsp
+npx expo install @loqalabs/loqa-audio-bridge @loqalabs/loqa-expo-dsp
 ```
 
 #### Complete Implementation
@@ -260,7 +260,7 @@ import {
   addAudioSampleListener,
   removeAudioSampleListener,
 } from '@loqalabs/loqa-audio-bridge';
-import { detectPitch, analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
+import { detectPitch, analyzeSpectrum } from '@loqalabs/loqa-expo-dsp';
 import { useEffect, useState } from 'react';
 import { View, Button, Text } from 'react-native';
 
@@ -389,7 +389,7 @@ npx expo install expo-file-system expo-asset
 
 ```typescript
 import * as FileSystem from 'expo-file-system';
-import { computeFFT, detectPitch, extractFormants } from '@loqalabs/loqa-audio-dsp';
+import { computeFFT, detectPitch, extractFormants } from '@loqalabs/loqa-expo-dsp';
 
 interface AudioAnalysisResult {
   pitch: { frequency: number | null; confidence: number };
@@ -547,7 +547,7 @@ import {
   stopAudioStream,
   addAudioSampleListener,
 } from '@loqalabs/loqa-audio-bridge';
-import { detectPitch } from '@loqalabs/loqa-audio-dsp';
+import { detectPitch } from '@loqalabs/loqa-expo-dsp';
 
 // Musical note data
 const NOTE_NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
@@ -764,7 +764,7 @@ import {
   stopAudioStream,
   addAudioSampleListener,
 } from '@loqalabs/loqa-audio-bridge';
-import { extractFormants, detectPitch } from '@loqalabs/loqa-audio-dsp';
+import { extractFormants, detectPitch } from '@loqalabs/loqa-expo-dsp';
 
 const { width } = Dimensions.get('window');
 const CHART_SIZE = width - 40;
@@ -994,7 +994,7 @@ import {
   stopAudioStream,
   addAudioSampleListener,
 } from '@loqalabs/loqa-audio-bridge';
-import { computeFFT, analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
+import { computeFFT, analyzeSpectrum } from '@loqalabs/loqa-expo-dsp';
 
 const { width } = Dimensions.get('window');
 const SPECTRUM_WIDTH = width - 40;
@@ -1364,7 +1364,7 @@ async function analyzeWithFallback(samples: Float32Array, sampleRate: number) {
 ### Input Validation
 
 ```typescript
-import { ValidationError } from '@loqalabs/loqa-audio-dsp';
+import { ValidationError } from '@loqalabs/loqa-expo-dsp';
 
 function validateAudioInput(samples: Float32Array, sampleRate: number): boolean {
   // Check buffer
@@ -1529,4 +1529,4 @@ async function startAnalysis() {
 - **API Reference**: See [API.md](../API.md) for complete function signatures
 - **Example App**: Explore `example/` directory for working demos
 - **Companion Package**: Check [@loqalabs/loqa-audio-bridge](https://github.com/loqalabs/loqa-audio-bridge) for audio streaming
-- **Support**: Report issues at [GitHub Issues](https://github.com/loqalabs/loqa-audio-dsp/issues)
+- **Support**: Report issues at [GitHub Issues](https://github.com/loqalabs/loqa-expo-dsp/issues)

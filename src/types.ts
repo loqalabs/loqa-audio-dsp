@@ -1,4 +1,4 @@
-// Type definitions for LoqaAudioDsp module
+// Type definitions for LoqaExpoDsp module
 
 /**
  * Configuration options for FFT computation
@@ -143,4 +143,159 @@ export interface SpectrumResult {
   rolloff: number;
   /** Spectral tilt (slope of spectrum) */
   tilt: number;
+}
+
+/**
+ * Configuration options for HNR (Harmonics-to-Noise Ratio) calculation
+ *
+ * HNR measures the ratio of harmonic to noise energy in voice,
+ * providing a quantitative measure of breathiness.
+ *
+ * @example
+ * ```typescript
+ * const options: HNROptions = {
+ *   sampleRate: 44100,
+ *   minFreq: 75,   // Minimum F0 to search
+ *   maxFreq: 500   // Maximum F0 to search
+ * };
+ * ```
+ */
+export interface HNROptions {
+  /** Sample rate in Hz */
+  sampleRate: number;
+  /**
+   * Minimum fundamental frequency to search in Hz.
+   * Defaults to 75 Hz. Lower values may be needed for very low voices.
+   */
+  minFreq?: number;
+  /**
+   * Maximum fundamental frequency to search in Hz.
+   * Defaults to 500 Hz. Higher values may be needed for very high voices.
+   */
+  maxFreq?: number;
+}
+
+/**
+ * Result of HNR (Harmonics-to-Noise Ratio) calculation
+ *
+ * HNR is the primary acoustic measure of breathiness:
+ * - Higher HNR (18-25 dB): Clear, less breathy voice
+ * - Lower HNR (12-18 dB): Softer, more breathy voice
+ * - Very low HNR (<10 dB): Very breathy or pathological voice
+ *
+ * @example
+ * ```typescript
+ * const result = await calculateHNR(audioBuffer, { sampleRate: 44100 });
+ *
+ * if (result.isVoiced) {
+ *   if (result.hnr > 20) {
+ *     console.log('Clear voice detected');
+ *   } else if (result.hnr < 15) {
+ *     console.log('Breathy voice detected');
+ *   }
+ * }
+ * ```
+ */
+export interface HNRResult {
+  /**
+   * Harmonics-to-Noise Ratio in decibels (dB).
+   *
+   * Typical ranges:
+   * - 12-18 dB: Breathy voice (e.g., soft, warm quality)
+   * - 18-25 dB: Clear voice (e.g., bright, crisp quality)
+   * - 0 dB: Returned for unvoiced signals
+   */
+  hnr: number;
+  /**
+   * Detected fundamental frequency in Hz.
+   *
+   * This is the F0 used for HNR calculation.
+   * Returns 0 if signal is unvoiced.
+   */
+  f0: number;
+  /**
+   * Whether the signal is voiced (periodic).
+   *
+   * If false, the signal is either unvoiced (noise, whisper)
+   * or below the voicing threshold.
+   */
+  isVoiced: boolean;
+}
+
+/**
+ * Configuration options for H1-H2 amplitude difference calculation
+ *
+ * H1-H2 measures the difference between the first and second harmonic amplitudes,
+ * correlating with vocal weight (lighter vs fuller voice quality).
+ *
+ * @example
+ * ```typescript
+ * const options: H1H2Options = {
+ *   sampleRate: 44100,
+ *   f0: 200  // Optional: provide pre-calculated F0 for efficiency
+ * };
+ * ```
+ */
+export interface H1H2Options {
+  /** Sample rate in Hz */
+  sampleRate: number;
+  /**
+   * Optional pre-calculated fundamental frequency in Hz.
+   *
+   * If provided, skips F0 detection (faster).
+   * If omitted or set to 0, F0 will be auto-detected.
+   * Use this if you've already called detectPitch().
+   */
+  f0?: number;
+}
+
+/**
+ * Result of H1-H2 amplitude difference calculation
+ *
+ * H1-H2 is a key acoustic correlate of vocal weight:
+ * - Higher H1-H2 (>5 dB): Lighter, breathier vocal quality
+ * - Lower H1-H2 (<0 dB): Fuller, heavier vocal quality
+ * - Moderate H1-H2 (0-5 dB): Balanced vocal weight
+ *
+ * @example
+ * ```typescript
+ * const result = await calculateH1H2(audioBuffer, { sampleRate: 44100 });
+ *
+ * if (result.h1h2 > 5) {
+ *   console.log('Lighter voice detected');
+ * } else if (result.h1h2 < 0) {
+ *   console.log('Fuller voice detected');
+ * }
+ * ```
+ */
+export interface H1H2Result {
+  /**
+   * H1-H2 amplitude difference in decibels (dB).
+   *
+   * Calculated as: H1_amplitude_dB - H2_amplitude_dB
+   *
+   * Typical ranges:
+   * - >5 dB: Lighter, breathier quality
+   * - 0-5 dB: Balanced
+   * - <0 dB: Fuller, heavier quality
+   */
+  h1h2: number;
+  /**
+   * First harmonic (fundamental) amplitude in dB.
+   *
+   * This is the amplitude at the F0 frequency.
+   */
+  h1AmplitudeDb: number;
+  /**
+   * Second harmonic amplitude in dB.
+   *
+   * This is the amplitude at 2*F0 frequency.
+   */
+  h2AmplitudeDb: number;
+  /**
+   * Fundamental frequency used for calculation in Hz.
+   *
+   * Either the provided F0 or the auto-detected value.
+   */
+  f0: number;
 }

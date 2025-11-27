@@ -1,5 +1,5 @@
 {
-  "name": "loqa-audio-dsp-example",
+  "name": "loqa-expo-dsp-example",
   "version": "0.1.0",
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@loqalabs/loqa-audio-bridge": "file:../../loqa-audio-bridge",
-    "@loqalabs/loqa-audio-dsp": "file:../",
+    "@loqalabs/loqa-expo-dsp": "file:../",
     "@react-navigation/bottom-tabs": "^6.5.0",
     "@react-navigation/native": "^6.1.0",
     "expo": "^54.0.0",

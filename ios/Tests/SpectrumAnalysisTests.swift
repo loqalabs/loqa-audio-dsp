@@ -1,5 +1,5 @@
 import XCTest
-@testable import LoqaAudioDsp
+@testable import LoqaExpoDsp
 
 /// Comprehensive tests for spectrum analysis functionality (Story 4.4)
 /// Tests native iOS spectral analysis implementation, FFI bindings, and memory management

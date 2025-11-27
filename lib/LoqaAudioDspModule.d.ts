@@ -1,3 +1,3 @@
-declare const LoqaAudioDspModule: any;
-export default LoqaAudioDspModule;
-//# sourceMappingURL=LoqaAudioDspModule.d.ts.map
+declare const LoqaExpoDspModule: any;
+export default LoqaExpoDspModule;
+//# sourceMappingURL=LoqaExpoDspModule.d.ts.map

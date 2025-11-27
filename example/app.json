@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "loqa-audio-dsp-example",
-    "slug": "loqa-audio-dsp-example",
+    "name": "loqa-expo-dsp-example",
+    "slug": "loqa-expo-dsp-example",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,14 +14,14 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.loqalabs.loqaaudiodsp.example"
+      "bundleIdentifier": "com.loqalabs.loqaexpodsp.example"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.loqalabs.loqaaudiodsp.example"
+      "package": "com.loqalabs.loqaexpodsp.example"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -1,4 +1,4 @@
-# loqa-audio-dsp - Epic Breakdown
+# loqa-expo-dsp - Epic Breakdown
 
 **Author:** Anna
 **Date:** 2025-11-20
@@ -10,7 +10,7 @@
 
 ## Overview
 
-This document provides the complete epic and story breakdown for loqa-audio-dsp, decomposing the requirements from the [PRD](./prd.md) into implementable stories.
+This document provides the complete epic and story breakdown for loqa-expo-dsp, decomposing the requirements from the [PRD](./prd.md) into implementable stories.
 
 **Living Document Notice:** This document includes technical implementation details from the Architecture document. UX Design workflow can be run later if UI-specific components are needed.
 
@@ -90,11 +90,11 @@ Each epic delivers something developers can use and test, enabling incremental v
 
 **Package Distribution:**
 
-- FR44: Package is published to npm registry as @loqalabs/loqa-audio-dsp
+- FR44: Package is published to npm registry as @loqalabs/loqa-expo-dsp
 - FR45: Package includes TypeScript type definitions (.d.ts files)
 - FR46: Package includes source maps for debugging
 - FR47: Package metadata includes correct peer dependencies
-- FR48: Package installs via `npx expo install @loqalabs/loqa-audio-dsp`
+- FR48: Package installs via `npx expo install @loqalabs/loqa-expo-dsp`
 - FR49: Package works with Expo managed workflow without ejecting
 - FR50: Package works with bare React Native after prebuild
 - FR51: Native dependencies are automatically configured for Expo users
@@ -197,13 +197,13 @@ So that I can develop native iOS and Android bindings following Expo best practi
 **Acceptance Criteria:**
 
 **Given** I am starting a new Expo native module project
-**When** I run `npx create-expo-module@latest loqa-audio-dsp`
+**When** I run `npx create-expo-module@latest loqa-expo-dsp`
 **Then** the following structure is created:
 
 - Root package.json with Expo module metadata
 - src/ directory for TypeScript source
-- ios/ directory with LoqaAudioDsp.podspec and LoqaAudioDspModule.swift
-- android/ directory with build.gradle and LoqaAudioDspModule.kt
+- ios/ directory with LoqaExpoDsp.podspec and LoqaExpoDspModule.swift
+- android/ directory with build.gradle and LoqaExpoDspModule.kt
 - example/ directory with demo Expo app
 - expo-module.config.json with module configuration
 
@@ -219,7 +219,7 @@ So that I can develop native iOS and Android bindings following Expo best practi
 
 - Use create-expo-module CLI as specified in Architecture document
 - Configure for both iOS 15.1+ and Android API 24+
-- Set package name as @loqalabs/loqa-audio-dsp
+- Set package name as @loqalabs/loqa-expo-dsp
 - Include .gitignore for node_modules, build artifacts, and IDE files
 - Architecture reference: [architecture.md](./architecture.md) - "Project Initialization" section
 
@@ -283,7 +283,7 @@ So that iOS can call Rust loqa-voice-dsp functions safely.
 - defer blocks to guarantee Rust memory deallocation
 - Error handling for FFI failures
 
-**And** LoqaAudioDspModule.swift implements Expo Module Definition protocol
+**And** LoqaExpoDspModule.swift implements Expo Module Definition protocol
 
 **And** Module exposes placeholder async functions for future DSP operations
 
@@ -311,14 +311,14 @@ So that Android can call Rust loqa-voice-dsp functions safely.
 
 **Given** Rust libraries are compiled for Android
 **When** I create Kotlin JNI bridge code
-**Then** android/src/main/java/com/loqalabs/loqaaudiodsp/RustJNI/RustBridge.kt is created with:
+**Then** android/src/main/java/com/loqalabs/loqaexpodsp/RustJNI/RustBridge.kt is created with:
 
 - JNI external function declarations for Rust functions
 - System.loadLibrary("loqa_voice_dsp") initialization
 - Kotlin wrapper functions that handle array marshalling
 - Error handling for JNI failures
 
-**And** LoqaAudioDspModule.kt implements Expo Module Definition protocol
+**And** LoqaExpoDspModule.kt implements Expo Module Definition protocol
 
 **And** Module exposes placeholder async functions for future DSP operations
 
@@ -348,14 +348,14 @@ So that I can implement DSP functions with full type safety.
 **Then** the following files exist in src/:
 
 - index.ts (main exports - currently empty placeholder exports)
-- LoqaAudioDspModule.ts (native module imports using requireNativeModule)
+- LoqaExpoDspModule.ts (native module imports using requireNativeModule)
 - types.ts with complete type definitions for all DSP functions:
   - FFTOptions, FFTResult
   - PitchDetectionOptions, PitchResult
   - FormantExtractionOptions, FormantsResult
   - SpectrumAnalysisOptions, SpectrumResult
 - errors.ts with custom error classes:
-  - LoqaAudioDspError (base class)
+  - LoqaExpoDspError (base class)
   - ValidationError
   - NativeModuleError
 - validation.ts with validation function signatures (to be implemented)
@@ -471,7 +471,7 @@ So that the module can be published and installed correctly.
 **When** I configure package.json for distribution
 **Then** package.json includes:
 
-- name: "@loqalabs/loqa-audio-dsp"
+- name: "@loqalabs/loqa-expo-dsp"
 - version: "0.1.0"
 - description: "Production-grade audio DSP analysis for React Native/Expo"
 - main: "lib/index.js"
@@ -557,7 +557,7 @@ So that iOS apps can perform frequency analysis.
 
 **Given** Rust FFT bindings exist
 **When** I implement Swift computeFFT
-**Then** LoqaAudioDspModule.swift exposes async function:
+**Then** LoqaExpoDspModule.swift exposes async function:
 
 ```swift
 AsyncFunction("computeFFT") { (buffer: [Float], options: [String: Any]) -> [String: Any]
@@ -603,7 +603,7 @@ So that Android apps can perform frequency analysis.
 
 **Given** Rust FFT bindings exist
 **When** I implement Kotlin computeFFT
-**Then** LoqaAudioDspModule.kt exposes async function:
+**Then** LoqaExpoDspModule.kt exposes async function:
 
 ```kotlin
 AsyncFunction("computeFFT") { buffer: FloatArray, options: Map<String, Any> -> Map<String, Any>
@@ -668,7 +668,7 @@ So that invalid inputs are caught early with clear error messages.
 
 **And** All error messages include the invalid value and expected range
 
-**And** ValidationError extends LoqaAudioDspError with code "VALIDATION_ERROR"
+**And** ValidationError extends LoqaExpoDspError with code "VALIDATION_ERROR"
 
 **Prerequisites:** Story 1.5 (TypeScript scaffold)
 
@@ -707,7 +707,7 @@ export async function computeFFT(
 
 **And** Function converts Float32Array to number[] for native bridge
 
-**And** Function calls LoqaAudioDspModule.computeFFT(buffer, options)
+**And** Function calls LoqaExpoDspModule.computeFFT(buffer, options)
 
 **And** Function converts result to FFTResult with Float32Array types
 
@@ -899,12 +899,12 @@ So that voice analysis capabilities work cross-platform.
 
 **Given** Rust pitch and formant bindings exist
 **When** I implement native functions
-**Then** iOS LoqaAudioDspModule.swift exposes:
+**Then** iOS LoqaExpoDspModule.swift exposes:
 
 - `AsyncFunction("detectPitch")` that calls Rust, returns PitchResult dictionary
 - `AsyncFunction("extractFormants")` that calls Rust, returns FormantsResult dictionary
 
-**And** Android LoqaAudioDspModule.kt exposes:
+**And** Android LoqaExpoDspModule.kt exposes:
 
 - `AsyncFunction("detectPitch")` that calls Rust via JNI, returns PitchResult map
 - `AsyncFunction("extractFormants")` that calls Rust via JNI, returns FormantsResult map
@@ -1096,11 +1096,11 @@ So that spectral analysis capabilities work cross-platform.
 
 **Given** Rust spectral analysis bindings exist
 **When** I implement native functions
-**Then** iOS LoqaAudioDspModule.swift exposes:
+**Then** iOS LoqaExpoDspModule.swift exposes:
 
 - `AsyncFunction("analyzeSpectrum")` that calls Rust, returns SpectrumResult dictionary
 
-**And** Android LoqaAudioDspModule.kt exposes:
+**And** Android LoqaExpoDspModule.kt exposes:
 
 - `AsyncFunction("analyzeSpectrum")` that calls Rust via JNI, returns SpectrumResult map
 
@@ -1141,7 +1141,7 @@ export async function analyzeSpectrum(
 
 **And** Function validates audioBuffer and sampleRate
 
-**And** Function calls LoqaAudioDspModule.analyzeSpectrum
+**And** Function calls LoqaExpoDspModule.analyzeSpectrum
 
 **And** Function converts result to SpectrumResult type
 
@@ -1261,7 +1261,7 @@ So that new users can quickly understand and use the package.
 **3. Installation:**
 
 ```bash
-npx expo install @loqalabs/loqa-audio-dsp
+npx expo install @loqalabs/loqa-expo-dsp
 ```
 
 **4. Quick Start:**
@@ -1511,7 +1511,7 @@ So that the package can be published and installed correctly.
 - Keywords for npm discoverability: audio, dsp, fft, pitch, formants, spectrum, react-native, expo
 - Author: Loqa Labs
 - License: MIT
-- Repository URL: github.com/loqalabs/loqa-audio-dsp
+- Repository URL: github.com/loqalabs/loqa-expo-dsp
 - Homepage URL
 - Bugs URL
 - Correct peerDependencies
@@ -1590,9 +1590,9 @@ So that developers can install and use it.
 - Package version is set to 0.1.0
 - Git tag v0.1.0 is created
 - CHANGELOG.md is updated
-- Package is published to npm as @loqalabs/loqa-audio-dsp
+- Package is published to npm as @loqalabs/loqa-expo-dsp
 - GitHub Actions publish workflow succeeds
-- Package is installable via `npx expo install @loqalabs/loqa-audio-dsp`
+- Package is installable via `npx expo install @loqalabs/loqa-expo-dsp`
 - README renders correctly on npmjs.com
 
 **And** GitHub release is created with:
@@ -1612,7 +1612,7 @@ So that developers can install and use it.
 
 ---
 
-**Epic 5 Complete:** Package is published to npm with complete documentation, example app, and excellent developer experience. The loqa-audio-dsp v0.1.0 MVP is production-ready!
+**Epic 5 Complete:** Package is published to npm with complete documentation, example app, and excellent developer experience. The loqa-expo-dsp v0.1.0 MVP is production-ready!
 
 ---
 
@@ -1731,7 +1731,7 @@ Every functional requirement from FR1 through FR82 is mapped to specific stories
 
 ## Summary
 
-**Epic Breakdown Complete for loqa-audio-dsp v0.1.0**
+**Epic Breakdown Complete for loqa-expo-dsp v0.1.0**
 
 **5 Epics | 38 Stories | 82 FRs Covered**
 

@@ -1,12 +1,12 @@
 // Comprehensive tests for computeFFT function
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
-import LoqaAudioDspModule from '../src/LoqaAudioDspModule';
+import LoqaExpoDspModule from '../src/LoqaExpoDspModule';
 import { computeFFT } from '../src/computeFFT';
 import { ValidationError, NativeModuleError } from '../src/errors';
 
 // Mock the native module
-jest.mock('../src/LoqaAudioDspModule', () => ({
+jest.mock('../src/LoqaExpoDspModule', () => ({
   __esModule: true,
   default: {
     computeFFT: jest.fn(),
@@ -60,8 +60,8 @@ function findPeakBin(magnitudes: Float32Array): number {
 }
 
 describe('computeFFT', () => {
-  const mockComputeFFT = LoqaAudioDspModule.computeFFT as jest.MockedFunction<
-    typeof LoqaAudioDspModule.computeFFT
+  const mockComputeFFT = LoqaExpoDspModule.computeFFT as jest.MockedFunction<
+    typeof LoqaExpoDspModule.computeFFT
   >;
 
   beforeEach(() => {

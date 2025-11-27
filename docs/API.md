@@ -1,9 +1,9 @@
 # API Reference
 
-**@loqalabs/loqa-audio-dsp**
+**@loqalabs/loqa-expo-dsp**
 Version: 0.1.0
 
-This document provides complete API reference for all functions, types, and options in the @loqalabs/loqa-audio-dsp module.
+This document provides complete API reference for all functions, types, and options in the @loqalabs/loqa-expo-dsp module.
 
 ---
 
@@ -24,7 +24,7 @@ This document provides complete API reference for all functions, types, and opti
   - [SpectrumAnalysisOptions](#spectrumanalysisoptions)
   - [SpectrumResult](#spectrumresult)
 - [Error Handling](#error-handling)
-  - [LoqaAudioDspError](#loqaaudiodsperror)
+  - [LoqaExpoDspError](#loqaexpodsperror)
   - [ValidationError](#validationerror)
   - [NativeModuleError](#nativemoduleerror)
 - [Validation Rules](#validation-rules)
@@ -65,7 +65,7 @@ async function computeFFT(
 #### Example
 
 ```typescript
-import { computeFFT } from '@loqalabs/loqa-audio-dsp';
+import { computeFFT } from '@loqalabs/loqa-expo-dsp';
 
 // Basic usage with defaults
 const audioData = new Float32Array(1024);
@@ -124,7 +124,7 @@ async function detectPitch(
 #### Example
 
 ```typescript
-import { detectPitch } from '@loqalabs/loqa-audio-dsp';
+import { detectPitch } from '@loqalabs/loqa-expo-dsp';
 
 // Basic usage with defaults (human voice range: 80-400 Hz)
 const audioData = new Float32Array(2048);
@@ -182,7 +182,7 @@ async function extractFormants(
 #### Example
 
 ```typescript
-import { extractFormants } from '@loqalabs/loqa-audio-dsp';
+import { extractFormants } from '@loqalabs/loqa-expo-dsp';
 
 // Basic usage with automatic LPC order
 const audioData = new Float32Array(2048);
@@ -250,7 +250,7 @@ async function analyzeSpectrum(
 #### Example
 
 ```typescript
-import { analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
+import { analyzeSpectrum } from '@loqalabs/loqa-expo-dsp';
 
 // Basic usage
 const audioData = new Float32Array(2048);
@@ -497,14 +497,14 @@ interface SpectrumResult {
 
 ## Error Handling
 
-All functions in @loqalabs/loqa-audio-dsp throw typed errors that extend the base `LoqaAudioDspError` class. Errors include detailed context information to help diagnose issues.
+All functions in @loqalabs/loqa-expo-dsp throw typed errors that extend the base `LoqaExpoDspError` class. Errors include detailed context information to help diagnose issues.
 
-### LoqaAudioDspError
+### LoqaExpoDspError
 
-Base error class for all LoqaAudioDsp errors.
+Base error class for all LoqaExpoDsp errors.
 
 ```typescript
-class LoqaAudioDspError extends Error {
+class LoqaExpoDspError extends Error {
   constructor(message: string, public code: string, public details?: Record<string, unknown>);
 }
 ```
@@ -516,7 +516,7 @@ class LoqaAudioDspError extends Error {
 | `message` | `string`                  | Human-readable error message               |
 | `code`    | `string`                  | Error code for programmatic error handling |
 | `details` | `Record<string, unknown>` | Additional error details for debugging     |
-| `name`    | `string`                  | Error class name (`'LoqaAudioDspError'`)   |
+| `name`    | `string`                  | Error class name (`'LoqaExpoDspError'`)    |
 
 ---
 
@@ -527,7 +527,7 @@ Error thrown when input validation fails.
 This error indicates that the provided input parameters did not meet the required constraints (e.g., buffer size, sample rate range, FFT size).
 
 ```typescript
-class ValidationError extends LoqaAudioDspError {
+class ValidationError extends LoqaExpoDspError {
   constructor(message: string, details?: Record<string, unknown>);
 }
 ```
@@ -557,7 +557,7 @@ class ValidationError extends LoqaAudioDspError {
 #### Example
 
 ```typescript
-import { computeFFT, ValidationError } from '@loqalabs/loqa-audio-dsp';
+import { computeFFT, ValidationError } from '@loqalabs/loqa-expo-dsp';
 
 try {
   const result = await computeFFT(audioBuffer, { fftSize: 1000 });
@@ -579,7 +579,7 @@ Error thrown when native module operations fail.
 This error wraps errors that occur in the native iOS or Android code, providing context about the failure and suggestions for resolution.
 
 ```typescript
-class NativeModuleError extends LoqaAudioDspError {
+class NativeModuleError extends LoqaExpoDspError {
   constructor(message: string, details?: Record<string, unknown>);
 }
 ```
@@ -605,7 +605,7 @@ class NativeModuleError extends LoqaAudioDspError {
 #### Example
 
 ```typescript
-import { computeFFT, NativeModuleError } from '@loqalabs/loqa-audio-dsp';
+import { computeFFT, NativeModuleError } from '@loqalabs/loqa-expo-dsp';
 
 try {
   const result = await computeFFT(audioBuffer);

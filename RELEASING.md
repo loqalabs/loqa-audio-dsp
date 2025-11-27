@@ -1,6 +1,6 @@
 # Release Process
 
-This document describes the process for releasing new versions of `@loqalabs/loqa-audio-dsp`.
+This document describes the process for releasing new versions of `@loqalabs/loqa-expo-dsp`.
 
 ## Overview
 
@@ -101,14 +101,14 @@ Once the tag is pushed, GitHub Actions automatically:
 4. **Run tests**: `npm test`
 5. **Publish to npm**: `npm publish --access public`
 
-Monitor the workflow at: https://github.com/loqalabs/loqa-audio-dsp/actions
+Monitor the workflow at: <https://github.com/loqalabs/loqa-expo-dsp/actions>
 
 ### 6. Verify npm Publication
 
 After the workflow succeeds, verify the package on npm:
 
 ```bash
-npm view @loqalabs/loqa-audio-dsp
+npm view @loqalabs/loqa-expo-dsp
 ```
 
 Check that:
@@ -122,14 +122,14 @@ Test installation in a clean project:
 ```bash
 npx create-expo-app test-project
 cd test-project
-npx expo install @loqalabs/loqa-audio-dsp
+npx expo install @loqalabs/loqa-expo-dsp
 ```
 
 ### 7. Create GitHub Release
 
 After npm publication, create a GitHub Release:
 
-1. Go to: https://github.com/loqalabs/loqa-audio-dsp/releases/new
+1. Go to: <https://github.com/loqalabs/loqa-expo-dsp/releases/new>
 2. Select the tag you just created
 3. Title: `v0.1.0` (or appropriate version)
 4. Description: Copy relevant section from CHANGELOG.md
@@ -144,9 +144,9 @@ After npm publication, create a GitHub Release:
 
 After release:
 
-- [ ] Package appears on npm: https://www.npmjs.com/package/@loqalabs/loqa-audio-dsp
-- [ ] GitHub release is created: https://github.com/loqalabs/loqa-audio-dsp/releases
-- [ ] Installation works: `npx expo install @loqalabs/loqa-audio-dsp`
+- [ ] Package appears on npm: <https://www.npmjs.com/package/@loqalabs/loqa-expo-dsp>
+- [ ] GitHub release is created: <https://github.com/loqalabs/loqa-expo-dsp/releases>
+- [ ] Installation works: `npx expo install @loqalabs/loqa-expo-dsp`
 - [ ] Example app works with published version
 
 ## Troubleshooting
@@ -198,8 +198,8 @@ git push origin main --tags
 **Solution**:
 
 1. Wait a few minutes for npm CDN propagation
-2. Try installing with full version: `npm install @loqalabs/loqa-audio-dsp@0.1.0`
-3. Check package is public: `npm access public @loqalabs/loqa-audio-dsp`
+2. Try installing with full version: `npm install @loqalabs/loqa-expo-dsp@0.1.0`
+3. Check package is public: `npm access public @loqalabs/loqa-expo-dsp`
 
 ## Rollback
 
@@ -208,7 +208,7 @@ If a release has critical issues:
 ### 1. Deprecate the Version
 
 ```bash
-npm deprecate @loqalabs/loqa-audio-dsp@0.1.0 "This version has critical issues, please use 0.1.1"
+npm deprecate @loqalabs/loqa-expo-dsp@0.1.0 "This version has critical issues, please use 0.1.1"
 ```
 
 ### 2. Release a Patch
@@ -237,7 +237,7 @@ For pre-1.0.0 releases:
 
 For issues with the release process:
 
-- File an issue: https://github.com/loqalabs/loqa-audio-dsp/issues
+- File an issue: <https://github.com/loqalabs/loqa-expo-dsp/issues>
 - Contact maintainers: Loqa Labs
 
 ---

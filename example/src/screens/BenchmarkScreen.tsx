@@ -1,9 +1,4 @@
-import {
-  computeFFT,
-  detectPitch,
-  extractFormants,
-  analyzeSpectrum,
-} from '@loqalabs/loqa-audio-dsp';
+import { computeFFT, detectPitch, extractFormants, analyzeSpectrum } from '@loqalabs/loqa-expo-dsp';
 import React, { useState } from 'react';
 import {
   View,

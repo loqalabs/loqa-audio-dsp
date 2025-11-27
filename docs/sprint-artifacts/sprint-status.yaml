@@ -1,6 +1,6 @@
 # generated: 2025-11-20
-# project: loqa-audio-dsp
-# project_key: loqa-audio-dsp
+# project: loqa-expo-dsp
+# project_key: loqa-expo-dsp
 # tracking_system: file-system
 # story_location: docs/sprint-artifacts
 
@@ -29,8 +29,8 @@
 # - Dev moves story to 'review', dev reviews, then Dev moves to 'done'
 
 generated: 2025-11-20
-project: loqa-audio-dsp
-project_key: loqa-audio-dsp
+project: loqa-expo-dsp
+project_key: loqa-expo-dsp
 tracking_system: file-system
 story_location: docs/sprint-artifacts
 

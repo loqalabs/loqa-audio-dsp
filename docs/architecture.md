@@ -1,6 +1,6 @@
-# @loqalabs/loqa-audio-dsp - Architecture Document
+# @loqalabs/loqa-expo-dsp - Architecture Document
 
-**Project:** loqa-audio-dsp
+**Project:** loqa-expo-dsp
 **Author:** Anna
 **Date:** 2025-11-20
 **Version:** 1.0
@@ -20,10 +20,10 @@ This architecture defines a production-grade Expo native module that wraps the l
 **First Implementation Story: Initialize Expo Module**
 
 ```bash
-npx create-expo-module@latest loqa-audio-dsp \
-  --slug loqa-audio-dsp \
-  --name LoqaAudioDsp \
-  --package @loqalabs/loqa-audio-dsp \
+npx create-expo-module@latest loqa-expo-dsp \
+  --slug loqa-expo-dsp \
+  --name LoqaExpoDsp \
+  --package @loqalabs/loqa-expo-dsp \
   --example
 ```
 
@@ -64,7 +64,7 @@ This establishes:
 ## Project Structure
 
 ```
-@loqalabs/loqa-audio-dsp/
+@loqalabs/loqa-expo-dsp/
 ├── package.json                    # npm package configuration
 ├── tsconfig.json                   # TypeScript configuration (strict mode)
 ├── .eslintrc.js                    # ESLint configuration
@@ -78,13 +78,13 @@ This establishes:
 │
 ├── src/                            # TypeScript source
 │   ├── index.ts                    # Main exports (computeFFT, detectPitch, etc.)
-│   ├── LoqaAudioDspModule.ts       # Native module bindings
+│   ├── LoqaExpoDspModule.ts       # Native module bindings
 │   ├── types.ts                    # TypeScript type definitions
 │   │   ├── FFTResult.ts
 │   │   ├── PitchResult.ts
 │   │   ├── FormantsResult.ts
 │   │   ├── SpectrumResult.ts
-│   │   └── LoqaAudioDspConfig.ts
+│   │   └── LoqaExpoDspConfig.ts
 │   ├── validation.ts               # Input validation utilities
 │   ├── errors.ts                   # Custom error types
 │   └── utils.ts                    # Helper functions
@@ -97,9 +97,9 @@ This establishes:
 │   └── validation.test.ts
 │
 ├── ios/                            # iOS native module
-│   ├── LoqaAudioDsp.podspec        # CocoaPods specification
-│   ├── LoqaAudioDspModule.swift    # Expo module implementation
-│   ├── LoqaAudioDspView.swift      # View component (if needed)
+│   ├── LoqaExpoDsp.podspec        # CocoaPods specification
+│   ├── LoqaExpoDspModule.swift    # Expo module implementation
+│   ├── LoqaExpoDspView.swift      # View component (if needed)
 │   ├── RustFFI/                    # Rust FFI bridge
 │   │   ├── RustBridge.swift        # Swift wrapper for Rust functions
 │   │   └── libloqa_voice_dsp.a    # Compiled Rust library (iOS)
@@ -113,15 +113,15 @@ This establishes:
 │   ├── build.gradle                # Gradle build configuration
 │   ├── src/
 │   │   ├── main/
-│   │   │   ├── java/com/loqalabs/loqaaudiodsp/
-│   │   │   │   ├── LoqaAudioDspModule.kt      # Expo module implementation
-│   │   │   │   ├── LoqaAudioDspView.kt        # View component (if needed)
+│   │   │   ├── java/com/loqalabs/loqaexpodsp/
+│   │   │   │   ├── LoqaExpoDspModule.kt      # Expo module implementation
+│   │   │   │   ├── LoqaExpoDspView.kt        # View component (if needed)
 │   │   │   │   └── RustJNI/                   # Rust JNI bridge
 │   │   │   │       ├── RustBridge.kt          # Kotlin wrapper for Rust
 │   │   │   │       └── libloqa_voice_dsp.so  # Compiled Rust library (Android)
 │   │   │   └── AndroidManifest.xml
 │   │   └── test/
-│   │       └── java/com/loqalabs/loqaaudiodsp/
+│   │       └── java/com/loqalabs/loqaexpodsp/
 │   │           ├── FFTTests.kt
 │   │           ├── PitchDetectionTests.kt
 │   │           ├── FormantExtractionTests.kt
@@ -167,15 +167,15 @@ This establishes:
 
 ## FR Category to Architecture Mapping
 
-| FR Category                                 | Architecture Component                | Location                                                            |
-| ------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------- |
-| **Core DSP Capabilities (FR1-FR16)**        | Rust loqa-voice-dsp crate via FFI/JNI | `ios/RustFFI/`, `android/src/main/java/.../RustJNI/`                |
-| **Native Platform Integration (FR17-FR27)** | Swift/Kotlin Expo Modules             | `ios/LoqaAudioDspModule.swift`, `android/.../LoqaAudioDspModule.kt` |
-| **TypeScript API Layer (FR28-FR43)**        | TypeScript API with validation        | `src/index.ts`, `src/validation.ts`, `src/types.ts`                 |
-| **Package Distribution (FR44-FR54)**        | npm configuration and metadata        | `package.json`, `CHANGELOG.md`                                      |
-| **Example Application (FR55-FR62)**         | Expo example app                      | `example/`                                                          |
-| **Documentation (FR63-FR70)**               | Markdown docs + JSDoc                 | `README.md`, `API.md`, `docs/`, inline comments                     |
-| **Build & CI/CD (FR71-FR82)**               | GitHub Actions + package scripts      | `.github/workflows/`, `package.json` scripts                        |
+| FR Category                                 | Architecture Component                | Location                                                          |
+| ------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------- |
+| **Core DSP Capabilities (FR1-FR16)**        | Rust loqa-voice-dsp crate via FFI/JNI | `ios/RustFFI/`, `android/src/main/java/.../RustJNI/`              |
+| **Native Platform Integration (FR17-FR27)** | Swift/Kotlin Expo Modules             | `ios/LoqaExpoDspModule.swift`, `android/.../LoqaExpoDspModule.kt` |
+| **TypeScript API Layer (FR28-FR43)**        | TypeScript API with validation        | `src/index.ts`, `src/validation.ts`, `src/types.ts`               |
+| **Package Distribution (FR44-FR54)**        | npm configuration and metadata        | `package.json`, `CHANGELOG.md`                                    |
+| **Example Application (FR55-FR62)**         | Expo example app                      | `example/`                                                        |
+| **Documentation (FR63-FR70)**               | Markdown docs + JSDoc                 | `README.md`, `API.md`, `docs/`, inline comments                   |
+| **Build & CI/CD (FR71-FR82)**               | GitHub Actions + package scripts      | `.github/workflows/`, `package.json` scripts                      |
 
 ---
 
@@ -258,7 +258,7 @@ This establishes:
 
 **Expo Modules API Integration:**
 
-- TypeScript layer uses `requireNativeModule('LoqaAudioDsp')` to access native bindings
+- TypeScript layer uses `requireNativeModule('LoqaExpoDsp')` to access native bindings
 - Swift/Kotlin modules implement Expo Module Definition protocol
 - Supports both old and new architecture (bridge + turbo modules)
 
@@ -275,7 +275,7 @@ func compute_fft_rust(
     fft_size: Int32
 ) -> UnsafePointer<Float>
 
-// LoqaAudioDspModule.swift - Swift wrapper
+// LoqaExpoDspModule.swift - Swift wrapper
 public func computeFFT(
     buffer: [Float],
     fftSize: Int
@@ -302,7 +302,7 @@ object RustBridge {
     ): FloatArray
 }
 
-// LoqaAudioDspModule.kt - Kotlin wrapper
+// LoqaExpoDspModule.kt - Kotlin wrapper
 @ExpoMethod
 fun computeFFT(
     buffer: FloatArray,
@@ -321,15 +321,15 @@ fun computeFFT(
 **TypeScript to Native Bridge:**
 
 ```typescript
-// src/LoqaAudioDspModule.ts
+// src/LoqaExpoDspModule.ts
 import { requireNativeModule } from 'expo-modules-core';
 
-const LoqaAudioDspModule = requireNativeModule('LoqaAudioDsp');
+const LoqaExpoDspModule = requireNativeModule('LoqaExpoDsp');
 
-export default LoqaAudioDspModule;
+export default LoqaExpoDspModule;
 
 // src/index.ts
-import LoqaAudioDspModule from './LoqaAudioDspModule';
+import LoqaExpoDspModule from './LoqaExpoDspModule';
 import { validateAudioBuffer, validateSampleRate } from './validation';
 
 export async function computeFFT(
@@ -341,7 +341,7 @@ export async function computeFFT(
   const fftSize = options?.fftSize || audioBuffer.length;
   validateFFTSize(fftSize);
 
-  const result = await LoqaAudioDspModule.computeFFT(Array.from(audioBuffer), fftSize);
+  const result = await LoqaExpoDspModule.computeFFT(Array.from(audioBuffer), fftSize);
 
   return {
     magnitude: new Float32Array(result.magnitude),
@@ -367,14 +367,14 @@ export async function computeFFT(
 **Swift:**
 
 - **Functions**: camelCase (`computeFFT`, `detectPitch`)
-- **Classes/Structs**: PascalCase (`LoqaAudioDspModule`)
-- **Files**: PascalCase (`LoqaAudioDspModule.swift`)
+- **Classes/Structs**: PascalCase (`LoqaExpoDspModule`)
+- **Files**: PascalCase (`LoqaExpoDspModule.swift`)
 
 **Kotlin:**
 
 - **Functions**: camelCase (`computeFFT`, `detectPitch`)
-- **Classes**: PascalCase (`LoqaAudioDspModule`)
-- **Files**: PascalCase (`LoqaAudioDspModule.kt`)
+- **Classes**: PascalCase (`LoqaExpoDspModule`)
+- **Files**: PascalCase (`LoqaExpoDspModule.kt`)
 
 ### Code Organization
 
@@ -395,21 +395,25 @@ export async function computeFFT(
 
 ```typescript
 // src/errors.ts
-export class LoqaAudioDspError extends Error {
-  constructor(message: string, public code: string, public details?: Record<string, unknown>) {
+export class LoqaExpoDspError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public details?: Record<string, unknown>
+  ) {
     super(message);
-    this.name = 'LoqaAudioDspError';
+    this.name = 'LoqaExpoDspError';
   }
 }
 
-export class ValidationError extends LoqaAudioDspError {
+export class ValidationError extends LoqaExpoDspError {
   constructor(message: string, details?: Record<string, unknown>) {
     super(message, 'VALIDATION_ERROR', details);
     this.name = 'ValidationError';
   }
 }
 
-export class NativeModuleError extends LoqaAudioDspError {
+export class NativeModuleError extends LoqaExpoDspError {
   constructor(message: string, details?: Record<string, unknown>) {
     super(message, 'NATIVE_MODULE_ERROR', details);
     this.name = 'NativeModuleError';
@@ -428,7 +432,7 @@ export async function computeFFT(
   }
 
   try {
-    const result = await LoqaAudioDspModule.computeFFT(/*...*/);
+    const result = await LoqaExpoDspModule.computeFFT(/*...*/);
     return result;
   } catch (error) {
     throw new NativeModuleError(`FFT computation failed: ${error.message}`, {
@@ -455,12 +459,12 @@ const DEBUG = __DEV__ || process.env.LOQA_AUDIO_DSP_DEBUG === 'true';
 
 export function logDebug(message: string, data?: unknown): void {
   if (DEBUG) {
-    console.log(`[LoqaAudioDsp] ${message}`, data || '');
+    console.log(`[LoqaExpoDsp] ${message}`, data || '');
   }
 }
 
 export function logWarning(message: string, data?: unknown): void {
-  console.warn(`[LoqaAudioDsp] ${message}`, data || '');
+  console.warn(`[LoqaExpoDsp] ${message}`, data || '');
 }
 
 // Usage
@@ -473,7 +477,7 @@ export async function computeFFT(
     fftSize: options?.fftSize,
   });
 
-  const result = await LoqaAudioDspModule.computeFFT(/*...*/);
+  const result = await LoqaExpoDspModule.computeFFT(/*...*/);
 
   logDebug('computeFFT completed', {
     resultLength: result.magnitude.length,
@@ -485,7 +489,7 @@ export async function computeFFT(
 
 **Logging Conventions:**
 
-- Prefix all logs with `[LoqaAudioDsp]`
+- Prefix all logs with `[LoqaExpoDsp]`
 - Use `logDebug` for development info (gated by DEBUG flag)
 - Use `logWarning` for non-critical issues
 - Never log in production unless error/warning
@@ -751,7 +755,7 @@ export type {
   SpectrumResult,
 } from './types';
 
-export { LoqaAudioDspError, ValidationError, NativeModuleError } from './errors';
+export { LoqaExpoDspError, ValidationError, NativeModuleError } from './errors';
 ```
 
 **Function Signatures:**
@@ -815,10 +819,10 @@ export async function analyzeSpectrum(
 **iOS (Swift):**
 
 ```swift
-@objc(LoqaAudioDspModule)
-public class LoqaAudioDspModule: Module {
+@objc(LoqaExpoDspModule)
+public class LoqaExpoDspModule: Module {
     public func definition() -> ModuleDefinition {
-        Name("LoqaAudioDsp")
+        Name("LoqaExpoDsp")
 
         AsyncFunction("computeFFT") { (buffer: [Float], options: [String: Any]) -> [String: Any] in
             // Implementation
@@ -842,9 +846,9 @@ public class LoqaAudioDspModule: Module {
 **Android (Kotlin):**
 
 ```kotlin
-class LoqaAudioDspModule : Module() {
+class LoqaExpoDspModule : Module() {
     override fun definition() = ModuleDefinition {
-        Name("LoqaAudioDsp")
+        Name("LoqaExpoDsp")
 
         AsyncFunction("computeFFT") { buffer: FloatArray, options: Map<String, Any> ->
             // Implementation
@@ -985,17 +989,14 @@ export function validateFFTSize(fftSize: number): void {
 **Optimization Strategies:**
 
 1. **Pre-allocated Buffers:**
-
    - Rust DSP core reuses buffers where possible
    - Minimize memory allocations in hot path
 
 2. **Zero-Copy Where Possible:**
-
    - iOS: Use `UnsafeBufferPointer` to avoid copying input
    - Android: JNI automatically handles primitive arrays efficiently
 
 3. **Async/Off-Main-Thread:**
-
    - All processing on background threads
    - Use appropriate QoS (`.userInitiated` for iOS)
 
@@ -1034,7 +1035,7 @@ export function validateFFTSize(fftSize: number): void {
 **Published Files:**
 
 ```
-@loqalabs/loqa-audio-dsp/
+@loqalabs/loqa-expo-dsp/
 ├── lib/                    # Compiled TypeScript
 │   ├── index.js
 │   ├── index.d.ts
@@ -1051,7 +1052,7 @@ export function validateFFTSize(fftSize: number): void {
 
 ```json
 {
-  "name": "@loqalabs/loqa-audio-dsp",
+  "name": "@loqalabs/loqa-expo-dsp",
   "version": "0.1.0",
   "description": "Production-grade audio DSP analysis for React Native/Expo",
   "main": "lib/index.js",
@@ -1155,7 +1156,6 @@ jobs:
    ```
 
 2. **Update CHANGELOG:**
-
    - Document all changes since last release
    - Follow Conventional Commits format
 
@@ -1200,8 +1200,8 @@ jobs:
 
 ```bash
 # Clone repository
-git clone https://github.com/loqalabs/loqa-audio-dsp.git
-cd loqa-audio-dsp
+git clone https://github.com/loqalabs/loqa-expo-dsp.git
+cd loqa-expo-dsp
 
 # Install dependencies
 npm install

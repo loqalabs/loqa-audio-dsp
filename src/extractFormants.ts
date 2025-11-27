@@ -1,5 +1,5 @@
 // extractFormants - Formant extraction API using LPC analysis
-import LoqaAudioDspModule from './LoqaAudioDspModule';
+import LoqaExpoDspModule from './LoqaExpoDspModule';
 import { NativeModuleError } from './errors';
 import type { FormantExtractionOptions, FormantsResult } from './types';
 import { logDebug } from './utils';
@@ -77,7 +77,7 @@ export async function extractFormants(
 
   try {
     // Step 4: Call native module
-    const nativeResult = await LoqaAudioDspModule.extractFormants(bufferArray, sampleRate, {
+    const nativeResult = await LoqaExpoDspModule.extractFormants(bufferArray, sampleRate, {
       lpcOrder,
     });
 
