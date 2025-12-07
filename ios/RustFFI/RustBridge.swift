@@ -1,55 +1,28 @@
 import Foundation
 
 // MARK: - FFI Function Declarations
-// These functions use @_extern(c) to bind to Rust extern "C" functions with C ABI
-// IMPORTANT: @_extern(c) is required for correct struct return value handling on ARM64
+// These functions are declared in loqa_voice_dsp.h (C header) for proper C ABI compatibility
+// The C header is included via the module.modulemap, allowing Swift to call Rust extern "C" functions
+// IMPORTANT: Using a C bridging header ensures correct struct return value handling on ARM64
 // Using @_silgen_name would cause ABI mismatch (Swift ABI vs C ABI)
-// NOTE: Actual Rust function implementations will be added in Epic 2 (FFT), Epic 3 (Pitch/Formants), and Epic 4 (Spectrum)
 
-// MARK: FFT Functions (Epic 2)
+// MARK: - Swift Result Types
+// These wrap the C structs for cleaner Swift API
 
-/// FFI declaration for FFT computation with window type support
-/// Implemented in Story 2.1, called from Story 2.2
-/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
-@_extern(c, "compute_fft_rust")
-func compute_fft_rust(
-    _ buffer: UnsafePointer<Float>,
-    _ length: Int32,
-    _ fftSize: Int32,
-    _ windowType: Int32
-) -> UnsafePointer<Float>?
-
-/// FFI declaration for freeing FFT result memory
-/// Implemented in Story 2.2
-/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
-@_extern(c, "free_fft_result_rust")
-func free_fft_result_rust(_ ptr: UnsafePointer<Float>)
-
-// MARK: Pitch Detection Functions (Epic 3)
-
-/// PitchResult struct matching Rust #[repr(C)] layout
-/// Returned by value from detect_pitch_rust
+/// PitchResult for Swift API (wraps PitchResultC from C header)
 public struct PitchResult {
     public let frequency: Float
     public let confidence: Float
     public let isVoiced: Bool
+
+    init(from c: PitchResultC) {
+        self.frequency = c.frequency
+        self.confidence = c.confidence
+        self.isVoiced = c.is_voiced
+    }
 }
 
-/// FFI declaration for pitch detection using YIN algorithm
-/// Implemented in Story 3.1, called from Story 3.3
-/// Note: Rust returns PitchResult by value (small struct, no heap allocation needed)
-/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
-@_extern(c, "detect_pitch_rust")
-func detect_pitch_rust(
-    _ buffer: UnsafePointer<Float>,
-    _ length: Int32,
-    _ sampleRate: Int32
-) -> PitchResult
-
-// MARK: Formant Extraction Functions (Epic 3)
-
-/// FormantsResult struct matching Rust #[repr(C)] layout
-/// Returned by value from extract_formants_rust
+/// FormantsResult for Swift API (wraps FormantsResultC from C header)
 public struct FormantsResult {
     public let f1: Float
     public let f2: Float
@@ -57,158 +30,129 @@ public struct FormantsResult {
     public let bw1: Float
     public let bw2: Float
     public let bw3: Float
+
+    init(from c: FormantsResultC) {
+        self.f1 = c.f1
+        self.f2 = c.f2
+        self.f3 = c.f3
+        self.bw1 = c.bw1
+        self.bw2 = c.bw2
+        self.bw3 = c.bw3
+    }
 }
 
-/// FFI declaration for formant extraction using LPC analysis
-/// Implemented in Story 3.2, called from Story 3.3
-/// Note: Rust returns FormantsResult by value (small struct, no heap allocation needed)
-/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
-@_extern(c, "extract_formants_rust")
-func extract_formants_rust(
-    _ buffer: UnsafePointer<Float>,
-    _ length: Int32,
-    _ sampleRate: Int32,
-    _ lpcOrder: Int32
-) -> FormantsResult
-
-// MARK: Spectrum Analysis Functions (Epic 4)
-
-/// SpectrumResult struct matching Rust #[repr(C)] layout
-/// Returned by value from analyze_spectrum_rust
+/// SpectrumResult for Swift API (wraps SpectrumResultC from C header)
 public struct SpectrumResult {
     public let centroid: Float
     public let rolloff: Float
     public let tilt: Float
+
+    init(from c: SpectrumResultC) {
+        self.centroid = c.centroid
+        self.rolloff = c.rolloff
+        self.tilt = c.tilt
+    }
 }
 
-/// FFI declaration for spectral analysis
-/// Implemented in Story 4.2, called from Story 4.2
-/// Note: Rust returns SpectrumResult by value (small struct, no heap allocation needed)
-/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
-@_extern(c, "analyze_spectrum_rust")
-func analyze_spectrum_rust(
-    _ buffer: UnsafePointer<Float>,
-    _ length: Int32,
-    _ sampleRate: Int32
-) -> SpectrumResult
-
-// MARK: HNR (Harmonics-to-Noise Ratio) Functions
-
-/// HNRResult struct matching Rust #[repr(C)] layout
-/// Returned by value from calculate_hnr_rust
+/// HNRResult for Swift API (wraps HNRResultC from C header)
 public struct HNRResult {
     public let hnr: Float
     public let f0: Float
     public let isVoiced: Bool
+
+    init(from c: HNRResultC) {
+        self.hnr = c.hnr
+        self.f0 = c.f0
+        self.isVoiced = c.is_voiced
+    }
 }
 
-/// FFI declaration for HNR calculation using Boersma's autocorrelation method
-/// Note: Rust returns HNRResult by value (small struct, no heap allocation needed)
-/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
-@_extern(c, "calculate_hnr_rust")
-func calculate_hnr_rust(
-    _ buffer: UnsafePointer<Float>,
-    _ length: Int32,
-    _ sampleRate: Int32,
-    _ minFreq: Float,
-    _ maxFreq: Float
-) -> HNRResult
-
-// MARK: H1-H2 (Harmonic Amplitude Difference) Functions
-
-/// H1H2Result struct matching Rust #[repr(C)] layout
-/// Returned by value from calculate_h1h2_rust
+/// H1H2Result for Swift API (wraps H1H2ResultC from C header)
 public struct H1H2Result {
     public let h1h2: Float
     public let h1AmplitudeDb: Float
     public let h2AmplitudeDb: Float
     public let f0: Float
-}
 
-/// FFI declaration for H1-H2 calculation for vocal weight analysis
-/// Note: Rust returns H1H2Result by value (small struct, no heap allocation needed)
-/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
-@_extern(c, "calculate_h1h2_rust")
-func calculate_h1h2_rust(
-    _ buffer: UnsafePointer<Float>,
-    _ length: Int32,
-    _ sampleRate: Int32,
-    _ f0: Float
-) -> H1H2Result
+    init(from c: H1H2ResultC) {
+        self.h1h2 = c.h1h2
+        self.h1AmplitudeDb = c.h1_amplitude_db
+        self.h2AmplitudeDb = c.h2_amplitude_db
+        self.f0 = c.f0
+    }
+}
 
 // MARK: - Swift Wrapper Functions
 // These functions provide memory-safe wrappers around the Rust FFI calls
 // They handle memory marshalling, deallocation, and error handling
 
-/// Error type for Rust FFI operations
-public enum RustFFIError: Error {
-    case computationFailed(String)
+// MARK: - Error Types
+
+/// Errors that can occur during Rust FFI calls
+public enum RustFFIError: Error, LocalizedError {
     case invalidInput(String)
+    case computationFailed(String)
     case memoryAllocationFailed
 
-    var localizedDescription: String {
+    public var errorDescription: String? {
         switch self {
-        case .computationFailed(let message):
-            return "Rust computation failed: \(message)"
         case .invalidInput(let message):
             return "Invalid input: \(message)"
+        case .computationFailed(let message):
+            return "Computation failed: \(message)"
         case .memoryAllocationFailed:
-            return "Memory allocation failed in Rust"
+            return "Memory allocation failed in Rust FFI"
         }
     }
 }
 
-// MARK: FFT Wrapper (Placeholder for Epic 2)
+// MARK: FFT Wrapper (Epic 2)
 
-/// Swift wrapper for FFT computation with window type support
-/// MEMORY SAFETY PATTERN: Uses defer block to guarantee Rust memory is freed
+/// Swift wrapper for FFT computation
+/// MEMORY SAFETY: Returns owned array; Rust memory is freed before return
 /// Implemented in Story 2.2
-public func computeFFTWrapper(buffer: [Float], fftSize: Int, windowType: Int32) throws -> [Float] {
+public func computeFFTWrapper(
+    buffer: [Float],
+    fftSize: Int,
+    windowType: Int = 0
+) throws -> [Float] {
     // Input validation
     guard !buffer.isEmpty else {
         throw RustFFIError.invalidInput("Buffer cannot be empty")
     }
 
     guard fftSize > 0 && (fftSize & (fftSize - 1)) == 0 else {
-        throw RustFFIError.invalidInput("FFT size must be a power of 2")
+        throw RustFFIError.invalidInput("FFT size must be a positive power of 2")
     }
 
-    guard fftSize >= 256 && fftSize <= 8192 else {
-        throw RustFFIError.invalidInput("FFT size must be between 256 and 8192")
-    }
-
-    var rustResult: UnsafePointer<Float>? = nil
-
-    // CRITICAL: defer block guarantees Rust memory is freed even if error occurs
-    defer {
-        if let ptr = rustResult {
-            free_fft_result_rust(ptr)
-        }
-    }
-
-    // Use withUnsafeBufferPointer for zero-copy access
-    buffer.withUnsafeBufferPointer { bufferPtr in
+    // Call Rust function
+    let resultPtr = buffer.withUnsafeBufferPointer { bufferPtr -> UnsafePointer<Float>? in
         guard let baseAddress = bufferPtr.baseAddress else {
-            return
+            return nil
         }
 
-        rustResult = compute_fft_rust(
+        return compute_fft_rust(
             baseAddress,
             Int32(buffer.count),
             Int32(fftSize),
-            windowType
+            Int32(windowType)
         )
     }
 
-    guard let result = rustResult else {
-        throw RustFFIError.computationFailed("FFT computation failed - Rust returned null (validation failure or computation error)")
+    // Check for allocation failure
+    guard let ptr = resultPtr else {
+        throw RustFFIError.memoryAllocationFailed
     }
 
-    // Copy to Swift array before freeing (defer will free after this)
-    let outputSize = fftSize / 2
-    let output = Array(UnsafeBufferPointer(start: result, count: outputSize))
+    // Copy to Swift array before freeing Rust memory
+    // Result length is fftSize/2 + 1 (DC to Nyquist)
+    let resultLength = fftSize / 2 + 1
+    let result = Array(UnsafeBufferPointer(start: ptr, count: resultLength))
 
-    return output
+    // Free Rust-allocated memory
+    free_fft_result_rust(ptr)
+
+    return result
 }
 
 // MARK: Pitch Detection Wrapper (Epic 3)
@@ -229,11 +173,11 @@ public func detectPitchWrapper(
         throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
     }
 
-    // Call Rust function - returns PitchResult by value (no memory management needed)
-    let result = buffer.withUnsafeBufferPointer { bufferPtr -> PitchResult in
+    // Call Rust function - returns PitchResultC by value (no memory management needed)
+    let cResult = buffer.withUnsafeBufferPointer { bufferPtr -> PitchResultC in
         guard let baseAddress = bufferPtr.baseAddress else {
             // Return error result if buffer pointer is invalid
-            return PitchResult(frequency: 0.0, confidence: 0.0, isVoiced: false)
+            return PitchResultC(frequency: 0.0, confidence: 0.0, is_voiced: false)
         }
 
         return detect_pitch_rust(
@@ -242,6 +186,9 @@ public func detectPitchWrapper(
             Int32(sampleRate)
         )
     }
+
+    // Convert to Swift result
+    let result = PitchResult(from: cResult)
 
     // Convert frequency: 0.0 -> nil, otherwise use actual value
     let frequency = result.isVoiced && result.frequency > 0 ? result.frequency : nil
@@ -257,8 +204,8 @@ public func detectPitchWrapper(
 public func extractFormantsWrapper(
     buffer: [Float],
     sampleRate: Int,
-    lpcOrder: Int? = nil
-) throws -> (f1: Float, f2: Float, f3: Float, bandwidths: (Float, Float, Float)) {
+    lpcOrder: Int = 12
+) throws -> (f1: Float, f2: Float, f3: Float, bw1: Float, bw2: Float, bw3: Float) {
     // Input validation
     guard !buffer.isEmpty else {
         throw RustFFIError.invalidInput("Buffer cannot be empty")
@@ -268,36 +215,31 @@ public func extractFormantsWrapper(
         throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
     }
 
-    // Default LPC order: sampleRate / 1000 + 2
-    // If lpcOrder is provided, use it; otherwise use 0 to signal Rust to use default
-    let order = lpcOrder ?? 0
+    guard lpcOrder >= 8 && lpcOrder <= 16 else {
+        throw RustFFIError.invalidInput("LPC order must be between 8 and 16")
+    }
 
-    // Call Rust function - returns FormantsResult by value (no memory management needed)
-    let result = buffer.withUnsafeBufferPointer { bufferPtr -> FormantsResult in
+    // Call Rust function - returns FormantsResultC by value
+    let cResult = buffer.withUnsafeBufferPointer { bufferPtr -> FormantsResultC in
         guard let baseAddress = bufferPtr.baseAddress else {
-            // Return error result if buffer pointer is invalid
-            return FormantsResult(f1: 0.0, f2: 0.0, f3: 0.0, bw1: 0.0, bw2: 0.0, bw3: 0.0)
+            return FormantsResultC(f1: 0, f2: 0, f3: 0, bw1: 0, bw2: 0, bw3: 0)
         }
 
         return extract_formants_rust(
             baseAddress,
             Int32(buffer.count),
             Int32(sampleRate),
-            Int32(order)
+            Int32(lpcOrder)
         )
     }
 
-    return (
-        f1: result.f1,
-        f2: result.f2,
-        f3: result.f3,
-        bandwidths: (result.bw1, result.bw2, result.bw3)
-    )
+    let result = FormantsResult(from: cResult)
+    return (result.f1, result.f2, result.f3, result.bw1, result.bw2, result.bw3)
 }
 
 // MARK: Spectrum Analysis Wrapper (Epic 4)
 
-/// Swift wrapper for spectral analysis
+/// Swift wrapper for spectrum analysis
 /// MEMORY SAFETY: SpectrumResult returned by value (no heap allocation, no cleanup needed)
 /// Implemented in Story 4.2
 public func analyzeSpectrumWrapper(
@@ -313,11 +255,10 @@ public func analyzeSpectrumWrapper(
         throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
     }
 
-    // Call Rust function - returns SpectrumResult by value (no memory management needed)
-    let result = buffer.withUnsafeBufferPointer { bufferPtr -> SpectrumResult in
+    // Call Rust function - returns SpectrumResultC by value
+    let cResult = buffer.withUnsafeBufferPointer { bufferPtr -> SpectrumResultC in
         guard let baseAddress = bufferPtr.baseAddress else {
-            // Return error result if buffer pointer is invalid
-            return SpectrumResult(centroid: 0.0, rolloff: 0.0, tilt: 0.0)
+            return SpectrumResultC(centroid: 0, rolloff: 0, tilt: 0)
         }
 
         return analyze_spectrum_rust(
@@ -327,33 +268,19 @@ public func analyzeSpectrumWrapper(
         )
     }
 
-    return (
-        centroid: result.centroid,
-        rolloff: result.rolloff,
-        tilt: result.tilt
-    )
+    let result = SpectrumResult(from: cResult)
+    return (result.centroid, result.rolloff, result.tilt)
 }
 
-// MARK: HNR Calculation Wrapper
+// MARK: HNR Wrapper
 
-/// Swift wrapper for HNR (Harmonics-to-Noise Ratio) calculation
+/// Swift wrapper for HNR calculation
 /// MEMORY SAFETY: HNRResult returned by value (no heap allocation, no cleanup needed)
-///
-/// HNR measures the ratio of harmonic to noise energy in voice:
-/// - Higher HNR (18-25 dB): Clear, less breathy voice
-/// - Lower HNR (12-18 dB): Softer, more breathy voice
-///
-/// - Parameters:
-///   - buffer: Audio samples as Float array
-///   - sampleRate: Sample rate in Hz (8000-48000)
-///   - minFreq: Minimum F0 to search (default: 75 Hz)
-///   - maxFreq: Maximum F0 to search (default: 500 Hz)
-/// - Returns: Tuple with hnr (dB), f0 (Hz), and isVoiced flag
 public func calculateHNRWrapper(
     buffer: [Float],
     sampleRate: Int,
-    minFreq: Float = 75.0,
-    maxFreq: Float = 500.0
+    minFrequency: Float = 75.0,
+    maxFrequency: Float = 500.0
 ) throws -> (hnr: Float, f0: Float, isVoiced: Bool) {
     // Input validation
     guard !buffer.isEmpty else {
@@ -364,51 +291,37 @@ public func calculateHNRWrapper(
         throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
     }
 
-    guard minFreq > 0 && maxFreq > minFreq else {
-        throw RustFFIError.invalidInput("Invalid frequency range: minFreq must be > 0 and maxFreq must be > minFreq")
+    guard minFrequency > 0 && maxFrequency > minFrequency else {
+        throw RustFFIError.invalidInput("Invalid frequency range")
     }
 
-    // Call Rust function - returns HNRResult by value (no memory management needed)
-    let result = buffer.withUnsafeBufferPointer { bufferPtr -> HNRResult in
+    // Call Rust function - returns HNRResultC by value
+    let cResult = buffer.withUnsafeBufferPointer { bufferPtr -> HNRResultC in
         guard let baseAddress = bufferPtr.baseAddress else {
-            // Return error result if buffer pointer is invalid
-            return HNRResult(hnr: 0.0, f0: 0.0, isVoiced: false)
+            return HNRResultC(hnr: 0, f0: 0, is_voiced: false)
         }
 
         return calculate_hnr_rust(
             baseAddress,
             Int32(buffer.count),
             Int32(sampleRate),
-            minFreq,
-            maxFreq
+            minFrequency,
+            maxFrequency
         )
     }
 
-    return (
-        hnr: result.hnr,
-        f0: result.f0,
-        isVoiced: result.isVoiced
-    )
+    let result = HNRResult(from: cResult)
+    return (result.hnr, result.f0, result.isVoiced)
 }
 
-// MARK: H1-H2 Calculation Wrapper
+// MARK: H1-H2 Wrapper
 
-/// Swift wrapper for H1-H2 amplitude difference calculation
+/// Swift wrapper for H1-H2 calculation
 /// MEMORY SAFETY: H1H2Result returned by value (no heap allocation, no cleanup needed)
-///
-/// H1-H2 measures the difference between first and second harmonic amplitudes:
-/// - Higher H1-H2 (>5 dB): Lighter, breathier vocal quality
-/// - Lower H1-H2 (<0 dB): Fuller, heavier vocal quality
-///
-/// - Parameters:
-///   - buffer: Audio samples as Float array
-///   - sampleRate: Sample rate in Hz (8000-48000)
-///   - f0: Optional fundamental frequency. If nil, auto-detects.
-/// - Returns: Tuple with h1h2 (dB), h1AmplitudeDb, h2AmplitudeDb, and f0 (Hz)
 public func calculateH1H2Wrapper(
     buffer: [Float],
     sampleRate: Int,
-    f0: Float? = nil
+    f0: Float
 ) throws -> (h1h2: Float, h1AmplitudeDb: Float, h2AmplitudeDb: Float, f0: Float) {
     // Input validation
     guard !buffer.isEmpty else {
@@ -419,51 +332,53 @@ public func calculateH1H2Wrapper(
         throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
     }
 
-    // Convert f0: nil -> 0.0 (auto-detect), otherwise use provided value
-    let f0Value = f0 ?? 0.0
+    guard f0 > 0 else {
+        throw RustFFIError.invalidInput("F0 must be positive")
+    }
 
-    // Call Rust function - returns H1H2Result by value (no memory management needed)
-    let result = buffer.withUnsafeBufferPointer { bufferPtr -> H1H2Result in
+    // Call Rust function - returns H1H2ResultC by value
+    let cResult = buffer.withUnsafeBufferPointer { bufferPtr -> H1H2ResultC in
         guard let baseAddress = bufferPtr.baseAddress else {
-            // Return error result if buffer pointer is invalid
-            return H1H2Result(h1h2: 0.0, h1AmplitudeDb: 0.0, h2AmplitudeDb: 0.0, f0: 0.0)
+            return H1H2ResultC(h1h2: 0, h1_amplitude_db: 0, h2_amplitude_db: 0, f0: 0)
         }
 
         return calculate_h1h2_rust(
             baseAddress,
             Int32(buffer.count),
             Int32(sampleRate),
-            f0Value
+            f0
         )
     }
 
-    // Check for error (all zeros with f0 = 0 indicates failure if we expected detection)
-    if f0 == nil && result.f0 == 0.0 {
-        throw RustFFIError.computationFailed("H1-H2 calculation failed - could not detect F0 (signal may be unvoiced)")
-    }
-
-    return (
-        h1h2: result.h1h2,
-        h1AmplitudeDb: result.h1AmplitudeDb,
-        h2AmplitudeDb: result.h2AmplitudeDb,
-        f0: result.f0
-    )
+    let result = H1H2Result(from: cResult)
+    return (result.h1h2, result.h1AmplitudeDb, result.h2AmplitudeDb, result.f0)
 }
 
-// MARK: - Memory Management Documentation
-
 /*
- MEMORY SAFETY RULES FOR FFI BOUNDARY:
+ MEMORY MANAGEMENT PATTERN FOR FFI CALLS
+ ========================================
 
- 1. Always use defer blocks to guarantee Rust memory is freed
- 2. Use UnsafeBufferPointer for zero-copy input where possible
- 3. Never hold references to Rust-allocated memory beyond function scope
- 4. Always copy data from Rust → Swift before freeing
- 5. Pattern: Call Rust → Copy result → Free Rust memory (via defer)
+ This file implements a consistent pattern for safe memory management across the FFI boundary:
 
- DEALLOCATION GUARANTEE:
- The defer block executes when the function exits, regardless of:
- - Normal return
+ 1. POINTER-RETURNING FUNCTIONS (e.g., compute_fft_rust):
+    - Rust allocates memory and returns a pointer
+    - Swift copies data to a Swift-owned array immediately
+    - Swift calls free_*_rust() to deallocate Rust memory
+    - Pattern: allocate -> copy -> free -> return Swift array
+
+ 2. VALUE-RETURNING FUNCTIONS (e.g., detect_pitch_rust, extract_formants_rust):
+    - Rust returns a small struct by value (not a pointer)
+    - No memory management needed - struct is copied to Swift stack
+    - Pattern: call -> receive value -> return Swift tuple
+
+ CRITICAL SAFETY RULES:
+ - Always copy pointer data before any operation that could fail
+ - Always free Rust memory in the same function that receives it
+ - Never store Rust pointers in Swift properties
+ - Use defer { } for cleanup when there are multiple exit points
+
+ ERROR HANDLING:
+ When validation fails or an error occurs, the wrapper functions:
  - Throwing an error
  - Early return
 

@@ -1,0 +1,4 @@
+module LoqaVoiceDSP {
+    header "loqa_voice_dsp.h"
+    export *
+}

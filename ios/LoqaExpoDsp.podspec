@@ -24,9 +24,21 @@ Pod::Spec.new do |s|
   s.source_files = "*.{h,m,mm,swift,hpp,cpp}", "RustFFI/**/*.{h,hpp,cpp,swift}"
   s.exclude_files = "Tests/**/*"
 
+  # C header for Rust FFI (required for proper C ABI on ARM64)
+  s.public_header_files = "RustFFI/*.h"
+  s.preserve_paths = "RustFFI/module.modulemap", "RustFFI/loqa_voice_dsp.h"
+
+  # Configure module map for C interop
+  s.pod_target_xcconfig = {
+    'SWIFT_INCLUDE_PATHS' => '$(PODS_TARGET_SRCROOT)/RustFFI',
+    'HEADER_SEARCH_PATHS' => '$(PODS_TARGET_SRCROOT)/RustFFI'
+  }
+  s.user_target_xcconfig = {
+    'HEADER_SEARCH_PATHS' => '$(PODS_ROOT)/LoqaExpoDsp/RustFFI'
+  }
+
   # Rust XCFramework (supports device + simulator)
   s.vendored_frameworks = "RustFFI/LoqaVoiceDSP.xcframework"
-  s.preserve_paths = "RustFFI/LoqaVoiceDSP.xcframework"
 
   # Fallback: Static library (device only, for legacy support)
   # s.vendored_libraries = "RustFFI/libloqa_voice_dsp.a"
