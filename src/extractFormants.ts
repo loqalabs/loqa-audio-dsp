@@ -26,7 +26,7 @@ import { validateAudioBuffer, validateSampleRate } from './validation';
  * // ... fill with voiced audio samples ...
  *
  * const result = await extractFormants(audioData, 44100, {
- *   lpcOrder: 14  // Optional: LPC order (defaults to sampleRate/1000 + 2)
+ *   lpcOrder: 14  // Optional: LPC order (8-16, defaults to 12)
  * });
  *
  * console.log(`F1: ${result.f1} Hz`);
@@ -51,18 +51,17 @@ export async function extractFormants(
   validateAudioBuffer(audioBuffer);
   validateSampleRate(sampleRate);
 
-  // Step 2: Calculate default LPC order based on sample rate
-  // Formula: lpcOrder = (sampleRate / 1000) + 2
-  // This provides appropriate resolution for formant analysis
-  const defaultLpcOrder = Math.floor(sampleRate / 1000) + 2;
-  const lpcOrder = options?.lpcOrder ?? defaultLpcOrder;
+  // Step 2: Calculate LPC order
+  // Use provided value or default to 12 (good for voice analysis at most sample rates)
+  // Native layer requires LPC order between 8-16
+  const MIN_LPC_ORDER = 8;
+  const MAX_LPC_ORDER = 16;
+  const DEFAULT_LPC_ORDER = 12;
 
-  // Validate LPC order is positive
-  if (lpcOrder <= 0) {
-    throw new NativeModuleError('LPC order must be positive', {
-      lpcOrder,
-    });
-  }
+  const lpcOrder = Math.max(
+    MIN_LPC_ORDER,
+    Math.min(MAX_LPC_ORDER, options?.lpcOrder ?? DEFAULT_LPC_ORDER)
+  );
 
   // Step 3: Convert to number[] for React Native bridge
   // React Native bridge requires plain arrays, not typed arrays
@@ -72,7 +71,6 @@ export async function extractFormants(
   logDebug('Calling native module for formant extraction', {
     sampleRate,
     lpcOrder,
-    defaultLpcOrder,
   });
 
   try {
