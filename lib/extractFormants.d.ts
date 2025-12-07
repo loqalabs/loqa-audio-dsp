@@ -20,7 +20,7 @@ import type { FormantExtractionOptions, FormantsResult } from './types';
  * // ... fill with voiced audio samples ...
  *
  * const result = await extractFormants(audioData, 44100, {
- *   lpcOrder: 46  // Optional: defaults to sampleRate/1000 + 2 (46 for 44100 Hz)
+ *   lpcOrder: 24  // Optional: defaults to min(24, sampleRate/1000 + 2)
  * });
  *
  * console.log(`F1: ${result.f1} Hz`);

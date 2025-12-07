@@ -215,8 +215,8 @@ public func extractFormantsWrapper(
         throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
     }
 
-    guard lpcOrder >= 8 && lpcOrder <= 50 else {
-        throw RustFFIError.invalidInput("LPC order must be between 8 and 50")
+    guard lpcOrder >= 10 && lpcOrder <= 24 else {
+        throw RustFFIError.invalidInput("LPC order must be between 10 and 24")
     }
 
     // Call Rust function - returns FormantsResultC by value
