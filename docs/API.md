@@ -1,7 +1,7 @@
 # API Reference
 
 **@loqalabs/loqa-expo-dsp**
-Version: 0.1.0
+Version: 0.2.11
 
 This document provides complete API reference for all functions, types, and options in the @loqalabs/loqa-expo-dsp module.
 
@@ -14,6 +14,8 @@ This document provides complete API reference for all functions, types, and opti
   - [detectPitch](#detectpitch)
   - [extractFormants](#extractformants)
   - [analyzeSpectrum](#analyzespectrum)
+  - [calculateHNR](#calculatehnr)
+  - [calculateH1H2](#calculateh1h2)
 - [Types](#types)
   - [FFTOptions](#fftoptions)
   - [FFTResult](#fftresult)
@@ -23,6 +25,10 @@ This document provides complete API reference for all functions, types, and opti
   - [FormantsResult](#formantsresult)
   - [SpectrumAnalysisOptions](#spectrumanalysisoptions)
   - [SpectrumResult](#spectrumresult)
+  - [HNROptions](#hnroptions)
+  - [HNRResult](#hnrresult)
+  - [H1H2Options](#h1h2options)
+  - [H1H2Result](#h1h2result)
 - [Error Handling](#error-handling)
   - [LoqaExpoDspError](#loqaexpodsperror)
   - [ValidationError](#validationerror)
@@ -95,6 +101,10 @@ console.log(`Peak at ${peakFrequency} Hz`);
 Detects pitch using YIN algorithm.
 
 This function performs fundamental frequency (F0) detection on audio data using the YIN algorithm, which is optimized for voice and monophonic instruments. It accepts audio buffers as Float32Array or number[], validates the input, and returns pitch information with confidence scores.
+
+> **Important: Buffer Size Recommendations**
+>
+> The YIN algorithm works best with buffer sizes of **2048-4096 samples** (~46-93ms at 44100 Hz). Larger buffers (e.g., 16384 samples) may fail to detect pitch reliably due to pitch variations within the window. For continuous pitch tracking, use overlapping frames of 2048-4096 samples with 50% overlap.
 
 ```typescript
 async function detectPitch(
@@ -281,6 +291,140 @@ if (result.tilt > 0) {
 
 ---
 
+### calculateHNR
+
+Calculates Harmonics-to-Noise Ratio (HNR) for breathiness analysis.
+
+HNR measures the ratio of harmonic (periodic) to noise (aperiodic) energy in voice, providing a quantitative measure of breathiness. It uses Boersma's autocorrelation-based method.
+
+Typical HNR ranges:
+- **18-25 dB**: Clear, less breathy voice
+- **12-18 dB**: Softer, more breathy voice
+- **<10 dB**: Very breathy or pathological voice
+
+```typescript
+async function calculateHNR(
+  audioBuffer: Float32Array | number[],
+  options: HNROptions
+): Promise<HNRResult>;
+```
+
+#### Parameters
+
+| Parameter     | Type                       | Required | Description                                                                                                    |
+| ------------- | -------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `audioBuffer` | `Float32Array \| number[]` | Yes      | Audio samples to analyze. Must be non-empty and contain no more than 16384 samples. All values must be finite. |
+| `options`     | `HNROptions`               | Yes      | Configuration options including sampleRate and optional frequency range. See [HNROptions](#hnroptions).        |
+
+#### Returns
+
+`Promise<HNRResult>` - Resolves to an [HNRResult](#hnrresult) containing HNR in dB, detected F0, and voicing status.
+
+#### Throws
+
+- `ValidationError` - If buffer or sample rate are invalid
+- `NativeModuleError` - If native computation fails
+
+#### Example
+
+```typescript
+import { calculateHNR } from '@loqalabs/loqa-expo-dsp';
+
+const audioData = new Float32Array(4096);
+// ... fill with audio samples ...
+
+const result = await calculateHNR(audioData, { sampleRate: 44100 });
+
+if (result.isVoiced) {
+  console.log(`HNR: ${result.hnr} dB`);
+  console.log(`Detected F0: ${result.f0} Hz`);
+
+  if (result.hnr > 20) {
+    console.log('Clear voice detected');
+  } else if (result.hnr < 15) {
+    console.log('Breathy voice detected');
+  }
+} else {
+  console.log('Signal is unvoiced');
+}
+
+// With custom frequency range for low voices
+const lowVoiceResult = await calculateHNR(audioData, {
+  sampleRate: 44100,
+  minFreq: 50,   // Lower bound for bass voices
+  maxFreq: 300
+});
+```
+
+---
+
+### calculateH1H2
+
+Calculates H1-H2 amplitude difference for vocal weight analysis.
+
+H1-H2 measures the difference in amplitude between the first harmonic (fundamental) and second harmonic. It's a key acoustic correlate of vocal weight:
+- **>5 dB**: Lighter, breathier vocal quality
+- **0-5 dB**: Balanced vocal weight
+- **<0 dB**: Fuller, heavier vocal quality
+
+The function uses parabolic interpolation around the harmonic peaks for accurate sub-bin amplitude estimation.
+
+```typescript
+async function calculateH1H2(
+  audioBuffer: Float32Array | number[],
+  options: H1H2Options
+): Promise<H1H2Result>;
+```
+
+#### Parameters
+
+| Parameter     | Type                       | Required | Description                                                                                                    |
+| ------------- | -------------------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| `audioBuffer` | `Float32Array \| number[]` | Yes      | Audio samples to analyze. Must be non-empty and contain no more than 16384 samples. All values must be finite. |
+| `options`     | `H1H2Options`              | Yes      | Configuration options including sampleRate and optional pre-calculated F0. See [H1H2Options](#h1h2options).    |
+
+#### Returns
+
+`Promise<H1H2Result>` - Resolves to an [H1H2Result](#h1h2result) containing H1-H2 difference, individual harmonic amplitudes, and F0.
+
+#### Throws
+
+- `ValidationError` - If buffer or sample rate are invalid
+- `NativeModuleError` - If native computation fails (e.g., unvoiced signal without provided F0)
+
+#### Example
+
+```typescript
+import { calculateH1H2, detectPitch } from '@loqalabs/loqa-expo-dsp';
+
+const audioData = new Float32Array(4096);
+// ... fill with audio samples ...
+
+// Option 1: Auto-detect F0
+const result = await calculateH1H2(audioData, { sampleRate: 44100 });
+
+console.log(`H1-H2: ${result.h1h2} dB`);
+console.log(`H1 amplitude: ${result.h1AmplitudeDb} dB`);
+console.log(`H2 amplitude: ${result.h2AmplitudeDb} dB`);
+
+if (result.h1h2 > 5) {
+  console.log('Lighter voice quality');
+} else if (result.h1h2 < 0) {
+  console.log('Fuller voice quality');
+}
+
+// Option 2: Provide pre-calculated F0 (more efficient if you already have it)
+const pitch = await detectPitch(audioData, 44100);
+if (pitch.isVoiced && pitch.frequency) {
+  const result2 = await calculateH1H2(audioData, {
+    sampleRate: 44100,
+    f0: pitch.frequency
+  });
+}
+```
+
+---
+
 ## Types
 
 ### FFTOptions
@@ -352,8 +496,10 @@ interface PitchDetectionOptions {
 | Property       | Type     | Default    | Description                                                                                                                                                    |
 | -------------- | -------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sampleRate`   | `number` | (required) | Sample rate in Hz. Must be an integer between 8000 and 48000.                                                                                                  |
-| `minFrequency` | `number` | `80`       | Minimum detectable frequency in Hz. Must be positive. Default value is optimized for human voice (80 Hz ≈ low male voice).                                     |
-| `maxFrequency` | `number` | `400`      | Maximum detectable frequency in Hz. Must be positive and greater than `minFrequency`. Default value is optimized for human voice (400 Hz ≈ high female voice). |
+| `minFrequency` | `number` | `80`       | Minimum detectable frequency in Hz. **Note: Currently not passed to the underlying algorithm** (reserved for future use). Default value is optimized for human voice (80 Hz ≈ low male voice).                                     |
+| `maxFrequency` | `number` | `400`      | Maximum detectable frequency in Hz. **Note: Currently not passed to the underlying algorithm** (reserved for future use). Default value is optimized for human voice (400 Hz ≈ high female voice). |
+
+> **Current Limitation:** The `minFrequency` and `maxFrequency` options are accepted by the API but are not currently passed to the underlying Rust YIN implementation. The algorithm uses its internal defaults. This will be addressed in a future upstream update.
 
 #### Validation Rules
 
@@ -401,7 +547,7 @@ interface FormantExtractionOptions {
 | Property     | Type     | Default                             | Description                                                                                                                                                                                                                |
 | ------------ | -------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sampleRate` | `number` | (required)                          | Sample rate in Hz. Must be an integer between 8000 and 48000.                                                                                                                                                              |
-| `lpcOrder`   | `number` | `Math.floor(sampleRate / 1000) + 2` | LPC (Linear Predictive Coding) order. Higher values provide better formant resolution but increase computation time. The default formula provides appropriate resolution for most speech analysis tasks. Must be positive. |
+| `lpcOrder`   | `number` | `min(24, Math.floor(sampleRate / 1000) + 2)` | LPC (Linear Predictive Coding) order. Must be between 10 and 24. Higher values provide better formant resolution but can cause numerical instability. Values outside 10-24 are automatically clamped. |
 
 #### Default LPC Order Values
 
@@ -410,13 +556,13 @@ interface FormantExtractionOptions {
 | 8000 Hz     | 10                |
 | 16000 Hz    | 18                |
 | 22050 Hz    | 24                |
-| 44100 Hz    | 46                |
-| 48000 Hz    | 50                |
+| 44100 Hz    | 24 (capped)       |
+| 48000 Hz    | 24 (capped)       |
 
 #### Validation Rules
 
 - `sampleRate` must be an integer between 8000 and 48000
-- `lpcOrder` must be positive
+- `lpcOrder` must be between 10 and 24 (values outside this range are clamped)
 
 ---
 
@@ -492,6 +638,94 @@ interface SpectrumResult {
 | `centroid` | `number` | Spectral centroid in Hz (brightness measure). Represents the "center of mass" of the spectrum. Higher values indicate brighter sounds (more high-frequency content), lower values indicate darker sounds (more low-frequency content). Typical ranges: Speech ~1500-3000 Hz, Bright instruments (cymbals) ~6000+ Hz, Bass instruments ~200-500 Hz. |
 | `rolloff`  | `number` | Spectral rolloff in Hz (95% energy threshold). Frequency below which 95% of the signal's energy is concentrated. Useful for distinguishing harmonic content from noise. Lower values indicate most energy is in low frequencies.                                                                                                                   |
 | `tilt`     | `number` | Spectral tilt (slope of spectrum). Measures the overall slope of the magnitude spectrum. **Positive values**: More energy in high frequencies (bright timbre). **Negative values**: More energy in low frequencies (dark timbre). **Near zero**: Balanced spectrum (white noise-like).                                                             |
+
+---
+
+### HNROptions
+
+Configuration options for HNR (Harmonics-to-Noise Ratio) calculation.
+
+```typescript
+interface HNROptions {
+  sampleRate: number;
+  minFreq?: number;
+  maxFreq?: number;
+}
+```
+
+#### Properties
+
+| Property     | Type     | Default | Description                                                                                                 |
+| ------------ | -------- | ------- | ----------------------------------------------------------------------------------------------------------- |
+| `sampleRate` | `number` | (required) | Sample rate in Hz. Must be an integer between 8000 and 48000.                                            |
+| `minFreq`    | `number` | `75`    | Minimum fundamental frequency to search in Hz. Lower values may be needed for very low voices.              |
+| `maxFreq`    | `number` | `500`   | Maximum fundamental frequency to search in Hz. Higher values may be needed for very high voices or children. |
+
+---
+
+### HNRResult
+
+Result of HNR (Harmonics-to-Noise Ratio) calculation.
+
+```typescript
+interface HNRResult {
+  hnr: number;
+  f0: number;
+  isVoiced: boolean;
+}
+```
+
+#### Properties
+
+| Property   | Type      | Description                                                                                                                                                              |
+| ---------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `hnr`      | `number`  | Harmonics-to-Noise Ratio in decibels (dB). Typical ranges: 12-18 dB (breathy voice), 18-25 dB (clear voice), 0 dB (returned for unvoiced signals).                       |
+| `f0`       | `number`  | Detected fundamental frequency in Hz. This is the F0 used for HNR calculation. Returns 0 if signal is unvoiced.                                                         |
+| `isVoiced` | `boolean` | Whether the signal is voiced (periodic). If false, the signal is either unvoiced (noise, whisper) or below the voicing threshold.                                        |
+
+---
+
+### H1H2Options
+
+Configuration options for H1-H2 amplitude difference calculation.
+
+```typescript
+interface H1H2Options {
+  sampleRate: number;
+  f0?: number;
+}
+```
+
+#### Properties
+
+| Property     | Type     | Default    | Description                                                                                                                              |
+| ------------ | -------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `sampleRate` | `number` | (required) | Sample rate in Hz. Must be an integer between 8000 and 48000.                                                                            |
+| `f0`         | `number` | (auto)     | Optional pre-calculated fundamental frequency in Hz. If provided, skips F0 detection (faster). If omitted or 0, F0 will be auto-detected. |
+
+---
+
+### H1H2Result
+
+Result of H1-H2 amplitude difference calculation.
+
+```typescript
+interface H1H2Result {
+  h1h2: number;
+  h1AmplitudeDb: number;
+  h2AmplitudeDb: number;
+  f0: number;
+}
+```
+
+#### Properties
+
+| Property        | Type     | Description                                                                                                                          |
+| --------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `h1h2`          | `number` | H1-H2 amplitude difference in dB (H1_amplitude - H2_amplitude). >5 dB = lighter quality, 0-5 dB = balanced, <0 dB = fuller quality.  |
+| `h1AmplitudeDb` | `number` | First harmonic (fundamental) amplitude in dB. This is the amplitude at the F0 frequency.                                            |
+| `h2AmplitudeDb` | `number` | Second harmonic amplitude in dB. This is the amplitude at 2*F0 frequency.                                                            |
+| `f0`            | `number` | Fundamental frequency used for calculation in Hz. Either the provided F0 or the auto-detected value.                                 |
 
 ---
 
@@ -667,9 +901,10 @@ Frequency ranges must meet these requirements:
 
 LPC order must meet these requirements:
 
-| Rule         | Constraint  | Recommended Values                                                                      |
-| ------------ | ----------- | --------------------------------------------------------------------------------------- |
-| **Positive** | Must be > 0 | Default: `Math.floor(sampleRate / 1000) + 2`<br>8 kHz: 10<br>16 kHz: 18<br>44.1 kHz: 46 |
+| Rule         | Constraint       | Recommended Values                                                                              |
+| ------------ | ---------------- | ----------------------------------------------------------------------------------------------- |
+| **Range**    | Must be 10-24    | Values outside this range are automatically clamped to prevent numerical instability            |
+| **Default**  | Auto-calculated  | `min(24, Math.floor(sampleRate / 1000) + 2)` - capped at 24 for high sample rates              |
 
 ---
 
@@ -709,6 +944,8 @@ Memory usage is proportional to buffer size and options:
 
 ## Version History
 
+- **0.2.11** (2025-12-07): Fixed LPC order stability (capped at 10-24), added buffer size guidance for pitch detection
+- **0.2.0** (2025-11-25): Added calculateHNR and calculateH1H2 functions for voice quality analysis
 - **0.1.0** (2025-11-20): Initial release with computeFFT, detectPitch, extractFormants, analyzeSpectrum
 
 ---
