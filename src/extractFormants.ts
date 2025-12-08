@@ -1,4 +1,4 @@
-// extractFormants - Formant extraction API using LPC analysis
+// extractFormants - Formant extraction API using LPC analysis (loqa-voice-dsp v0.4.0)
 import LoqaExpoDspModule from './LoqaExpoDspModule';
 import { NativeModuleError } from './errors';
 import type { FormantExtractionOptions, FormantsResult } from './types';
@@ -13,10 +13,14 @@ import { validateAudioBuffer, validateSampleRate } from './validation';
  * frequencies of the vocal tract and are essential for vowel identification
  * and speech analysis.
  *
+ * As of loqa-voice-dsp v0.4.0, this returns a confidence score instead of
+ * individual bandwidth values. The confidence score indicates the reliability
+ * of the formant detection (0-1, higher is better).
+ *
  * @param audioBuffer - Audio samples (Float32Array or number[])
  * @param sampleRate - Sample rate in Hz (8000-48000)
  * @param options - Formant extraction options (lpcOrder)
- * @returns Promise resolving to formants result with F1, F2, F3 and bandwidths
+ * @returns Promise resolving to formants result with F1, F2, F3 and confidence
  * @throws ValidationError if buffer or sample rate are invalid
  * @throws NativeModuleError if native computation fails
  *
@@ -32,7 +36,7 @@ import { validateAudioBuffer, validateSampleRate } from './validation';
  * console.log(`F1: ${result.f1} Hz`);
  * console.log(`F2: ${result.f2} Hz`);
  * console.log(`F3: ${result.f3} Hz`);
- * console.log(`Bandwidths:`, result.bandwidths);
+ * console.log(`Confidence: ${result.confidence}`);
  * ```
  */
 export async function extractFormants(
@@ -84,26 +88,24 @@ export async function extractFormants(
       f1: nativeResult.f1,
       f2: nativeResult.f2,
       f3: nativeResult.f3,
-      hasBandwidths: !!nativeResult.bandwidths,
+      confidence: nativeResult.confidence,
     });
 
     // Step 5: Convert result to FormantsResult type
     // Native module returns dictionary/map, convert to proper TypeScript type
+    // v0.4.0: Now returns confidence instead of bandwidths
     const result: FormantsResult = {
       f1: nativeResult.f1,
       f2: nativeResult.f2,
       f3: nativeResult.f3,
-      bandwidths: {
-        f1: nativeResult.bandwidths.f1,
-        f2: nativeResult.bandwidths.f2,
-        f3: nativeResult.bandwidths.f3,
-      },
+      confidence: nativeResult.confidence,
     };
 
     logDebug('extractFormants completed successfully', {
       f1: result.f1,
       f2: result.f2,
       f3: result.f3,
+      confidence: result.confidence,
     });
 
     return result;

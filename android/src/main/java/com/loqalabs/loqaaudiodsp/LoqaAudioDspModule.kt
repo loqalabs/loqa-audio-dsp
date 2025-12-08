@@ -9,18 +9,19 @@ import com.loqalabs.loqaexpodsp.RustJNI.RustBridge
  *
  * This module exposes async functions for:
  * - computeFFT: Fast Fourier Transform analysis
- * - detectPitch: YIN pitch detection algorithm
+ * - detectPitch: pYIN pitch detection algorithm (v0.4.0)
  * - extractFormants: LPC formant extraction
  * - analyzeSpectrum: Spectral feature analysis
+ * - calculateHNR: Harmonics-to-Noise Ratio
+ * - calculateH1H2: H1-H2 amplitude difference
  *
  * All functions run on background threads automatically via Expo's AsyncFunction.
  * Results are returned via Promises for async/await support in JavaScript/TypeScript.
  *
- * Implementation Notes:
- * - Story 1.4: Placeholder async function stubs (this story)
- * - Story 2.3: Real FFT implementation
- * - Story 3.3: Real pitch and formant implementations
- * - Story 4.2: Real spectrum analysis implementation
+ * v0.4.0 CHANGES:
+ * - detectPitch now uses pYIN algorithm with min/max frequency parameters
+ * - detectPitch returns voicedProbability in addition to isVoiced
+ * - extractFormants returns confidence instead of bandwidths
  */
 class LoqaExpoDspModule : Module() {
   // Module definition for Expo Modules API
@@ -102,19 +103,27 @@ class LoqaExpoDspModule : Module() {
     // ============================================================================
 
     /**
-     * Detects pitch using YIN algorithm.
+     * Detects pitch using pYIN algorithm (v0.4.0).
      *
-     * Implemented in Story 3.3.
      * Expo automatically runs this on a background thread.
+     *
+     * v0.4.0 CHANGES:
+     * - Now uses pYIN algorithm with HMM smoothing for better accuracy
+     * - Accepts minFrequency and maxFrequency parameters
+     * - Returns voicedProbability in addition to isVoiced
      *
      * @param buffer Audio samples as FloatArray
      * @param sampleRate Sample rate in Hz (Int)
-     * @param options Map with optional keys (currently unused - min/max frequency hardcoded in Rust)
-     * @return Map with keys: "frequency" (Float or null), "confidence" (Float), "isVoiced" (Boolean)
+     * @param options Map with optional keys: "minFrequency" (Double), "maxFrequency" (Double)
+     * @return Map with keys: "frequency" (Float or null), "confidence" (Float), "isVoiced" (Boolean), "voicedProbability" (Float)
      * @throws Exception with error code "PITCH_ERROR"
      */
     AsyncFunction("detectPitch") { buffer: FloatArray, sampleRate: Int, options: Map<String, Any?> ->
       try {
+        // Extract options with defaults for human voice range
+        val minFrequency = (options["minFrequency"] as? Double)?.toFloat() ?: 80.0f
+        val maxFrequency = (options["maxFrequency"] as? Double)?.toFloat() ?: 400.0f
+
         // Validate buffer is not empty (AC3)
         if (buffer.isEmpty()) {
           throw Exception("VALIDATION_ERROR: Buffer cannot be empty")
@@ -125,15 +134,17 @@ class LoqaExpoDspModule : Module() {
           throw Exception("VALIDATION_ERROR: Sample rate must be between 8000 and 48000 Hz, got $sampleRate")
         }
 
-        // Call Rust pitch detection via JNI (AC1, AC2)
-        val result = RustBridge.detectPitch(buffer, sampleRate)
+        // Call Rust pYIN pitch detection via JNI with min/max frequency (v0.4.0)
+        val result = RustBridge.detectPitch(buffer, sampleRate, minFrequency, maxFrequency)
 
-        // Convert PitchResult to Map for TypeScript (AC4)
+        // Convert PitchResult to Map for TypeScript
         // frequency is null if not voiced or 0.0
+        // v0.4.0: Now includes voicedProbability
         mapOf(
           "frequency" to if (result.isVoiced && result.frequency > 0) result.frequency else null,
           "confidence" to result.confidence,
-          "isVoiced" to result.isVoiced
+          "isVoiced" to result.isVoiced,
+          "voicedProbability" to result.voicedProbability
         )
       } catch (e: RuntimeException) {
         // Catch JNI/Rust errors and throw with PITCH_ERROR code
@@ -151,13 +162,15 @@ class LoqaExpoDspModule : Module() {
     /**
      * Extracts formant frequencies (F1, F2, F3) using LPC analysis.
      *
-     * Implemented in Story 3.3.
      * Expo automatically runs this on a background thread.
+     *
+     * v0.4.0 BREAKING CHANGE:
+     * - Now returns confidence score instead of bandwidths
      *
      * @param buffer Audio samples as FloatArray
      * @param sampleRate Sample rate in Hz (Int)
      * @param options Map with optional keys: "lpcOrder" (Int)
-     * @return Map with keys: "f1" (Float), "f2" (Float), "f3" (Float), "bandwidths" (Map)
+     * @return Map with keys: "f1" (Float), "f2" (Float), "f3" (Float), "confidence" (Float)
      * @throws Exception with error code "FORMANTS_ERROR"
      */
     AsyncFunction("extractFormants") { buffer: FloatArray, sampleRate: Int, options: Map<String, Any?> ->
@@ -176,19 +189,16 @@ class LoqaExpoDspModule : Module() {
           throw Exception("VALIDATION_ERROR: Sample rate must be between 8000 and 48000 Hz, got $sampleRate")
         }
 
-        // Call Rust formant extraction via JNI (AC1, AC2)
+        // Call Rust formant extraction via JNI
         val result = RustBridge.extractFormants(buffer, sampleRate, lpcOrder)
 
-        // Convert FormantsResult to Map for TypeScript (AC4)
+        // Convert FormantsResult to Map for TypeScript
+        // v0.4.0: Now returns confidence instead of bandwidths
         mapOf(
           "f1" to result.f1,
           "f2" to result.f2,
           "f3" to result.f3,
-          "bandwidths" to mapOf(
-            "f1" to result.bw1,
-            "f2" to result.bw2,
-            "f3" to result.bw3
-          )
+          "confidence" to result.confidence
         )
       } catch (e: RuntimeException) {
         // Catch JNI/Rust errors and throw with FORMANTS_ERROR code
@@ -239,6 +249,306 @@ class LoqaExpoDspModule : Module() {
       } catch (e: Exception) {
         // Catch validation errors and other unexpected errors (AC4)
         throw Exception("SPECTRUM_ERROR: ${e.message}", e)
+      }
+    }
+
+    // ============================================================================
+    // Async Function: calculateHNR
+    // ============================================================================
+
+    /**
+     * Calculates Harmonics-to-Noise Ratio (HNR) for voice quality analysis.
+     *
+     * @param buffer Audio samples as FloatArray
+     * @param sampleRate Sample rate in Hz (Int)
+     * @param options Map with optional keys: "minFreq" (Double), "maxFreq" (Double)
+     * @return Map with keys: "hnr" (Float), "f0" (Float), "isVoiced" (Boolean)
+     * @throws Exception with error code "HNR_ERROR"
+     */
+    AsyncFunction("calculateHNR") { buffer: FloatArray, sampleRate: Int, options: Map<String, Any?> ->
+      try {
+        // Extract options with defaults
+        val minFreq = (options["minFreq"] as? Double)?.toFloat() ?: 75.0f
+        val maxFreq = (options["maxFreq"] as? Double)?.toFloat() ?: 500.0f
+
+        // Validate buffer is not empty
+        if (buffer.isEmpty()) {
+          throw Exception("VALIDATION_ERROR: Buffer cannot be empty")
+        }
+
+        // Validate sample rate
+        if (sampleRate < 8000 || sampleRate > 48000) {
+          throw Exception("VALIDATION_ERROR: Sample rate must be between 8000 and 48000 Hz, got $sampleRate")
+        }
+
+        // Call Rust HNR calculation via JNI
+        val result = RustBridge.calculateHNR(buffer, sampleRate, minFreq, maxFreq)
+
+        // Convert HNRResult to Map for TypeScript
+        mapOf(
+          "hnr" to result.hnr,
+          "f0" to result.f0,
+          "isVoiced" to result.isVoiced
+        )
+      } catch (e: RuntimeException) {
+        throw Exception("HNR_ERROR: ${e.message}", e)
+      } catch (e: Exception) {
+        throw Exception("HNR_ERROR: ${e.message}", e)
+      }
+    }
+
+    // ============================================================================
+    // Async Function: calculateH1H2
+    // ============================================================================
+
+    /**
+     * Calculates H1-H2 amplitude difference for vocal weight analysis.
+     *
+     * @param buffer Audio samples as FloatArray
+     * @param sampleRate Sample rate in Hz (Int)
+     * @param options Map with optional keys: "f0" (Double)
+     * @return Map with keys: "h1h2" (Float), "h1AmplitudeDb" (Float), "h2AmplitudeDb" (Float), "f0" (Float)
+     * @throws Exception with error code "H1H2_ERROR"
+     */
+    AsyncFunction("calculateH1H2") { buffer: FloatArray, sampleRate: Int, options: Map<String, Any?> ->
+      try {
+        // Extract optional f0 (0 means auto-detect)
+        val f0 = (options["f0"] as? Double)?.toFloat() ?: 0.0f
+
+        // Validate buffer is not empty
+        if (buffer.isEmpty()) {
+          throw Exception("VALIDATION_ERROR: Buffer cannot be empty")
+        }
+
+        // Validate sample rate
+        if (sampleRate < 8000 || sampleRate > 48000) {
+          throw Exception("VALIDATION_ERROR: Sample rate must be between 8000 and 48000 Hz, got $sampleRate")
+        }
+
+        // Call Rust H1-H2 calculation via JNI
+        val result = RustBridge.calculateH1H2(buffer, sampleRate, f0)
+
+        // Convert H1H2Result to Map for TypeScript
+        mapOf(
+          "h1h2" to result.h1h2,
+          "h1AmplitudeDb" to result.h1AmplitudeDb,
+          "h2AmplitudeDb" to result.h2AmplitudeDb,
+          "f0" to result.f0
+        )
+      } catch (e: RuntimeException) {
+        throw Exception("H1H2_ERROR: ${e.message}", e)
+      } catch (e: Exception) {
+        throw Exception("H1H2_ERROR: ${e.message}", e)
+      }
+    }
+
+    // ============================================================================
+    // VoiceAnalyzer Streaming API (v0.3.0)
+    // ============================================================================
+
+    /**
+     * Creates a new VoiceAnalyzer instance with configuration.
+     *
+     * @param config Map with keys: "sampleRate" (Int), optional: "minFrequency", "maxFrequency", "frameSize", "hopSize"
+     * @return Map with keys: "id" (String), "config" (Map)
+     * @throws Exception with error code "ANALYZER_ERROR"
+     */
+    AsyncFunction("createVoiceAnalyzer") { config: Map<String, Any?> ->
+      try {
+        // Extract config with defaults
+        val sampleRate = (config["sampleRate"] as? Int)
+          ?: throw Exception("VALIDATION_ERROR: sampleRate is required")
+        val minFrequency = (config["minFrequency"] as? Double)?.toFloat() ?: 80.0f
+        val maxFrequency = (config["maxFrequency"] as? Double)?.toFloat() ?: 400.0f
+        val frameSize = (config["frameSize"] as? Int) ?: 2048
+        val hopSize = (config["hopSize"] as? Int) ?: (frameSize / 4)
+
+        // Validate sample rate
+        if (sampleRate < 8000 || sampleRate > 48000) {
+          throw Exception("VALIDATION_ERROR: Sample rate must be between 8000 and 48000 Hz, got $sampleRate")
+        }
+
+        // Create config
+        val analyzerConfig = VoiceAnalyzerConfig(
+          sampleRate = sampleRate,
+          minFrequency = minFrequency,
+          maxFrequency = maxFrequency,
+          frameSize = frameSize,
+          hopSize = hopSize
+        )
+
+        // Create analyzer
+        val handle = RustBridge.createVoiceAnalyzer(analyzerConfig)
+
+        // Store handle and return ID
+        val id = storeAnalyzer(handle, analyzerConfig)
+
+        mapOf(
+          "id" to id,
+          "config" to mapOf(
+            "sampleRate" to sampleRate,
+            "minFrequency" to minFrequency,
+            "maxFrequency" to maxFrequency,
+            "frameSize" to frameSize,
+            "hopSize" to hopSize
+          )
+        )
+      } catch (e: RuntimeException) {
+        throw Exception("ANALYZER_ERROR: ${e.message}", e)
+      } catch (e: Exception) {
+        throw Exception("ANALYZER_ERROR: ${e.message}", e)
+      }
+    }
+
+    /**
+     * Process audio through VoiceAnalyzer and return aggregated results.
+     *
+     * @param analyzerId Analyzer ID from createVoiceAnalyzer
+     * @param buffer Audio samples as FloatArray
+     * @return VoiceAnalyzerResult map with frames and statistics
+     * @throws Exception with error code "ANALYZER_ERROR"
+     */
+    AsyncFunction("analyzeClip") { analyzerId: String, buffer: FloatArray ->
+      try {
+        // Get analyzer handle
+        val (handle, config) = getAnalyzer(analyzerId)
+          ?: throw Exception("VALIDATION_ERROR: Invalid analyzer ID: $analyzerId")
+
+        if (buffer.isEmpty()) {
+          throw Exception("VALIDATION_ERROR: Buffer cannot be empty")
+        }
+
+        // Process audio through analyzer
+        val frames = RustBridge.processAudioWithAnalyzer(handle, buffer)
+
+        // Calculate aggregate statistics
+        val voicedFrames = frames.filter { it.isVoiced }
+        val voicedFrequencies = voicedFrames
+          .filter { it.frequency > 0 }
+          .map { it.frequency }
+
+        // Convert frames to maps
+        val frameMaps = frames.map { frame ->
+          mapOf(
+            "frequency" to if (frame.isVoiced && frame.frequency > 0) frame.frequency else null,
+            "confidence" to frame.confidence,
+            "isVoiced" to frame.isVoiced,
+            "voicedProbability" to frame.voicedProbability
+          )
+        }
+
+        // Calculate statistics
+        val medianPitch: Float? = if (voicedFrequencies.isEmpty()) null else {
+          val sorted = voicedFrequencies.sorted()
+          val mid = sorted.size / 2
+          if (sorted.size % 2 == 0) {
+            (sorted[mid - 1] + sorted[mid]) / 2
+          } else {
+            sorted[mid]
+          }
+        }
+
+        val meanPitch: Float? = if (voicedFrequencies.isEmpty()) null else {
+          voicedFrequencies.sum() / voicedFrequencies.size
+        }
+
+        val pitchStdDev: Float? = if (voicedFrequencies.size < 2 || meanPitch == null) null else {
+          val variance = voicedFrequencies.map { (it - meanPitch) * (it - meanPitch) }.sum() / voicedFrequencies.size
+          kotlin.math.sqrt(variance)
+        }
+
+        val meanConfidence: Float? = if (voicedFrames.isEmpty()) null else {
+          voicedFrames.map { it.confidence }.sum() / voicedFrames.size
+        }
+
+        val meanVoicedProbability: Float = if (frames.isEmpty()) 0f else {
+          frames.map { it.voicedProbability }.sum() / frames.size
+        }
+
+        mapOf(
+          "frames" to frameMaps,
+          "frameCount" to frames.size,
+          "voicedFrameCount" to voicedFrames.size,
+          "medianPitch" to medianPitch,
+          "meanPitch" to meanPitch,
+          "pitchStdDev" to pitchStdDev,
+          "meanConfidence" to meanConfidence,
+          "meanVoicedProbability" to meanVoicedProbability
+        )
+      } catch (e: RuntimeException) {
+        throw Exception("ANALYZER_ERROR: ${e.message}", e)
+      } catch (e: Exception) {
+        throw Exception("ANALYZER_ERROR: ${e.message}", e)
+      }
+    }
+
+    /**
+     * Reset analyzer state for reuse with new audio.
+     *
+     * @param analyzerId Analyzer ID from createVoiceAnalyzer
+     * @throws Exception with error code "ANALYZER_ERROR"
+     */
+    AsyncFunction("resetVoiceAnalyzer") { analyzerId: String ->
+      try {
+        val (handle, _) = getAnalyzer(analyzerId)
+          ?: throw Exception("VALIDATION_ERROR: Invalid analyzer ID: $analyzerId")
+
+        RustBridge.resetVoiceAnalyzer(handle)
+        null
+      } catch (e: RuntimeException) {
+        throw Exception("ANALYZER_ERROR: ${e.message}", e)
+      } catch (e: Exception) {
+        throw Exception("ANALYZER_ERROR: ${e.message}", e)
+      }
+    }
+
+    /**
+     * Free a VoiceAnalyzer instance.
+     *
+     * @param analyzerId Analyzer ID from createVoiceAnalyzer
+     * @throws Exception with error code "ANALYZER_ERROR"
+     */
+    AsyncFunction("freeVoiceAnalyzer") { analyzerId: String ->
+      if (removeAnalyzer(analyzerId)) {
+        null
+      } else {
+        throw Exception("VALIDATION_ERROR: Invalid analyzer ID: $analyzerId")
+      }
+    }
+  }
+
+  // ============================================================================
+  // Analyzer Storage (Thread-safe)
+  // ============================================================================
+
+  companion object {
+    private val analyzers = mutableMapOf<String, Pair<Long, VoiceAnalyzerConfig>>()
+    private val analyzerLock = Any()
+    private var nextAnalyzerId = 1
+
+    fun storeAnalyzer(handle: Long, config: VoiceAnalyzerConfig): String {
+      synchronized(analyzerLock) {
+        val id = "va_$nextAnalyzerId"
+        nextAnalyzerId++
+        analyzers[id] = Pair(handle, config)
+        return id
+      }
+    }
+
+    fun getAnalyzer(id: String): Pair<Long, VoiceAnalyzerConfig>? {
+      synchronized(analyzerLock) {
+        return analyzers[id]
+      }
+    }
+
+    fun removeAnalyzer(id: String): Boolean {
+      synchronized(analyzerLock) {
+        val entry = analyzers.remove(id)
+        if (entry != null) {
+          RustBridge.freeVoiceAnalyzer(entry.first)
+          return true
+        }
+        return false
       }
     }
   }

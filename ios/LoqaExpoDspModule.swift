@@ -2,18 +2,18 @@ import ExpoModulesCore
 
 public class LoqaExpoDspModule: Module {
   // Module definition for Expo Modules API
+  // Updated for loqa-voice-dsp v0.4.0
   public func definition() -> ModuleDefinition {
     // Module name that JavaScript will use to require this module
     Name("LoqaExpoDsp")
 
-    // MARK: - computeFFT (Implemented in Story 2.2)
+    // MARK: - computeFFT
     // Calls Rust FFT via RustBridge.computeFFTWrapper()
     AsyncFunction("computeFFT") { (buffer: [Float], options: [String: Any], promise: Promise) in
       do {
         // Extract options with defaults
         let fftSize = options["fftSize"] as? Int ?? buffer.count
-        let windowTypeString = options["windowType"] as? String ?? "hanning"
-        let sampleRate = options["sampleRate"] as? Double ?? 44100.0
+        let sampleRate = options["sampleRate"] as? Int ?? 44100
 
         // Validate inputs
         guard !buffer.isEmpty else {
@@ -31,27 +31,12 @@ public class LoqaExpoDspModule: Module {
           return
         }
 
-        // Map windowType string to integer (none=0, hanning=1, hamming=2, blackman=3)
-        let windowType: Int32
-        switch windowTypeString.lowercased() {
-        case "none":
-          windowType = 0
-        case "hanning":
-          windowType = 1
-        case "hamming":
-          windowType = 2
-        case "blackman":
-          windowType = 3
-        default:
-          promise.reject("VALIDATION_ERROR", "Invalid window type. Must be one of: none, hanning, hamming, blackman")
-          return
-        }
-
-        // Call Rust FFT function via wrapper
-        let magnitude = try computeFFTWrapper(buffer: buffer, fftSize: fftSize, windowType: Int(windowType))
-
-        // Build frequency array: freq[i] = (sampleRate / fftSize) * i
-        let frequencies = (0..<magnitude.count).map { Float(sampleRate / Double(fftSize) * Double($0)) }
+        // Call Rust FFT function via wrapper (v0.4.0 API)
+        let (magnitude, frequencies) = try computeFFTWrapper(
+          buffer: buffer,
+          sampleRate: sampleRate,
+          fftSize: fftSize
+        )
 
         // Return result dictionary
         let result: [String: Any] = [
@@ -76,10 +61,15 @@ public class LoqaExpoDspModule: Module {
       }
     }
 
-    // MARK: - detectPitch (Implemented in Story 3.3)
-    // Calls Rust YIN pitch detection via RustBridge.detectPitchWrapper()
+    // MARK: - detectPitch
+    // Calls Rust pYIN pitch detection via RustBridge.detectPitchWrapper()
+    // v0.4.0: Now supports min/max frequency and returns voicedProbability
     AsyncFunction("detectPitch") { (buffer: [Float], sampleRate: Int, options: [String: Any], promise: Promise) in
       do {
+        // Extract options with defaults for human voice
+        let minFrequency = (options["minFrequency"] as? Double).map { Float($0) } ?? 80.0
+        let maxFrequency = (options["maxFrequency"] as? Double).map { Float($0) } ?? 400.0
+
         // Validate inputs (basic validation - detailed validation in RustBridge)
         guard !buffer.isEmpty else {
           promise.reject("VALIDATION_ERROR", "Buffer cannot be empty")
@@ -91,10 +81,12 @@ public class LoqaExpoDspModule: Module {
           return
         }
 
-        // Call Rust pitch detection via wrapper
-        let (frequency, confidence, isVoiced) = try detectPitchWrapper(
+        // Call Rust pitch detection via wrapper (v0.4.0 API with min/max frequency)
+        let (frequency, confidence, isVoiced, voicedProbability) = try detectPitchWrapper(
           buffer: buffer,
-          sampleRate: sampleRate
+          sampleRate: sampleRate,
+          minFrequency: minFrequency,
+          maxFrequency: maxFrequency
         )
 
         // Build result dictionary matching PitchResult type
@@ -102,7 +94,8 @@ public class LoqaExpoDspModule: Module {
         let result: [String: Any] = [
           "frequency": frequency ?? NSNull(),
           "confidence": confidence,
-          "isVoiced": isVoiced
+          "isVoiced": isVoiced,
+          "voicedProbability": voicedProbability
         ]
 
         promise.resolve(result)
@@ -122,8 +115,9 @@ public class LoqaExpoDspModule: Module {
       }
     }
 
-    // MARK: - extractFormants (Implemented in Story 3.3)
+    // MARK: - extractFormants
     // Calls Rust LPC formant extraction via RustBridge.extractFormantsWrapper()
+    // v0.4.0: Now returns confidence instead of bandwidths
     AsyncFunction("extractFormants") { (buffer: [Float], sampleRate: Int, options: [String: Any], promise: Promise) in
       do {
         // Extract optional LPC order from options
@@ -140,23 +134,20 @@ public class LoqaExpoDspModule: Module {
           return
         }
 
-        // Call Rust formant extraction via wrapper
-        let (f1, f2, f3, bw1, bw2, bw3) = try extractFormantsWrapper(
+        // Call Rust formant extraction via wrapper (v0.4.0 API)
+        let (f1, f2, f3, confidence) = try extractFormantsWrapper(
           buffer: buffer,
           sampleRate: sampleRate,
           lpcOrder: lpcOrder ?? 12
         )
 
         // Build result dictionary matching FormantsResult type
+        // v0.4.0 BREAKING CHANGE: confidence replaces bandwidths
         let result: [String: Any] = [
           "f1": f1,
           "f2": f2,
           "f3": f3,
-          "bandwidths": [
-            "f1": bw1,
-            "f2": bw2,
-            "f3": bw3
-          ]
+          "confidence": confidence
         ]
 
         promise.resolve(result)
@@ -176,7 +167,7 @@ public class LoqaExpoDspModule: Module {
       }
     }
 
-    // MARK: - analyzeSpectrum (Implemented in Story 4.2)
+    // MARK: - analyzeSpectrum
     // Calls Rust spectral analysis via RustBridge.analyzeSpectrumWrapper()
     AsyncFunction("analyzeSpectrum") { (buffer: [Float], sampleRate: Int, options: [String: Any], promise: Promise) in
       do {
@@ -321,5 +312,220 @@ public class LoqaExpoDspModule: Module {
         promise.reject("H1H2_ERROR", error.localizedDescription)
       }
     }
+
+    // MARK: - VoiceAnalyzer Streaming API (v0.3.0)
+    // Stateful pitch tracking with HMM smoothing for analyzing longer audio clips
+
+    // MARK: - createVoiceAnalyzer
+    // Creates a new VoiceAnalyzer instance with configuration
+    AsyncFunction("createVoiceAnalyzer") { (config: [String: Any], promise: Promise) in
+      do {
+        // Extract config with defaults
+        guard let sampleRate = config["sampleRate"] as? Int else {
+          promise.reject("VALIDATION_ERROR", "sampleRate is required")
+          return
+        }
+        let minFrequency = (config["minFrequency"] as? Double).map { Float($0) } ?? 80.0
+        let maxFrequency = (config["maxFrequency"] as? Double).map { Float($0) } ?? 400.0
+        let frameSize = config["frameSize"] as? Int ?? 2048
+        let hopSize = config["hopSize"] as? Int ?? (frameSize / 4)
+
+        // Validate sample rate
+        guard sampleRate >= 8000 && sampleRate <= 48000 else {
+          promise.reject("VALIDATION_ERROR", "Sample rate must be between 8000 and 48000 Hz")
+          return
+        }
+
+        // Create config struct
+        let analyzerConfig = VoiceAnalyzerConfig(
+          sampleRate: UInt32(sampleRate),
+          minFrequency: minFrequency,
+          maxFrequency: maxFrequency,
+          frameSize: frameSize,
+          hopSize: hopSize
+        )
+
+        // Create analyzer
+        let handle = try createVoiceAnalyzerWrapper(config: analyzerConfig)
+
+        // Store handle and return ID
+        let id = LoqaExpoDspModule.storeAnalyzer(handle)
+
+        let result: [String: Any] = [
+          "id": id,
+          "config": [
+            "sampleRate": sampleRate,
+            "minFrequency": minFrequency,
+            "maxFrequency": maxFrequency,
+            "frameSize": frameSize,
+            "hopSize": hopSize
+          ]
+        ]
+
+        promise.resolve(result)
+      } catch let error as RustFFIError {
+        switch error {
+        case .invalidInput(let message):
+          promise.reject("VALIDATION_ERROR", message)
+        case .computationFailed(let message):
+          promise.reject("ANALYZER_ERROR", message)
+        case .memoryAllocationFailed:
+          promise.reject("ANALYZER_ERROR", "Memory allocation failed creating VoiceAnalyzer")
+        }
+      } catch {
+        promise.reject("ANALYZER_ERROR", error.localizedDescription)
+      }
+    }
+
+    // MARK: - analyzeClip
+    // Process audio through VoiceAnalyzer and return aggregated results
+    AsyncFunction("analyzeClip") { (analyzerId: String, buffer: [Float], promise: Promise) in
+      do {
+        // Get analyzer handle
+        guard let handle = LoqaExpoDspModule.getAnalyzer(id: analyzerId) else {
+          promise.reject("VALIDATION_ERROR", "Invalid analyzer ID: \(analyzerId)")
+          return
+        }
+
+        guard !buffer.isEmpty else {
+          promise.reject("VALIDATION_ERROR", "Buffer cannot be empty")
+          return
+        }
+
+        // Process audio through analyzer
+        let frames = try processAudioWithAnalyzer(analyzer: handle, samples: buffer)
+
+        // Calculate aggregate statistics
+        let voicedFrames = frames.filter { $0.isVoiced }
+        let voicedFrequencies = voicedFrames.compactMap { $0.frequency > 0 ? $0.frequency : nil }
+
+        // Convert frames to dictionaries
+        let frameDicts: [[String: Any]] = frames.map { frame in
+          return [
+            "frequency": frame.frequency > 0 && frame.isVoiced ? frame.frequency : NSNull(),
+            "confidence": frame.confidence,
+            "isVoiced": frame.isVoiced,
+            "voicedProbability": frame.voicedProbability
+          ]
+        }
+
+        // Calculate statistics
+        let medianPitch: Float? = voicedFrequencies.isEmpty ? nil : {
+          let sorted = voicedFrequencies.sorted()
+          let mid = sorted.count / 2
+          if sorted.count % 2 == 0 {
+            return (sorted[mid - 1] + sorted[mid]) / 2
+          } else {
+            return sorted[mid]
+          }
+        }()
+
+        let meanPitch: Float? = voicedFrequencies.isEmpty ? nil : voicedFrequencies.reduce(0, +) / Float(voicedFrequencies.count)
+
+        let pitchStdDev: Float? = voicedFrequencies.count < 2 ? nil : {
+          guard let mean = meanPitch else { return nil }
+          let variance = voicedFrequencies.reduce(0) { $0 + pow($1 - mean, 2) } / Float(voicedFrequencies.count)
+          return sqrt(variance)
+        }()
+
+        let meanConfidence: Float? = voicedFrames.isEmpty ? nil : voicedFrames.reduce(0) { $0 + $1.confidence } / Float(voicedFrames.count)
+
+        let meanVoicedProbability: Float = frames.isEmpty ? 0 : frames.reduce(0) { $0 + $1.voicedProbability } / Float(frames.count)
+
+        // Build result
+        let result: [String: Any] = [
+          "frames": frameDicts,
+          "frameCount": frames.count,
+          "voicedFrameCount": voicedFrames.count,
+          "medianPitch": medianPitch ?? NSNull(),
+          "meanPitch": meanPitch ?? NSNull(),
+          "pitchStdDev": pitchStdDev ?? NSNull(),
+          "meanConfidence": meanConfidence ?? NSNull(),
+          "meanVoicedProbability": meanVoicedProbability
+        ]
+
+        promise.resolve(result)
+      } catch let error as RustFFIError {
+        switch error {
+        case .invalidInput(let message):
+          promise.reject("VALIDATION_ERROR", message)
+        case .computationFailed(let message):
+          promise.reject("ANALYZER_ERROR", message)
+        case .memoryAllocationFailed:
+          promise.reject("ANALYZER_ERROR", "Memory allocation failed during analysis")
+        }
+      } catch {
+        promise.reject("ANALYZER_ERROR", error.localizedDescription)
+      }
+    }
+
+    // MARK: - resetVoiceAnalyzer
+    // Reset analyzer state for reuse with new audio
+    AsyncFunction("resetVoiceAnalyzer") { (analyzerId: String, promise: Promise) in
+      do {
+        guard let handle = LoqaExpoDspModule.getAnalyzer(id: analyzerId) else {
+          promise.reject("VALIDATION_ERROR", "Invalid analyzer ID: \(analyzerId)")
+          return
+        }
+
+        try resetVoiceAnalyzerWrapper(analyzer: handle)
+        promise.resolve(nil)
+      } catch let error as RustFFIError {
+        switch error {
+        case .invalidInput(let message):
+          promise.reject("VALIDATION_ERROR", message)
+        case .computationFailed(let message):
+          promise.reject("ANALYZER_ERROR", message)
+        case .memoryAllocationFailed:
+          promise.reject("ANALYZER_ERROR", "Memory allocation failed during reset")
+        }
+      } catch {
+        promise.reject("ANALYZER_ERROR", error.localizedDescription)
+      }
+    }
+
+    // MARK: - freeVoiceAnalyzer
+    // Explicitly free an analyzer (also freed on module unload)
+    AsyncFunction("freeVoiceAnalyzer") { (analyzerId: String, promise: Promise) in
+      if LoqaExpoDspModule.removeAnalyzer(id: analyzerId) {
+        promise.resolve(nil)
+      } else {
+        promise.reject("VALIDATION_ERROR", "Invalid analyzer ID: \(analyzerId)")
+      }
+    }
+  }
+
+  // MARK: - Analyzer Storage
+  // Thread-safe storage for VoiceAnalyzer handles
+
+  private static var analyzers: [String: VoiceAnalyzerHandle] = [:]
+  private static let analyzerLock = NSLock()
+  private static var nextAnalyzerId: Int = 1
+
+  static func storeAnalyzer(_ handle: VoiceAnalyzerHandle) -> String {
+    analyzerLock.lock()
+    defer { analyzerLock.unlock() }
+
+    let id = "va_\(nextAnalyzerId)"
+    nextAnalyzerId += 1
+    analyzers[id] = handle
+    return id
+  }
+
+  static func getAnalyzer(id: String) -> VoiceAnalyzerHandle? {
+    analyzerLock.lock()
+    defer { analyzerLock.unlock() }
+
+    return analyzers[id]
+  }
+
+  static func removeAnalyzer(id: String) -> Bool {
+    analyzerLock.lock()
+    defer { analyzerLock.unlock() }
+
+    if analyzers.removeValue(forKey: id) != nil {
+      return true
+    }
+    return false
   }
 }

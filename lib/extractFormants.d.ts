@@ -7,10 +7,14 @@ import type { FormantExtractionOptions, FormantsResult } from './types';
  * frequencies of the vocal tract and are essential for vowel identification
  * and speech analysis.
  *
+ * As of loqa-voice-dsp v0.4.0, this returns a confidence score instead of
+ * individual bandwidth values. The confidence score indicates the reliability
+ * of the formant detection (0-1, higher is better).
+ *
  * @param audioBuffer - Audio samples (Float32Array or number[])
  * @param sampleRate - Sample rate in Hz (8000-48000)
  * @param options - Formant extraction options (lpcOrder)
- * @returns Promise resolving to formants result with F1, F2, F3 and bandwidths
+ * @returns Promise resolving to formants result with F1, F2, F3 and confidence
  * @throws ValidationError if buffer or sample rate are invalid
  * @throws NativeModuleError if native computation fails
  *
@@ -26,7 +30,7 @@ import type { FormantExtractionOptions, FormantsResult } from './types';
  * console.log(`F1: ${result.f1} Hz`);
  * console.log(`F2: ${result.f2} Hz`);
  * console.log(`F3: ${result.f3} Hz`);
- * console.log(`Bandwidths:`, result.bandwidths);
+ * console.log(`Confidence: ${result.confidence}`);
  * ```
  */
 export declare function extractFormants(audioBuffer: Float32Array | number[], sampleRate: number, options?: Partial<FormantExtractionOptions>): Promise<FormantsResult>;

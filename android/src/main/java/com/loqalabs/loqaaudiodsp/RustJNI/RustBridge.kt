@@ -1,26 +1,33 @@
 package com.loqalabs.loqaexpodsp.RustJNI
 
 /**
- * PitchResult data class matching Rust #[repr(C)] PitchResult struct.
+ * PitchResult data class matching Rust #[repr(C)] PitchResultFFI struct.
  * Returned by value from nativeDetectPitch JNI function.
+ *
+ * v0.4.0 CHANGES:
+ * - Added voicedProbability field for soft voiced/unvoiced decisions
+ * - nativeDetectPitch now takes minFrequency and maxFrequency parameters
  */
 data class PitchResult(
     val frequency: Float,
     val confidence: Float,
-    val isVoiced: Boolean
+    val isVoiced: Boolean,
+    val voicedProbability: Float
 )
 
 /**
- * FormantsResult data class matching Rust #[repr(C)] FormantsResult struct.
+ * FormantsResult data class matching Rust #[repr(C)] FormantResultFFI struct.
  * Returned by value from nativeExtractFormants JNI function.
+ *
+ * v0.4.0 BREAKING CHANGE:
+ * - Removed bw1, bw2, bw3 bandwidth fields
+ * - Added confidence score (0-1) indicating reliability of detection
  */
 data class FormantsResult(
     val f1: Float,
     val f2: Float,
     val f3: Float,
-    val bw1: Float,
-    val bw2: Float,
-    val bw3: Float
+    val confidence: Float
 )
 
 /**
@@ -50,6 +57,23 @@ data class H1H2Result(
     val h1AmplitudeDb: Float,
     val h2AmplitudeDb: Float,
     val f0: Float
+)
+
+/**
+ * VoiceAnalyzerConfig data class for VoiceAnalyzer initialization.
+ *
+ * @property sampleRate Sample rate in Hz (8000-48000)
+ * @property minFrequency Minimum detectable frequency in Hz (default: 80)
+ * @property maxFrequency Maximum detectable frequency in Hz (default: 400)
+ * @property frameSize Frame size in samples (default: 2048)
+ * @property hopSize Hop size in samples (default: frameSize / 4)
+ */
+data class VoiceAnalyzerConfig(
+    val sampleRate: Int,
+    val minFrequency: Float = 80.0f,
+    val maxFrequency: Float = 400.0f,
+    val frameSize: Int = 2048,
+    val hopSize: Int = 512
 )
 
 /**
@@ -116,15 +140,24 @@ object RustBridge {
      * Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeDetectPitch
      *
      * This external function is resolved by JNI to the Rust implementation in lib.rs.
-     * The Rust function uses YIN algorithm for pitch detection.
+     * The Rust function uses pYIN algorithm for pitch detection (v0.4.0).
+     *
+     * v0.4.0 CHANGES:
+     * - Added minFrequency and maxFrequency parameters
+     * - Returns voicedProbability in PitchResult
+     * - Uses pYIN algorithm with HMM smoothing
      *
      * @param buffer Input audio samples as FloatArray (JNI auto-converts to *const f32)
      * @param sampleRate Sample rate in Hz (8000-48000)
-     * @return PitchResult struct with frequency, confidence, and isVoiced
+     * @param minFrequency Minimum detectable frequency in Hz (default: 80)
+     * @param maxFrequency Maximum detectable frequency in Hz (default: 400)
+     * @return PitchResult struct with frequency, confidence, isVoiced, and voicedProbability
      */
     external fun nativeDetectPitch(
         buffer: FloatArray,
-        sampleRate: Int
+        sampleRate: Int,
+        minFrequency: Float,
+        maxFrequency: Float
     ): PitchResult
 
     /**
@@ -136,10 +169,13 @@ object RustBridge {
      * This external function is resolved by JNI to the Rust implementation in lib.rs.
      * The Rust function uses LPC analysis for formant extraction.
      *
+     * v0.4.0 BREAKING CHANGE:
+     * - FormantsResult now returns confidence instead of bandwidths (bw1, bw2, bw3)
+     *
      * @param buffer Input audio samples as FloatArray (JNI auto-converts to *const f32)
      * @param sampleRate Sample rate in Hz (8000-48000)
      * @param lpcOrder LPC order (0 for default: sampleRate / 1000 + 2)
-     * @return FormantsResult struct with f1, f2, f3 and bandwidths
+     * @return FormantsResult struct with f1, f2, f3 and confidence
      */
     external fun nativeExtractFormants(
         buffer: FloatArray,
@@ -204,6 +240,58 @@ object RustBridge {
     ): H1H2Result
 
     // ============================================================================
+    // VoiceAnalyzer JNI Functions (v0.3.0 Streaming API)
+    // ============================================================================
+
+    /**
+     * JNI native function to create a VoiceAnalyzer instance.
+     *
+     * Returns a handle (Long) that must be freed with nativeVoiceAnalyzerFree.
+     *
+     * @param sampleRate Sample rate in Hz (8000-48000)
+     * @param minFrequency Minimum detectable frequency in Hz
+     * @param maxFrequency Maximum detectable frequency in Hz
+     * @param frameSize Frame size in samples
+     * @param hopSize Hop size in samples
+     * @return Handle to the analyzer (Long pointer), or 0 if creation failed
+     */
+    external fun nativeVoiceAnalyzerNew(
+        sampleRate: Int,
+        minFrequency: Float,
+        maxFrequency: Float,
+        frameSize: Int,
+        hopSize: Int
+    ): Long
+
+    /**
+     * JNI native function to process audio through a VoiceAnalyzer.
+     *
+     * Returns an array of PitchResult for each frame processed.
+     *
+     * @param handle Analyzer handle from nativeVoiceAnalyzerNew
+     * @param buffer Audio samples to process
+     * @return Array of PitchResult for each frame
+     */
+    external fun nativeVoiceAnalyzerProcessStream(
+        handle: Long,
+        buffer: FloatArray
+    ): Array<PitchResult>
+
+    /**
+     * JNI native function to reset a VoiceAnalyzer's state.
+     *
+     * @param handle Analyzer handle from nativeVoiceAnalyzerNew
+     */
+    external fun nativeVoiceAnalyzerReset(handle: Long)
+
+    /**
+     * JNI native function to free a VoiceAnalyzer instance.
+     *
+     * @param handle Analyzer handle from nativeVoiceAnalyzerNew
+     */
+    external fun nativeVoiceAnalyzerFree(handle: Long)
+
+    // ============================================================================
     // Kotlin Wrapper Functions with Error Handling
     // ============================================================================
 
@@ -233,17 +321,26 @@ object RustBridge {
      * Implemented in Story 3.3. This wrapper calls the native JNI function and
      * provides Kotlin-friendly error handling.
      *
+     * v0.4.0 CHANGES:
+     * - Added minFrequency and maxFrequency parameters (with defaults for human voice)
+     * - Returns voicedProbability in PitchResult
+     * - Uses pYIN algorithm with HMM smoothing for better accuracy
+     *
      * @param buffer Input audio samples
      * @param sampleRate Sample rate in Hz (8000-48000)
-     * @return PitchResult with frequency, confidence, and isVoiced
+     * @param minFrequency Minimum detectable frequency in Hz (default: 80)
+     * @param maxFrequency Maximum detectable frequency in Hz (default: 400)
+     * @return PitchResult with frequency, confidence, isVoiced, and voicedProbability
      * @throws RuntimeException if JNI call fails
      */
     fun detectPitch(
         buffer: FloatArray,
-        sampleRate: Int
+        sampleRate: Int,
+        minFrequency: Float = 80.0f,
+        maxFrequency: Float = 400.0f
     ): PitchResult {
         return try {
-            nativeDetectPitch(buffer, sampleRate)
+            nativeDetectPitch(buffer, sampleRate, minFrequency, maxFrequency)
         } catch (e: Exception) {
             throw RuntimeException("JNI call to nativeDetectPitch failed", e)
         }
@@ -255,10 +352,13 @@ object RustBridge {
      * Implemented in Story 3.3. This wrapper calls the native JNI function and
      * provides Kotlin-friendly error handling.
      *
+     * v0.4.0 BREAKING CHANGE:
+     * - FormantsResult now returns confidence instead of bandwidths (bw1, bw2, bw3)
+     *
      * @param buffer Input audio samples
      * @param sampleRate Sample rate in Hz (8000-48000)
      * @param lpcOrder LPC order (0 for default: sampleRate / 1000 + 2)
-     * @return FormantsResult with f1, f2, f3 and bandwidths
+     * @return FormantsResult with f1, f2, f3 and confidence
      * @throws RuntimeException if JNI call fails
      */
     fun extractFormants(
@@ -340,6 +440,81 @@ object RustBridge {
             nativeCalculateH1H2(buffer, sampleRate, f0)
         } catch (e: Exception) {
             throw RuntimeException("JNI call to nativeCalculateH1H2 failed", e)
+        }
+    }
+
+    // ============================================================================
+    // VoiceAnalyzer Wrapper Functions (v0.3.0 Streaming API)
+    // ============================================================================
+
+    /**
+     * Creates a new VoiceAnalyzer instance with the given configuration.
+     *
+     * @param config VoiceAnalyzerConfig with sample rate and frequency range
+     * @return Handle to the analyzer (must be freed with freeVoiceAnalyzer)
+     * @throws RuntimeException if creation fails
+     */
+    fun createVoiceAnalyzer(config: VoiceAnalyzerConfig): Long {
+        return try {
+            val handle = nativeVoiceAnalyzerNew(
+                config.sampleRate,
+                config.minFrequency,
+                config.maxFrequency,
+                config.frameSize,
+                config.hopSize
+            )
+            if (handle == 0L) {
+                throw RuntimeException("Failed to create VoiceAnalyzer")
+            }
+            handle
+        } catch (e: Exception) {
+            throw RuntimeException("JNI call to nativeVoiceAnalyzerNew failed", e)
+        }
+    }
+
+    /**
+     * Process audio samples through the VoiceAnalyzer.
+     *
+     * @param handle Analyzer handle from createVoiceAnalyzer
+     * @param buffer Audio samples to process
+     * @return Array of PitchResult for each frame
+     * @throws RuntimeException if processing fails
+     */
+    fun processAudioWithAnalyzer(
+        handle: Long,
+        buffer: FloatArray
+    ): Array<PitchResult> {
+        return try {
+            nativeVoiceAnalyzerProcessStream(handle, buffer)
+        } catch (e: Exception) {
+            throw RuntimeException("JNI call to nativeVoiceAnalyzerProcessStream failed", e)
+        }
+    }
+
+    /**
+     * Reset the VoiceAnalyzer state for reuse with new audio.
+     *
+     * @param handle Analyzer handle from createVoiceAnalyzer
+     * @throws RuntimeException if reset fails
+     */
+    fun resetVoiceAnalyzer(handle: Long) {
+        try {
+            nativeVoiceAnalyzerReset(handle)
+        } catch (e: Exception) {
+            throw RuntimeException("JNI call to nativeVoiceAnalyzerReset failed", e)
+        }
+    }
+
+    /**
+     * Free a VoiceAnalyzer instance.
+     *
+     * @param handle Analyzer handle from createVoiceAnalyzer
+     */
+    fun freeVoiceAnalyzer(handle: Long) {
+        try {
+            nativeVoiceAnalyzerFree(handle)
+        } catch (e: Exception) {
+            // Log but don't throw - this is cleanup
         }
     }
 }

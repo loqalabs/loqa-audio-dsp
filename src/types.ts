@@ -87,6 +87,17 @@ export interface PitchDetectionOptions {
 
 /**
  * Result of pitch detection
+ *
+ * @example
+ * ```typescript
+ * const result = await detectPitch(audioData, 44100);
+ *
+ * if (result.isVoiced) {
+ *   console.log(`Pitch: ${result.frequency} Hz`);
+ *   console.log(`Confidence: ${result.confidence}`);
+ *   console.log(`Voiced probability: ${result.voicedProbability}`);
+ * }
+ * ```
  */
 export interface PitchResult {
   /** Detected pitch in Hz (or null if no pitch detected) */
@@ -95,6 +106,14 @@ export interface PitchResult {
   confidence: number;
   /** Whether audio is voiced */
   isVoiced: boolean;
+  /**
+   * Probabilistic voiced/unvoiced decision (0-1).
+   * Added in loqa-voice-dsp v0.4.0 with pYIN algorithm.
+   *
+   * Values closer to 1 indicate higher probability of voiced speech.
+   * This provides a "soft" decision compared to the binary isVoiced flag.
+   */
+  voicedProbability: number;
 }
 
 /**
@@ -109,6 +128,18 @@ export interface FormantExtractionOptions {
 
 /**
  * Result of formant extraction
+ *
+ * Note: In loqa-voice-dsp v0.4.0, bandwidths were replaced with a confidence score.
+ *
+ * @example
+ * ```typescript
+ * const result = await extractFormants(audioData, 44100);
+ *
+ * console.log(`F1: ${result.f1} Hz`);
+ * console.log(`F2: ${result.f2} Hz`);
+ * console.log(`F3: ${result.f3} Hz`);
+ * console.log(`Confidence: ${result.confidence}`);
+ * ```
  */
 export interface FormantsResult {
   /** First formant (F1) in Hz */
@@ -117,12 +148,13 @@ export interface FormantsResult {
   f2: number;
   /** Third formant (F3) in Hz */
   f3: number;
-  /** Formant bandwidths in Hz */
-  bandwidths: {
-    f1: number;
-    f2: number;
-    f3: number;
-  };
+  /**
+   * Confidence score for the formant extraction (0-1).
+   * Added in loqa-voice-dsp v0.4.0, replacing bandwidths.
+   *
+   * Higher values indicate more reliable formant detection.
+   */
+  confidence: number;
 }
 
 /**
@@ -298,4 +330,121 @@ export interface H1H2Result {
    * Either the provided F0 or the auto-detected value.
    */
   f0: number;
+}
+
+/**
+ * Configuration options for VoiceAnalyzer streaming API
+ *
+ * The VoiceAnalyzer provides stateful pitch tracking with HMM smoothing,
+ * ideal for analyzing longer audio clips frame-by-frame with temporal coherence.
+ *
+ * @example
+ * ```typescript
+ * const config: VoiceAnalyzerConfig = {
+ *   sampleRate: 44100,
+ *   minFrequency: 80,
+ *   maxFrequency: 400,
+ *   frameSize: 2048,
+ *   hopSize: 512
+ * };
+ * ```
+ */
+export interface VoiceAnalyzerConfig {
+  /** Sample rate in Hz (8000-48000) */
+  sampleRate: number;
+  /**
+   * Minimum detectable frequency in Hz.
+   * Defaults to 80 Hz (low male voice).
+   */
+  minFrequency?: number;
+  /**
+   * Maximum detectable frequency in Hz.
+   * Defaults to 400 Hz (high female voice).
+   */
+  maxFrequency?: number;
+  /**
+   * Frame size in samples for analysis.
+   * Defaults to 2048 samples (~46ms at 44100 Hz).
+   * Larger frames provide better frequency resolution but worse time resolution.
+   */
+  frameSize?: number;
+  /**
+   * Hop size in samples between consecutive frames.
+   * Defaults to frameSize / 4 (75% overlap).
+   * Smaller hop sizes provide smoother pitch tracks but more computation.
+   */
+  hopSize?: number;
+}
+
+/**
+ * Handle to a VoiceAnalyzer instance
+ *
+ * This is an opaque handle returned by createVoiceAnalyzer().
+ * Use it with analyzeClip(), resetVoiceAnalyzer(), and freeVoiceAnalyzer().
+ */
+export interface VoiceAnalyzerHandle {
+  /** Unique identifier for this analyzer instance */
+  id: string;
+  /** Configuration used to create this analyzer */
+  config: VoiceAnalyzerConfig;
+}
+
+/**
+ * Result of analyzing a clip with VoiceAnalyzer
+ *
+ * Contains an array of pitch results for each frame, plus aggregate statistics.
+ *
+ * @example
+ * ```typescript
+ * const result = await analyzeClip(analyzer, audioData);
+ *
+ * console.log(`Analyzed ${result.frameCount} frames`);
+ * console.log(`Median pitch: ${result.medianPitch} Hz`);
+ * console.log(`Voiced frames: ${result.voicedFrameCount}`);
+ *
+ * // Access individual frame results
+ * for (const frame of result.frames) {
+ *   if (frame.isVoiced) {
+ *     console.log(`Frame pitch: ${frame.frequency} Hz`);
+ *   }
+ * }
+ * ```
+ */
+export interface VoiceAnalyzerResult {
+  /**
+   * Array of pitch results for each analyzed frame.
+   * Frames are analyzed with HMM smoothing for temporal coherence.
+   */
+  frames: PitchResult[];
+  /** Total number of frames analyzed */
+  frameCount: number;
+  /** Number of frames detected as voiced */
+  voicedFrameCount: number;
+  /**
+   * Median pitch across all voiced frames in Hz.
+   * null if no voiced frames were detected.
+   * Use this as the primary pitch estimate for the clip.
+   */
+  medianPitch: number | null;
+  /**
+   * Mean pitch across all voiced frames in Hz.
+   * null if no voiced frames were detected.
+   */
+  meanPitch: number | null;
+  /**
+   * Standard deviation of pitch across voiced frames in Hz.
+   * null if fewer than 2 voiced frames were detected.
+   * Lower values indicate more stable pitch.
+   */
+  pitchStdDev: number | null;
+  /**
+   * Mean confidence across all voiced frames (0-1).
+   * null if no voiced frames were detected.
+   */
+  meanConfidence: number | null;
+  /**
+   * Mean voiced probability across all frames (0-1).
+   * Higher values indicate more of the clip was voiced.
+   */
+  meanVoicedProbability: number;
 }

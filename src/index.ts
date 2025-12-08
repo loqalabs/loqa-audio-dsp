@@ -18,6 +18,9 @@ export type {
   HNRResult,
   H1H2Options,
   H1H2Result,
+  VoiceAnalyzerConfig,
+  VoiceAnalyzerHandle,
+  VoiceAnalyzerResult,
 } from './types';
 
 // Export error classes
@@ -38,3 +41,11 @@ export { extractFormants } from './extractFormants';
 export { analyzeSpectrum } from './analyzeSpectrum';
 export { calculateHNR } from './calculateHNR';
 export { calculateH1H2 } from './calculateH1H2';
+
+// Export VoiceAnalyzer streaming API (v0.3.0)
+export {
+  createVoiceAnalyzer,
+  analyzeClip,
+  resetVoiceAnalyzer,
+  freeVoiceAnalyzer,
+} from './voiceAnalyzer';

@@ -1,110 +1,171 @@
 // loqa_voice_dsp.h
-// C header for Rust FFI functions exported by loqa-voice-dsp
+// C header for Rust FFI functions exported by loqa-voice-dsp v0.4.0
 // This header allows Swift to call Rust extern "C" functions with proper C ABI
+//
+// BREAKING CHANGES from v0.2.x:
+// - All structs now have 'success' field first
+// - PitchResultFFI adds 'voiced_probability' field
+// - FormantResultFFI replaces bandwidths with 'confidence'
+// - Function names changed from *_rust to loqa_*
+// - loqa_detect_pitch now takes min_frequency and max_frequency
 
 #ifndef loqa_voice_dsp_h
 #define loqa_voice_dsp_h
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 // MARK: - Result Structs (matching Rust #[repr(C)] layout)
 
-/// Pitch detection result
+/// Pitch detection result (v0.4.0 - includes voiced_probability)
 typedef struct {
+    bool success;
     float frequency;
     float confidence;
     bool is_voiced;
-} PitchResultC;
+    float voiced_probability;
+} PitchResultFFI;
 
-/// Formant extraction result
+/// Formant extraction result (v0.4.0 - confidence instead of bandwidths)
 typedef struct {
+    bool success;
     float f1;
     float f2;
     float f3;
-    float bw1;
-    float bw2;
-    float bw3;
-} FormantsResultC;
+    float confidence;
+} FormantResultFFI;
 
-/// Spectrum analysis result
+/// FFT result (caller must free with loqa_free_fft_result)
 typedef struct {
+    bool success;
+    float* magnitudes_ptr;
+    float* frequencies_ptr;
+    size_t length;
+    uint32_t sample_rate;
+} FFTResultFFI;
+
+/// Spectral features result
+typedef struct {
+    bool success;
     float centroid;
-    float rolloff;
     float tilt;
-} SpectrumResultC;
+    float rolloff_95;
+} SpectralFeaturesFFI;
 
 /// HNR (Harmonics-to-Noise Ratio) result
 typedef struct {
+    bool success;
     float hnr;
     float f0;
     bool is_voiced;
-} HNRResultC;
+} HNRResultFFI;
 
 /// H1-H2 (Harmonic Amplitude Difference) result
 typedef struct {
+    bool success;
     float h1h2;
     float h1_amplitude_db;
     float h2_amplitude_db;
     float f0;
-} H1H2ResultC;
+} H1H2ResultFFI;
+
+/// VoiceAnalyzer configuration
+typedef struct {
+    uint32_t sample_rate;
+    float min_frequency;
+    float max_frequency;
+    size_t frame_size;
+    size_t hop_size;
+} AnalysisConfigFFI;
 
 // MARK: - FFI Function Declarations
 
-/// FFT computation with window type support
-/// Returns pointer to FFT magnitudes (caller must free with free_fft_result_rust)
-const float* compute_fft_rust(
-    const float* buffer,
-    int32_t length,
-    int32_t fft_size,
-    int32_t window_type
-);
-
-/// Free FFT result memory allocated by compute_fft_rust
-void free_fft_result_rust(const float* ptr);
-
-/// Pitch detection using YIN algorithm
-/// Returns PitchResultC by value
-PitchResultC detect_pitch_rust(
-    const float* buffer,
-    int32_t length,
-    int32_t sample_rate
+/// Pitch detection using pYIN algorithm with min/max frequency bounds
+/// Returns PitchResultFFI by value with success=true if detection succeeded
+PitchResultFFI loqa_detect_pitch(
+    const float* audio_ptr,
+    size_t audio_len,
+    uint32_t sample_rate,
+    float min_frequency,
+    float max_frequency
 );
 
 /// Formant extraction using LPC analysis
-/// Returns FormantsResultC by value
-FormantsResultC extract_formants_rust(
-    const float* buffer,
-    int32_t length,
-    int32_t sample_rate,
-    int32_t lpc_order
+/// Returns FormantResultFFI by value with success=true if extraction succeeded
+FormantResultFFI loqa_extract_formants(
+    const float* audio_ptr,
+    size_t audio_len,
+    uint32_t sample_rate,
+    size_t lpc_order
 );
 
-/// Spectrum analysis (centroid, rolloff, tilt)
-/// Returns SpectrumResultC by value
-SpectrumResultC analyze_spectrum_rust(
-    const float* buffer,
-    int32_t length,
-    int32_t sample_rate
+/// FFT computation
+/// Returns FFTResultFFI - caller must free with loqa_free_fft_result
+FFTResultFFI loqa_compute_fft(
+    const float* audio_ptr,
+    size_t audio_len,
+    uint32_t sample_rate,
+    size_t fft_size
+);
+
+/// Free FFT result memory allocated by loqa_compute_fft
+void loqa_free_fft_result(FFTResultFFI* result);
+
+/// Spectral analysis (centroid, tilt, rolloff)
+/// Takes pointer to FFTResultFFI, returns SpectralFeaturesFFI by value
+SpectralFeaturesFFI loqa_analyze_spectrum(
+    const FFTResultFFI* fft_result
 );
 
 /// HNR calculation using Boersma's autocorrelation method
-/// Returns HNRResultC by value
-HNRResultC calculate_hnr_rust(
-    const float* buffer,
-    int32_t length,
-    int32_t sample_rate,
-    float min_freq,
-    float max_freq
+/// Returns HNRResultFFI by value with success=true if calculation succeeded
+HNRResultFFI loqa_calculate_hnr(
+    const float* audio_ptr,
+    size_t audio_len,
+    uint32_t sample_rate,
+    float min_frequency,
+    float max_frequency
 );
 
 /// H1-H2 calculation for vocal weight analysis
-/// Returns H1H2ResultC by value
-H1H2ResultC calculate_h1h2_rust(
-    const float* buffer,
-    int32_t length,
-    int32_t sample_rate,
+/// Pass f0=0.0 for auto-detection of fundamental frequency
+/// Returns H1H2ResultFFI by value with success=true if calculation succeeded
+H1H2ResultFFI loqa_calculate_h1h2(
+    const float* audio_ptr,
+    size_t audio_len,
+    uint32_t sample_rate,
     float f0
 );
+
+// MARK: - Stateful VoiceAnalyzer API (v0.4.0)
+
+/// Create a new VoiceAnalyzer instance
+/// Returns opaque pointer to analyzer (caller must free with loqa_voice_analyzer_free)
+void* loqa_voice_analyzer_new(AnalysisConfigFFI config);
+
+/// Process a single frame with the VoiceAnalyzer
+/// Returns PitchResultFFI for the frame
+PitchResultFFI loqa_voice_analyzer_process_frame(
+    void* analyzer,
+    const float* samples,
+    size_t len
+);
+
+/// Process streaming audio, writing results to output buffer
+/// Returns number of results written (up to max_results)
+size_t loqa_voice_analyzer_process_stream(
+    void* analyzer,
+    const float* samples,
+    size_t len,
+    PitchResultFFI* results_out,
+    size_t max_results
+);
+
+/// Reset the VoiceAnalyzer state
+void loqa_voice_analyzer_reset(void* analyzer);
+
+/// Free a VoiceAnalyzer instance
+void loqa_voice_analyzer_free(void* analyzer);
 
 #endif /* loqa_voice_dsp_h */

@@ -1,9 +1,11 @@
 # API Reference
 
 **@loqalabs/loqa-expo-dsp**
-Version: 0.2.11
+Version: 0.3.0
 
 This document provides complete API reference for all functions, types, and options in the @loqalabs/loqa-expo-dsp module.
+
+> **Note**: Version 0.3.0 includes breaking changes from the underlying loqa-voice-dsp v0.4.0 library. See [Version History](#version-history) for details.
 
 ---
 
@@ -16,6 +18,11 @@ This document provides complete API reference for all functions, types, and opti
   - [analyzeSpectrum](#analyzespectrum)
   - [calculateHNR](#calculatehnr)
   - [calculateH1H2](#calculateh1h2)
+- [VoiceAnalyzer API](#voiceanalyzer-api)
+  - [createVoiceAnalyzer](#createvoiceanalyzer)
+  - [analyzeClip](#analyzeclip)
+  - [resetVoiceAnalyzer](#resetvoiceanalyzer)
+  - [freeVoiceAnalyzer](#freevoiceanalyzer)
 - [Types](#types)
   - [FFTOptions](#fftoptions)
   - [FFTResult](#fftresult)
@@ -29,6 +36,9 @@ This document provides complete API reference for all functions, types, and opti
   - [HNRResult](#hnrresult)
   - [H1H2Options](#h1h2options)
   - [H1H2Result](#h1h2result)
+  - [VoiceAnalyzerConfig](#voiceanalyzerconfig)
+  - [VoiceAnalyzerHandle](#voiceanalyzerhandle)
+  - [VoiceAnalyzerResult](#voiceanalyzerresult)
 - [Error Handling](#error-handling)
   - [LoqaExpoDspError](#loqaexpodsperror)
   - [ValidationError](#validationerror)
@@ -98,13 +108,19 @@ console.log(`Peak at ${peakFrequency} Hz`);
 
 ### detectPitch
 
-Detects pitch using YIN algorithm.
+Detects pitch using pYIN (probabilistic YIN) algorithm.
 
-This function performs fundamental frequency (F0) detection on audio data using the YIN algorithm, which is optimized for voice and monophonic instruments. It accepts audio buffers as Float32Array or number[], validates the input, and returns pitch information with confidence scores.
+This function performs fundamental frequency (F0) detection on audio data using the pYIN algorithm, which provides improved accuracy for breathy or noisy signals compared to standard YIN. It accepts audio buffers as Float32Array or number[], validates the input, and returns pitch information with confidence scores and voiced probability.
+
+As of loqa-voice-dsp v0.4.0, the pYIN implementation includes:
+
+- Beta distribution threshold sampling for probabilistic candidate generation
+- HMM with Viterbi decoding for smooth pitch tracks
+- Voice-specific optimizations (default 80-400 Hz range, ±20% transition constraints)
 
 > **Important: Buffer Size Recommendations**
 >
-> The YIN algorithm works best with buffer sizes of **2048-4096 samples** (~46-93ms at 44100 Hz). Larger buffers (e.g., 16384 samples) may fail to detect pitch reliably due to pitch variations within the window. For continuous pitch tracking, use overlapping frames of 2048-4096 samples with 50% overlap.
+> The pYIN algorithm works best with buffer sizes of **2048-4096 samples** (~46-93ms at 44100 Hz). Larger buffers (e.g., 16384 samples) may fail to detect pitch reliably due to pitch variations within the window. For continuous pitch tracking, use overlapping frames of 2048-4096 samples with 50% overlap.
 
 ```typescript
 async function detectPitch(
@@ -145,6 +161,7 @@ const result = await detectPitch(audioData, 44100);
 if (result.isVoiced) {
   console.log(`Detected pitch: ${result.frequency} Hz`);
   console.log(`Confidence: ${result.confidence}`);
+  console.log(`Voiced probability: ${result.voicedProbability}`);
 } else {
   console.log('No pitch detected (unvoiced segment)');
 }
@@ -164,6 +181,8 @@ Extracts formants (F1, F2, F3) using LPC analysis.
 
 This function performs Linear Predictive Coding (LPC) analysis to extract the first three formant frequencies from audio data. Formants are resonant frequencies of the vocal tract and are essential for vowel identification and speech analysis.
 
+As of loqa-voice-dsp v0.4.0, this returns a confidence score instead of individual bandwidth values. The confidence score indicates the reliability of the formant detection (0-1, higher is better).
+
 ```typescript
 async function extractFormants(
   audioBuffer: Float32Array | number[],
@@ -182,7 +201,7 @@ async function extractFormants(
 
 #### Returns
 
-`Promise<FormantsResult>` - Resolves to a [FormantsResult](#formantsresult) containing F1, F2, F3 frequencies and their bandwidths.
+`Promise<FormantsResult>` - Resolves to a [FormantsResult](#formantsresult) containing F1, F2, F3 frequencies and a confidence score.
 
 #### Throws
 
@@ -203,18 +222,20 @@ const result = await extractFormants(audioData, 44100);
 console.log(`F1: ${result.f1} Hz`);
 console.log(`F2: ${result.f2} Hz`);
 console.log(`F3: ${result.f3} Hz`);
-console.log(`Bandwidths:`, result.bandwidths);
+console.log(`Confidence: ${result.confidence}`);
 
 // Custom LPC order for high sample rates
 const result2 = await extractFormants(audioData, 48000, {
   lpcOrder: 16, // Higher order for 48kHz audio
 });
 
-// Vowel identification example
-if (result.f1 < 400 && result.f2 > 2000) {
-  console.log('Likely vowel: /i/ (as in "beat")');
-} else if (result.f1 > 700 && result.f2 < 1200) {
-  console.log('Likely vowel: /ɑ/ (as in "father")');
+// Vowel identification example (only trust high-confidence results)
+if (result.confidence > 0.7) {
+  if (result.f1 < 400 && result.f2 > 2000) {
+    console.log('Likely vowel: /i/ (as in "beat")');
+  } else if (result.f1 > 700 && result.f2 < 1200) {
+    console.log('Likely vowel: /ɑ/ (as in "father")');
+  }
 }
 ```
 
@@ -425,6 +446,246 @@ if (pitch.isVoiced && pitch.frequency) {
 
 ---
 
+## VoiceAnalyzer API
+
+The VoiceAnalyzer API provides stateful, HMM-smoothed pitch tracking for analyzing longer audio clips. Unlike the single-shot `detectPitch()` function, the VoiceAnalyzer maintains internal state across frames for temporal coherence and provides aggregate statistics.
+
+**Benefits over single-shot `detectPitch()`:**
+- HMM state persistence between frames for smoother pitch tracks
+- Better accuracy through temporal context
+- Aggregate statistics (median, mean, std dev) across all frames
+- Efficient batch processing of large audio clips
+
+**Typical workflow:**
+1. Create an analyzer with `createVoiceAnalyzer()`
+2. Analyze clips with `analyzeClip()`
+3. Reset state between independent clips with `resetVoiceAnalyzer()`
+4. Free resources when done with `freeVoiceAnalyzer()`
+
+---
+
+### createVoiceAnalyzer
+
+Creates a new VoiceAnalyzer instance for stateful pitch tracking.
+
+```typescript
+async function createVoiceAnalyzer(
+  config: VoiceAnalyzerConfig
+): Promise<VoiceAnalyzerHandle>;
+```
+
+#### Parameters
+
+| Parameter | Type                  | Required | Description                                                      |
+| --------- | --------------------- | -------- | ---------------------------------------------------------------- |
+| `config`  | `VoiceAnalyzerConfig` | Yes      | Configuration options. See [VoiceAnalyzerConfig](#voiceanalyzerconfig). |
+
+#### Returns
+
+`Promise<VoiceAnalyzerHandle>` - Resolves to a [VoiceAnalyzerHandle](#voiceanalyzerhandle) that can be used with other VoiceAnalyzer functions.
+
+#### Throws
+
+- `ValidationError` - If config parameters are invalid
+- `NativeModuleError` - If native creation fails
+
+#### Example
+
+```typescript
+import { createVoiceAnalyzer, analyzeClip, freeVoiceAnalyzer } from '@loqalabs/loqa-expo-dsp';
+
+// Create analyzer for 44.1kHz audio with default settings
+const analyzer = await createVoiceAnalyzer({ sampleRate: 44100 });
+
+try {
+  // Use analyzer...
+  const result = await analyzeClip(analyzer, audioSamples);
+} finally {
+  // Always free when done
+  await freeVoiceAnalyzer(analyzer);
+}
+
+// Custom configuration for bass voices
+const bassAnalyzer = await createVoiceAnalyzer({
+  sampleRate: 44100,
+  minFrequency: 50,   // Lower for bass voices
+  maxFrequency: 300,
+  frameSize: 4096,    // Larger for better low-frequency resolution
+  hopSize: 1024
+});
+```
+
+---
+
+### analyzeClip
+
+Analyzes an audio clip using the VoiceAnalyzer, returning frame-by-frame results plus aggregate statistics.
+
+The analyzer processes the audio frame-by-frame with HMM smoothing, providing temporally coherent pitch tracking. The analyzer maintains internal state, so consecutive calls build on previous state. Call `resetVoiceAnalyzer()` to start fresh with a new independent clip.
+
+```typescript
+async function analyzeClip(
+  analyzer: VoiceAnalyzerHandle,
+  audioBuffer: Float32Array | number[]
+): Promise<VoiceAnalyzerResult>;
+```
+
+#### Parameters
+
+| Parameter     | Type                       | Required | Description                                                    |
+| ------------- | -------------------------- | -------- | -------------------------------------------------------------- |
+| `analyzer`    | `VoiceAnalyzerHandle`      | Yes      | Analyzer handle from `createVoiceAnalyzer()`                   |
+| `audioBuffer` | `Float32Array \| number[]` | Yes      | Audio samples to analyze. No maximum size limit for this API.  |
+
+#### Returns
+
+`Promise<VoiceAnalyzerResult>` - Resolves to a [VoiceAnalyzerResult](#voiceanalyzerresult) containing frame results and aggregate statistics.
+
+#### Throws
+
+- `ValidationError` - If analyzer handle or buffer is invalid
+- `NativeModuleError` - If native analysis fails
+
+#### Example
+
+```typescript
+import { createVoiceAnalyzer, analyzeClip, freeVoiceAnalyzer } from '@loqalabs/loqa-expo-dsp';
+
+const analyzer = await createVoiceAnalyzer({ sampleRate: 44100 });
+
+try {
+  // Analyze a recorded clip (can be much larger than 16384 samples)
+  const result = await analyzeClip(analyzer, audioSamples);
+
+  console.log(`Analyzed ${result.frameCount} frames`);
+  console.log(`Voiced: ${result.voicedFrameCount} frames`);
+
+  if (result.medianPitch !== null) {
+    console.log(`Median pitch: ${result.medianPitch.toFixed(1)} Hz`);
+    console.log(`Mean pitch: ${result.meanPitch?.toFixed(1)} Hz`);
+    console.log(`Pitch std dev: ${result.pitchStdDev?.toFixed(1)} Hz`);
+    console.log(`Mean confidence: ${result.meanConfidence?.toFixed(2)}`);
+  }
+
+  // Access individual frames for detailed analysis
+  for (const frame of result.frames) {
+    if (frame.isVoiced && frame.frequency !== null) {
+      console.log(`${frame.frequency.toFixed(1)} Hz (conf: ${frame.confidence.toFixed(2)})`);
+    }
+  }
+} finally {
+  await freeVoiceAnalyzer(analyzer);
+}
+```
+
+---
+
+### resetVoiceAnalyzer
+
+Resets the VoiceAnalyzer state for reuse with new, independent audio.
+
+Call this between analyzing different audio clips to ensure the HMM state from one clip doesn't affect the next. If analyzing consecutive segments of the same audio (e.g., streaming), do NOT reset - let the state carry over for temporal continuity.
+
+```typescript
+async function resetVoiceAnalyzer(
+  analyzer: VoiceAnalyzerHandle
+): Promise<void>;
+```
+
+#### Parameters
+
+| Parameter  | Type                  | Required | Description                                  |
+| ---------- | --------------------- | -------- | -------------------------------------------- |
+| `analyzer` | `VoiceAnalyzerHandle` | Yes      | Analyzer handle from `createVoiceAnalyzer()` |
+
+#### Throws
+
+- `ValidationError` - If analyzer handle is invalid
+- `NativeModuleError` - If native reset fails
+
+#### Example
+
+```typescript
+import { createVoiceAnalyzer, analyzeClip, resetVoiceAnalyzer, freeVoiceAnalyzer } from '@loqalabs/loqa-expo-dsp';
+
+const analyzer = await createVoiceAnalyzer({ sampleRate: 44100 });
+
+try {
+  // Analyze first clip
+  const result1 = await analyzeClip(analyzer, clip1Samples);
+  console.log(`Clip 1 median: ${result1.medianPitch} Hz`);
+
+  // Reset for independent second clip
+  await resetVoiceAnalyzer(analyzer);
+
+  // Analyze second clip with fresh state
+  const result2 = await analyzeClip(analyzer, clip2Samples);
+  console.log(`Clip 2 median: ${result2.medianPitch} Hz`);
+} finally {
+  await freeVoiceAnalyzer(analyzer);
+}
+```
+
+---
+
+### freeVoiceAnalyzer
+
+Frees a VoiceAnalyzer instance and releases native resources.
+
+Always call this when done with an analyzer to prevent memory leaks. After calling this, the analyzer handle should not be used again.
+
+```typescript
+async function freeVoiceAnalyzer(
+  analyzer: VoiceAnalyzerHandle
+): Promise<void>;
+```
+
+#### Parameters
+
+| Parameter  | Type                  | Required | Description                                  |
+| ---------- | --------------------- | -------- | -------------------------------------------- |
+| `analyzer` | `VoiceAnalyzerHandle` | Yes      | Analyzer handle from `createVoiceAnalyzer()` |
+
+#### Throws
+
+- `ValidationError` - If analyzer handle is invalid
+- `NativeModuleError` - If native free fails
+
+#### Example
+
+```typescript
+import { createVoiceAnalyzer, analyzeClip, freeVoiceAnalyzer } from '@loqalabs/loqa-expo-dsp';
+
+// Pattern 1: try/finally
+const analyzer = await createVoiceAnalyzer({ sampleRate: 44100 });
+try {
+  const result = await analyzeClip(analyzer, samples);
+  // ... use result ...
+} finally {
+  await freeVoiceAnalyzer(analyzer);
+}
+
+// Pattern 2: React useEffect cleanup
+useEffect(() => {
+  let analyzer: VoiceAnalyzerHandle | null = null;
+
+  const init = async () => {
+    analyzer = await createVoiceAnalyzer({ sampleRate: 44100 });
+    // ... use analyzer ...
+  };
+
+  init();
+
+  return () => {
+    if (analyzer) {
+      freeVoiceAnalyzer(analyzer);
+    }
+  };
+}, []);
+```
+
+---
+
 ## Types
 
 ### FFTOptions
@@ -496,10 +757,8 @@ interface PitchDetectionOptions {
 | Property       | Type     | Default    | Description                                                                                                                                                    |
 | -------------- | -------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `sampleRate`   | `number` | (required) | Sample rate in Hz. Must be an integer between 8000 and 48000.                                                                                                  |
-| `minFrequency` | `number` | `80`       | Minimum detectable frequency in Hz. **Note: Currently not passed to the underlying algorithm** (reserved for future use). Default value is optimized for human voice (80 Hz ≈ low male voice).                                     |
-| `maxFrequency` | `number` | `400`      | Maximum detectable frequency in Hz. **Note: Currently not passed to the underlying algorithm** (reserved for future use). Default value is optimized for human voice (400 Hz ≈ high female voice). |
-
-> **Current Limitation:** The `minFrequency` and `maxFrequency` options are accepted by the API but are not currently passed to the underlying Rust YIN implementation. The algorithm uses its internal defaults. This will be addressed in a future upstream update.
+| `minFrequency` | `number` | `80`       | Minimum detectable frequency in Hz. Default value is optimized for human voice (80 Hz ≈ low male voice). Passed to the pYIN algorithm for efficient search.    |
+| `maxFrequency` | `number` | `400`      | Maximum detectable frequency in Hz. Default value is optimized for human voice (400 Hz ≈ high female voice). Passed to the pYIN algorithm for efficient search. |
 
 #### Validation Rules
 
@@ -518,16 +777,18 @@ interface PitchResult {
   frequency: number | null;
   confidence: number;
   isVoiced: boolean;
+  voicedProbability: number;
 }
 ```
 
 #### Properties
 
-| Property     | Type             | Description                                                                                                                                                                            |
-| ------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `frequency`  | `number \| null` | Detected pitch in Hz. `null` if no pitch was detected (unvoiced segment or below confidence threshold).                                                                                |
-| `confidence` | `number`         | Confidence score (0-1). Values closer to 1 indicate higher confidence in the detected pitch. Values below ~0.5 typically indicate unvoiced segments or unreliable pitch.               |
-| `isVoiced`   | `boolean`        | Whether the audio segment is voiced. `true` indicates periodic signal (likely speech or musical note), `false` indicates non-periodic signal (silence, noise, or unvoiced consonants). |
+| Property            | Type             | Description                                                                                                                                                                            |
+| ------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `frequency`         | `number \| null` | Detected pitch in Hz. `null` if no pitch was detected (unvoiced segment or below confidence threshold).                                                                                |
+| `confidence`        | `number`         | Confidence score (0-1). Values closer to 1 indicate higher confidence in the detected pitch. Values below ~0.5 typically indicate unvoiced segments or unreliable pitch.               |
+| `isVoiced`          | `boolean`        | Whether the audio segment is voiced. `true` indicates periodic signal (likely speech or musical note), `false` indicates non-periodic signal (silence, noise, or unvoiced consonants). |
+| `voicedProbability` | `number`         | Probabilistic voiced/unvoiced decision (0-1). Added in v0.3.0 with pYIN algorithm. Values closer to 1 indicate higher probability of voiced speech. Provides a "soft" decision compared to the binary `isVoiced` flag. |
 
 ---
 
@@ -570,30 +831,25 @@ interface FormantExtractionOptions {
 
 Result of formant extraction.
 
+> **Breaking Change in v0.3.0**: The `bandwidths` object has been replaced with a single `confidence` score. This change reflects the upstream loqa-voice-dsp v0.4.0 API.
+
 ```typescript
 interface FormantsResult {
   f1: number;
   f2: number;
   f3: number;
-  bandwidths: {
-    f1: number;
-    f2: number;
-    f3: number;
-  };
+  confidence: number;
 }
 ```
 
 #### Properties
 
-| Property        | Type     | Description                                                                                                                                                      |
-| --------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `f1`            | `number` | First formant (F1) in Hz. Typically 200-1000 Hz for speech. Correlates with vowel height (low F1 = high vowels like /i/, high F1 = low vowels like /a/).         |
-| `f2`            | `number` | Second formant (F2) in Hz. Typically 600-3000 Hz for speech. Correlates with vowel frontness (low F2 = back vowels like /u/, high F2 = front vowels like /i/).   |
-| `f3`            | `number` | Third formant (F3) in Hz. Typically 1500-4000 Hz for speech. Less variable than F1/F2 but useful for distinguishing certain consonants (especially /r/ and /l/). |
-| `bandwidths`    | `object` | Formant bandwidths in Hz. Indicates the resonance width of each formant. Narrower bandwidths indicate sharper resonances.                                        |
-| `bandwidths.f1` | `number` | Bandwidth of F1 in Hz.                                                                                                                                           |
-| `bandwidths.f2` | `number` | Bandwidth of F2 in Hz.                                                                                                                                           |
-| `bandwidths.f3` | `number` | Bandwidth of F3 in Hz.                                                                                                                                           |
+| Property     | Type     | Description                                                                                                                                                      |
+| ------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `f1`         | `number` | First formant (F1) in Hz. Typically 200-1000 Hz for speech. Correlates with vowel height (low F1 = high vowels like /i/, high F1 = low vowels like /a/).         |
+| `f2`         | `number` | Second formant (F2) in Hz. Typically 600-3000 Hz for speech. Correlates with vowel frontness (low F2 = back vowels like /u/, high F2 = front vowels like /i/).   |
+| `f3`         | `number` | Third formant (F3) in Hz. Typically 1500-4000 Hz for speech. Less variable than F1/F2 but useful for distinguishing certain consonants (especially /r/ and /l/). |
+| `confidence` | `number` | Confidence score (0-1) indicating reliability of formant detection. Higher values indicate more reliable detection. Added in v0.3.0, replacing the previous `bandwidths` object. |
 
 ---
 
@@ -726,6 +982,102 @@ interface H1H2Result {
 | `h1AmplitudeDb` | `number` | First harmonic (fundamental) amplitude in dB. This is the amplitude at the F0 frequency.                                            |
 | `h2AmplitudeDb` | `number` | Second harmonic amplitude in dB. This is the amplitude at 2*F0 frequency.                                                            |
 | `f0`            | `number` | Fundamental frequency used for calculation in Hz. Either the provided F0 or the auto-detected value.                                 |
+
+---
+
+### VoiceAnalyzerConfig
+
+Configuration options for VoiceAnalyzer creation.
+
+```typescript
+interface VoiceAnalyzerConfig {
+  sampleRate: number;
+  minFrequency?: number;
+  maxFrequency?: number;
+  frameSize?: number;
+  hopSize?: number;
+}
+```
+
+#### Properties
+
+| Property       | Type     | Default          | Description                                                                                                                                           |
+| -------------- | -------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sampleRate`   | `number` | (required)       | Sample rate in Hz. Must be an integer between 8000 and 48000.                                                                                         |
+| `minFrequency` | `number` | `80`             | Minimum detectable frequency in Hz. Default is optimized for human voice (80 Hz ≈ low male voice).                                                    |
+| `maxFrequency` | `number` | `400`            | Maximum detectable frequency in Hz. Default is optimized for human voice (400 Hz ≈ high female voice).                                                |
+| `frameSize`    | `number` | `2048`           | Frame size in samples (~46ms at 44100 Hz). Larger frames provide better frequency resolution but lower time resolution.                               |
+| `hopSize`      | `number` | `frameSize / 4`  | Hop size in samples between consecutive frames. Default gives 75% overlap. Smaller hop sizes provide smoother pitch tracks but more computation.      |
+
+#### Config Validation
+
+- `sampleRate` must be an integer between 8000 and 48000
+- `minFrequency` must be positive
+- `maxFrequency` must be greater than `minFrequency`
+- `frameSize` must be a positive integer
+- `hopSize` must be a positive integer
+
+---
+
+### VoiceAnalyzerHandle
+
+Opaque handle to a VoiceAnalyzer instance.
+
+```typescript
+interface VoiceAnalyzerHandle {
+  id: string;
+  config: VoiceAnalyzerConfig;
+}
+```
+
+#### Properties
+
+| Property | Type                  | Description                                  |
+| -------- | --------------------- | -------------------------------------------- |
+| `id`     | `string`              | Unique identifier for this analyzer instance |
+| `config` | `VoiceAnalyzerConfig` | Configuration used to create this analyzer   |
+
+> **Note**: The handle contains an internal reference to native resources. Always call `freeVoiceAnalyzer()` when done to release these resources.
+
+---
+
+### VoiceAnalyzerResult
+
+Result of analyzing a clip with VoiceAnalyzer.
+
+Contains an array of pitch results for each frame, plus aggregate statistics across all voiced frames.
+
+```typescript
+interface VoiceAnalyzerResult {
+  frames: PitchResult[];
+  frameCount: number;
+  voicedFrameCount: number;
+  medianPitch: number | null;
+  meanPitch: number | null;
+  pitchStdDev: number | null;
+  meanConfidence: number | null;
+  meanVoicedProbability: number;
+}
+```
+
+#### Properties
+
+| Property                | Type             | Description                                                                                                       |
+| ----------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `frames`                | `PitchResult[]`  | Array of pitch results for each analyzed frame. Frames are analyzed with HMM smoothing for temporal coherence.    |
+| `frameCount`            | `number`         | Total number of frames analyzed.                                                                                  |
+| `voicedFrameCount`      | `number`         | Number of frames detected as voiced.                                                                              |
+| `medianPitch`           | `number \| null` | Median pitch across all voiced frames in Hz. `null` if no voiced frames. Use this as the primary pitch estimate.  |
+| `meanPitch`             | `number \| null` | Mean pitch across all voiced frames in Hz. `null` if no voiced frames.                                            |
+| `pitchStdDev`           | `number \| null` | Standard deviation of pitch across voiced frames in Hz. `null` if fewer than 2 voiced frames. Lower = more stable. |
+| `meanConfidence`        | `number \| null` | Mean confidence across all voiced frames (0-1). `null` if no voiced frames.                                       |
+| `meanVoicedProbability` | `number`         | Mean voiced probability across all frames (0-1). Higher values indicate more of the clip was voiced.              |
+
+#### Usage Notes
+
+- **`medianPitch`** is recommended over `meanPitch` as it's more robust to outliers
+- **`pitchStdDev`** indicates pitch stability - lower values suggest steady pitch, higher values suggest variation or vibrato
+- **`meanVoicedProbability`** helps assess overall signal quality - very low values may indicate background noise or silence
 
 ---
 
@@ -944,6 +1296,16 @@ Memory usage is proportional to buffer size and options:
 
 ## Version History
 
+- **0.3.0** (2025-12-08): **BREAKING CHANGES** - Updated for loqa-voice-dsp v0.4.0:
+  - **NEW**: VoiceAnalyzer streaming API for analyzing longer audio clips with HMM-smoothed pitch tracking
+    - `createVoiceAnalyzer()`, `analyzeClip()`, `resetVoiceAnalyzer()`, `freeVoiceAnalyzer()`
+    - Provides aggregate statistics (median, mean, std dev) across all frames
+    - Better accuracy for full-clip analysis vs single-shot `detectPitch()`
+  - `detectPitch` now uses pYIN algorithm with HMM smoothing (improved accuracy)
+  - `detectPitch` now passes `minFrequency`/`maxFrequency` to the native algorithm
+  - Added `voicedProbability` to `PitchResult` for soft voiced/unvoiced decisions
+  - **BREAKING**: `FormantsResult.bandwidths` replaced with `FormantsResult.confidence`
+  - All native FFI function names updated from `*_rust` to `loqa_*`
 - **0.2.11** (2025-12-07): Fixed LPC order stability (capped at 10-24), added buffer size guidance for pitch detection
 - **0.2.0** (2025-11-25): Added calculateHNR and calculateH1H2 functions for voice quality analysis
 - **0.1.0** (2025-11-20): Initial release with computeFFT, detectPitch, extractFormants, analyzeSpectrum
