@@ -427,36 +427,60 @@ public func calculateH1H2Wrapper(
 
 // MARK: - VoiceAnalyzer Wrapper (Streaming API)
 
+/// Pitch detection algorithm selection
+public enum PitchAlgorithm: UInt32 {
+    case auto = 0       // Auto-select best algorithm
+    case pyin = 1       // Probabilistic YIN (recommended)
+    case yin = 2        // Classic YIN
+    case autocorr = 3   // Autocorrelation
+}
+
 /// VoiceAnalyzer configuration for Swift
 public struct VoiceAnalyzerConfig {
     public let sampleRate: UInt32
+    public let frameSize: UInt32
+    public let hopSize: UInt32
     public let minFrequency: Float
     public let maxFrequency: Float
-    public let frameSize: Int
-    public let hopSize: Int
+    public let algorithm: PitchAlgorithm
+    public let threshold: Float
+    public let minConfidence: Float
+    public let interpolate: Bool
 
     public init(
         sampleRate: UInt32,
         minFrequency: Float = 80.0,
         maxFrequency: Float = 400.0,
-        frameSize: Int = 2048,
-        hopSize: Int = 512
+        frameSize: UInt32 = 2048,
+        hopSize: UInt32 = 512,
+        algorithm: PitchAlgorithm = .auto,
+        threshold: Float = 0.1,
+        minConfidence: Float = 0.5,
+        interpolate: Bool = true
     ) {
         self.sampleRate = sampleRate
-        self.minFrequency = minFrequency
-        self.maxFrequency = maxFrequency
         self.frameSize = frameSize
         self.hopSize = hopSize
+        self.minFrequency = minFrequency
+        self.maxFrequency = maxFrequency
+        self.algorithm = algorithm
+        self.threshold = threshold
+        self.minConfidence = minConfidence
+        self.interpolate = interpolate
     }
 
-    /// Convert to C FFI struct
+    /// Convert to C FFI struct (field order must match Rust struct exactly)
     func toFFI() -> AnalysisConfigFFI {
         return AnalysisConfigFFI(
             sample_rate: sampleRate,
+            frame_size: frameSize,
+            hop_size: hopSize,
             min_frequency: minFrequency,
             max_frequency: maxFrequency,
-            frame_size: frameSize,
-            hop_size: hopSize
+            algorithm: algorithm.rawValue,
+            threshold: threshold,
+            min_confidence: minConfidence,
+            interpolate: interpolate
         )
     }
 }
@@ -536,7 +560,9 @@ public func processAudioWithAnalyzer(
     }
 
     // Calculate maximum number of results based on frame/hop size
-    let maxResults = max(1, (samples.count - analyzer.config.frameSize) / analyzer.config.hopSize + 1)
+    let frameSize = Int(analyzer.config.frameSize)
+    let hopSize = Int(analyzer.config.hopSize)
+    let maxResults = max(1, (samples.count - frameSize) / hopSize + 1)
 
     // Allocate output buffer for results
     var resultsBuffer = [PitchResultFFI](repeating: PitchResultFFI(

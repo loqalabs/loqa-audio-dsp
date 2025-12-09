@@ -70,14 +70,21 @@ typedef struct {
     float f0;
 } H1H2ResultFFI;
 
-/// VoiceAnalyzer configuration
+/// VoiceAnalyzer configuration (must match Rust struct layout exactly)
 typedef struct {
     uint32_t sample_rate;
+    uint32_t frame_size;
+    uint32_t hop_size;
     float min_frequency;
     float max_frequency;
-    size_t frame_size;
-    size_t hop_size;
+    uint32_t algorithm;      // 0=Auto, 1=PYIN, 2=YIN, 3=Autocorr
+    float threshold;
+    float min_confidence;
+    bool interpolate;
 } AnalysisConfigFFI;
+
+/// Get default analysis configuration
+AnalysisConfigFFI loqa_analysis_config_default(void);
 
 // MARK: - FFI Function Declarations
 

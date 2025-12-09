@@ -156,17 +156,29 @@ public struct H1H2ResultFFI {
 
 public struct AnalysisConfigFFI {
     public var sample_rate: UInt32
+    public var frame_size: UInt32
+    public var hop_size: UInt32
     public var min_frequency: Float
     public var max_frequency: Float
-    public var frame_size: Int
-    public var hop_size: Int
-    public init(sample_rate: UInt32, min_frequency: Float, max_frequency: Float, frame_size: Int, hop_size: Int) {
+    public var algorithm: UInt32
+    public var threshold: Float
+    public var min_confidence: Float
+    public var interpolate: Bool
+    public init(sample_rate: UInt32, frame_size: UInt32, hop_size: UInt32, min_frequency: Float, max_frequency: Float, algorithm: UInt32, threshold: Float, min_confidence: Float, interpolate: Bool) {
         self.sample_rate = sample_rate
-        self.min_frequency = min_frequency
-        self.max_frequency = max_frequency
         self.frame_size = frame_size
         self.hop_size = hop_size
+        self.min_frequency = min_frequency
+        self.max_frequency = max_frequency
+        self.algorithm = algorithm
+        self.threshold = threshold
+        self.min_confidence = min_confidence
+        self.interpolate = interpolate
     }
+}
+
+public func loqa_analysis_config_default() -> AnalysisConfigFFI {
+    AnalysisConfigFFI(sample_rate: 16000, frame_size: 2048, hop_size: 512, min_frequency: 80.0, max_frequency: 400.0, algorithm: 0, threshold: 0.1, min_confidence: 0.5, interpolate: true)
 }
 
 // Mock FFI functions (matching loqa-voice-dsp v0.4.0 API)

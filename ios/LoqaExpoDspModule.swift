@@ -327,8 +327,8 @@ public class LoqaExpoDspModule: Module {
         }
         let minFrequency = (config["minFrequency"] as? Double).map { Float($0) } ?? 80.0
         let maxFrequency = (config["maxFrequency"] as? Double).map { Float($0) } ?? 400.0
-        let frameSize = config["frameSize"] as? Int ?? 2048
-        let hopSize = config["hopSize"] as? Int ?? (frameSize / 4)
+        let frameSize = UInt32(config["frameSize"] as? Int ?? 2048)
+        let hopSize = UInt32(config["hopSize"] as? Int ?? Int(frameSize / 4))
 
         // Validate sample rate
         guard sampleRate >= 8000 && sampleRate <= 48000 else {
@@ -336,13 +336,17 @@ public class LoqaExpoDspModule: Module {
           return
         }
 
-        // Create config struct
+        // Create config struct with all required fields for Rust FFI
         let analyzerConfig = VoiceAnalyzerConfig(
           sampleRate: UInt32(sampleRate),
           minFrequency: minFrequency,
           maxFrequency: maxFrequency,
           frameSize: frameSize,
-          hopSize: hopSize
+          hopSize: hopSize,
+          algorithm: .auto,       // Use auto-selection for best results
+          threshold: 0.1,         // Default YIN threshold
+          minConfidence: 0.5,     // Minimum confidence for voiced detection
+          interpolate: true       // Enable parabolic interpolation
         )
 
         // Create analyzer
@@ -357,8 +361,8 @@ public class LoqaExpoDspModule: Module {
             "sampleRate": sampleRate,
             "minFrequency": minFrequency,
             "maxFrequency": maxFrequency,
-            "frameSize": frameSize,
-            "hopSize": hopSize
+            "frameSize": Int(frameSize),
+            "hopSize": Int(hopSize)
           ]
         ]
 
