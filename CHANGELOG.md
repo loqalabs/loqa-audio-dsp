@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-12-08
+
+### Fixed
+
+- **Critical**: Rebuild iOS XCFramework with VoiceAnalyzer symbols
+  - Fixes issue #12: `undefined symbol _loqa_voice_analyzer_free`
+  - Updated Rust dependency to loqa-voice-dsp v0.4.0
+  - XCFramework now exports all VoiceAnalyzer FFI functions:
+    - `loqa_voice_analyzer_new`
+    - `loqa_voice_analyzer_process_frame`
+    - `loqa_voice_analyzer_process_stream`
+    - `loqa_voice_analyzer_reset`
+    - `loqa_voice_analyzer_free`
+  - iOS builds now complete successfully
+
 ## [0.3.0] - 2025-12-08
 
 ### Added
@@ -234,6 +249,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[0.3.1]: https://github.com/loqalabs/loqa-expo-dsp/releases/tag/v0.3.1
 [0.3.0]: https://github.com/loqalabs/loqa-expo-dsp/releases/tag/v0.3.0
 [0.2.0]: https://github.com/loqalabs/loqa-expo-dsp/releases/tag/v0.2.0
 [0.1.9]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.9
