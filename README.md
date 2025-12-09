@@ -13,11 +13,12 @@ Production-grade Expo native module for audio DSP analysis.
 ### DSP Functions
 
 - **FFT Analysis** - `computeFFT()`: Fast Fourier Transform for frequency spectrum
-- **Pitch Detection** - `detectPitch()`: YIN algorithm for fundamental frequency
+- **Pitch Detection** - `detectPitch()`: pYIN algorithm for fundamental frequency
 - **Formant Extraction** - `extractFormants()`: LPC-based formant analysis (F1, F2, F3)
 - **Spectral Analysis** - `analyzeSpectrum()`: Spectral centroid, tilt, rolloff
 - **HNR Analysis** - `calculateHNR()`: Harmonics-to-Noise Ratio for breathiness measurement
 - **H1-H2 Calculation** - `calculateH1H2()`: First/second harmonic amplitude difference for vocal weight
+- **VoiceAnalyzer** - `createVoiceAnalyzer()`: Streaming pitch analysis with HMM smoothing for accurate tracking across clips
 
 ### Companion Package
 
@@ -218,6 +219,44 @@ if (h1h2Result.h1h2 > 5) {
   console.log('Heavier, pressed voice quality');
 } else {
   console.log('Balanced voice quality');
+}
+```
+
+### VoiceAnalyzer Example (Streaming Pitch Tracking)
+
+```typescript
+import { createVoiceAnalyzer, analyzeClip, freeVoiceAnalyzer } from '@loqalabs/loqa-expo-dsp';
+
+// Example: Track pitch across an audio recording with HMM smoothing
+const audioSamples = new Float32Array(44100); // 1 second of audio
+// ... fill buffer with audio data ...
+
+// Create analyzer with config
+const analyzer = await createVoiceAnalyzer({
+  sampleRate: 44100,
+  minPitch: 80,   // Hz (optional, default 50)
+  maxPitch: 400,  // Hz (optional, default 550)
+});
+
+try {
+  // Analyze the clip - get frame-by-frame results + aggregates
+  const result = await analyzeClip(analyzer, audioSamples);
+
+  console.log(`Analyzed ${result.frameCount} frames`);
+  console.log(`Voiced frames: ${result.voicedFrameCount}`);
+  console.log(`Median pitch: ${result.medianPitch?.toFixed(1)} Hz`);
+  console.log(`Mean pitch: ${result.meanPitch?.toFixed(1)} Hz`);
+  console.log(`Pitch std dev: ${result.stdDevPitch?.toFixed(1)} Hz`);
+
+  // Access individual frames for detailed analysis
+  result.frames.forEach((frame, i) => {
+    if (frame.isVoiced) {
+      console.log(`Frame ${i}: ${frame.pitch.toFixed(1)} Hz (confidence: ${frame.confidence.toFixed(2)})`);
+    }
+  });
+} finally {
+  // Always free the analyzer when done
+  await freeVoiceAnalyzer(analyzer);
 }
 ```
 
