@@ -17,9 +17,9 @@ dependencies = [
 
 [[package]]
 name = "loqa-voice-dsp"
-version = "0.4.1"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa5a4efaaf754903f75e41e3fdeb75ca3684b63b75d0109b6a46e4cd9ec351ef"
+checksum = "f997914d086f32aca80f6662587d3c35fdaa250eb27ce47808955ff8c5b13e76"
 dependencies = [
  "ndarray",
  "num-complex",
